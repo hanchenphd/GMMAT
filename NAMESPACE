@@ -1,0 +1,16 @@
+import(Rcpp)
+import(SeqArray)
+import(SeqVarTools)
+import(foreach)
+import(parallel)
+import(doMC)
+importFrom("stats", "as.formula", "binomial", "glm", "model.frame",
+"model.matrix", "na.omit", "na.pass", "pchisq", "dchisq", "qchisq", "var",
+"pnorm", "uniroot", "integrate")
+importFrom("utils", "read.table", "write.table")
+importFrom("CompQuadForm", "davies", "liu")
+
+useDynLib(GMMAT, .registration = TRUE, .fixes = "C_")
+
+# functions
+export(glmmkin, glmm.score, glmm.wald, glmm.score.meta, glmm.rvtests, glmm.rvtests.meta)
