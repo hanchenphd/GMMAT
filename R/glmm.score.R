@@ -82,6 +82,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 					})
 					tmp.out <- matrix(unlist(tmp.out), ncol = 4, byrow = TRUE, dimnames = list(NULL, c("N", "SCORE", "VAR", "PVAL")))
 					out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c("SCORE","VAR","PVAL")])
+					names(out)[6] <- "N"
 					rm(tmp.out)
 					if(b == 1) {
 				     	        write.table(out, outfile, quote=FALSE, row.names=FALSE, col.names=(ii == 1), sep="\t", append=(ii > 1), na=".")
@@ -145,6 +146,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 				})
 				tmp.out <- matrix(unlist(tmp.out), ncol = 4, byrow = TRUE, dimnames = list(NULL, c("N", "SCORE", "VAR", "PVAL")))
 				out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c("SCORE","VAR","PVAL")])
+				names(out)[6] <- "N"
 				rm(tmp.out)
 			     	write.table(out, outfile, quote=FALSE, row.names=FALSE, col.names=(ii == 1), sep="\t", append=(ii > 1), na=".")
 				rm(out)
