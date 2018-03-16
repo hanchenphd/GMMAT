@@ -53,10 +53,11 @@ glmm.rvtests <- function(null.obj, null.obj.id = NULL, geno.file, group.file, gr
 	    cat("alt:", alt[tmp.dups], "\n")
 	    cat("Warning: both variants with alleles ref/alt and alt/ref were present at the same position and coding should be double checked!\nFor these variants, only those with alleles ref/alt were used in the analysis...\n")
 	    variant.idx2[tmp.dups] <- NA
+	    rm(tmp.dups)
     	}
     	group.info$flip <- 1*(!is.na(variant.idx2))
     	group.info$variant.idx[!is.na(variant.idx2)] <- variant.idx2[!is.na(variant.idx2)]
-	rm(variant.id2, variant.idx2, tmp.dups)
+	rm(variant.id2, variant.idx2)
     }
     rm(variant.id, variant.id1, variant.idx1); gc()
     #group.info$variant.idx <- variant.idx[match(group.info$variant, variant.id)]
