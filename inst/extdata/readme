@@ -4,8 +4,7 @@ geno.bed, geno.bim, geno.fam: plink format genotype file for 400 individuals and
 meta1.txt, meta2.txt, meta3.txt: example input files for glmm.score.meta( )
 GRM.txt.bz2: genetic relationship matrix for 400 individuals, also available in example.rda
 pheno.txt: phenotype and covariate file for 400 individuals, also available in example.rda
-SetID.txt: set ID file for variant-set analysis (burden test, SKAT, hybrid test)
-SetID.withweights.txt: set ID file with user-defined weights for variant-set analysis (burden test, SKAT, hybrid test)
+SetID.withweights.txt: set ID file with user-defined weights for variant-set analysis (burden test, SKAT, SKAT-O, SMMAT)
 
 In example.rda:
 GRM <- as.matrix(read.table("GRM.txt.bz2"))
