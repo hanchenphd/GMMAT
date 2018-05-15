@@ -4,7 +4,7 @@
 Performing GLMM based Wald tests
 }
 \description{
-Fit a GLMM under the alternative hypothesis to perform Wald tests for association with genotypes in a plink .bed file (binary genotypes), or a plain text file (or compressed .gz or .bz2 file).
+Fit a GLMM under the alternative hypothesis to perform Wald tests for association with genotypes in a plink .bed file (binary genotypes), a GDS file .gds, or a plain text file (or compressed .gz or .bz2 file).
 }
 \usage{
 glmm.wald(fixed, data = parent.frame(), kins, groups = NULL,
@@ -116,6 +116,18 @@ if \code{infile} is the prefix of plink binary files (.bed, .bim and .fam), a da
   \item{A2}{allele 2, copied from .bim file.}
   \item{N}{number of individuals with non-missing genotypes for each SNP.}
   \item{AF}{effect allele frequency for each SNP.}
+  \item{BETA}{effect size estimate for each SNP from the GLMM under the alternative hypothesis.}
+  \item{SE}{standard error of the effect size estimate for each SNP.}
+  \item{PVAL}{Wald test p-value for each SNP.}
+  \item{converged}{a logical indicator for convergence for each SNP.}
+if \code{infile} is a GDS file (.gds), a data frame containing the following:
+  \item{SNP}{SNP name, as supplied in \code{snps}.}
+  \item{CHR}{Chromosome, copied from .gds file.}
+  \item{POS}{physical position in base pairs, copied from .gds file.}
+  \item{REF}{reference allele, copied from .gds file.}
+  \item{ALT}{alternate allele, copied from .gds file.}
+  \item{N}{number of individuals with non-missing genotypes for each SNP.}
+  \item{AF}{ALT allele frequency for each SNP.}
   \item{BETA}{effect size estimate for each SNP from the GLMM under the alternative hypothesis.}
   \item{SE}{standard error of the effect size estimate for each SNP.}
   \item{PVAL}{Wald test p-value for each SNP.}

@@ -1,12 +1,12 @@
-glmm.rvtests <- function(null.obj, null.obj.id = NULL, geno.file, group.file, group.file.sep = "\t", meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "SMMAT", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, auto.flip = FALSE, Garbage.Collection = FALSE, ncores = 1)
+glmm.rvtests <- function(null.obj, null.obj.id = NULL, geno.file, group.file, group.file.sep = "\t", meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, auto.flip = FALSE, Garbage.Collection = FALSE, ncores = 1)
 {
     missing.method <- try(match.arg(missing.method, c("impute2mean", "impute2zero")))
     if(class(missing.method) == "try-error") stop("Error: \"missing.method\" must be \"impute2mean\" or \"impute2zero\".")
-    if(any(!tests %in% c("Burden", "SKAT", "SKAT-O", "SMMAT"))) stop("Error: \"tests\" should only include \"Burden\", \"SKAT\", \"SKAT-O\" or \"SMMAT\".")
-    Burden <- "Burden" %in% tests
-    SKAT <- "SKAT" %in% tests
-    SKATO <- "SKAT-O" %in% tests
-    SMMAT <- "SMMAT" %in% tests
+    if(any(!tests %in% c("B", "S", "O", "E"))) stop("Error: \"tests\" should only include \"B\" for the burden test, \"S\" for SKAT, \"O\" for SKAT-O or \"E\" for the efficient hybrid test of the burden test and SKAT.")
+    Burden <- "B" %in% tests
+    SKAT <- "S" %in% tests
+    SKATO <- "O" %in% tests
+    SMMAT <- "E" %in% tests
     residuals <- null.obj$scaled.residuals
     if(is.null(null.obj.id)) null.obj.id <- null.obj$id_include
     if(!grepl("\\.gds$", geno.file)) stop("Error: currently only .gds format is supported in geno.file!")
@@ -140,6 +140,7 @@ glmm.rvtests <- function(null.obj, null.obj.id = NULL, geno.file, group.file, gr
 		    tmp.group.info$weight[freq > 0.5] <- -tmp.group.info$weight[freq > 0.5]
 		    freq[freq > 0.5] <- 1 - freq[freq > 0.5]
 		}
+		tmp.group.info$weight <- tmp.group.info$weight * MAF.weights.beta.fun(freq, MAF.weights.beta[1], MAF.weights.beta[2])
 	    	n.variants[i] <- n.p
 	    	miss.min[i] <- min(miss)
 	    	miss.mean[i] <- mean(miss)
@@ -198,17 +199,17 @@ glmm.rvtests <- function(null.obj, null.obj.id = NULL, geno.file, group.file, gr
 	    if(!is.null(meta.file.prefix)) close(meta.file.var.handle)
     	    tmp.out <- data.frame(group=unique(group.info$group)[idx], n.variants=n.variants, miss.min=miss.min, miss.mean=miss.mean, miss.max=miss.max, freq.min=freq.min, freq.mean=freq.mean, freq.max=freq.max)
 	    if(Burden | SKATO | SMMAT) {
-	        tmp.out$Burden.score <- Burden.score
-		tmp.out$Burden.var <- Burden.var
-		tmp.out$Burden.pval <- Burden.pval
+	        tmp.out$B.score <- Burden.score
+		tmp.out$B.var <- Burden.var
+		tmp.out$B.pval <- Burden.pval
 	    }
-    	    if(SKAT | SKATO) tmp.out$SKAT.pval <- SKAT.pval
+    	    if(SKAT | SKATO) tmp.out$S.pval <- SKAT.pval
 	    if(SKATO) {
-	        tmp.out$SKATO.pval <- SKATO.pval
-		tmp.out$SKATO.minp <- SKATO.minp
-		tmp.out$SKATO.minp.rho <- SKATO.minp.rho
+	        tmp.out$O.pval <- SKATO.pval
+		tmp.out$O.minp <- SKATO.minp
+		tmp.out$O.minp.rho <- SKATO.minp.rho
 	    }
-    	    if(SMMAT) tmp.out$SMMAT.pval <- SMMAT.pval
+    	    if(SMMAT) tmp.out$E.pval <- SMMAT.pval
 	    tmp.out
 	}
     } else { # use a single core
@@ -276,6 +277,7 @@ glmm.rvtests <- function(null.obj, null.obj.id = NULL, geno.file, group.file, gr
 		tmp.group.info$weight[freq > 0.5] <- -tmp.group.info$weight[freq > 0.5]
 		freq[freq > 0.5] <- 1 - freq[freq > 0.5]
 	    }
+	    tmp.group.info$weight <- tmp.group.info$weight * MAF.weights.beta.fun(freq, MAF.weights.beta[1], MAF.weights.beta[2])
 	    n.variants[i] <- n.p
 	    miss.min[i] <- min(miss)
 	    miss.mean[i] <- mean(miss)
@@ -334,22 +336,22 @@ glmm.rvtests <- function(null.obj, null.obj.id = NULL, geno.file, group.file, gr
     	if(!is.null(meta.file.prefix)) close(meta.file.var.handle)
     	out <- data.frame(group=unique(group.info$group), n.variants=n.variants, miss.min=miss.min, miss.mean=miss.mean, miss.max=miss.max, freq.min=freq.min, freq.mean=freq.mean, freq.max=freq.max)
 	    if(Burden | SKATO | SMMAT) {
-	        out$Burden.score <- Burden.score
-		out$Burden.var <- Burden.var
-		out$Burden.pval <- Burden.pval
+	        out$B.score <- Burden.score
+		out$B.var <- Burden.var
+		out$B.pval <- Burden.pval
 	    }
-    	    if(SKAT | SKATO) out$SKAT.pval <- SKAT.pval
+    	    if(SKAT | SKATO) out$S.pval <- SKAT.pval
 	    if(SKATO) {
-	        out$SKATO.pval <- SKATO.pval
-		out$SKATO.minp <- SKATO.minp
-		out$SKATO.minp.rho <- SKATO.minp.rho
+	        out$O.pval <- SKATO.pval
+		out$O.minp <- SKATO.minp
+		out$O.minp.rho <- SKATO.minp.rho
 	    }
-    	    if(SMMAT) out$SMMAT.pval <- SMMAT.pval
+    	    if(SMMAT) out$E.pval <- SMMAT.pval
     }
     return(out[match(groups, out$group),])
 }
 
-glmm.rvtests.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.prefix)), cohort.group.idx = NULL, group.file, group.file.sep = "\t", MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", tests = "SMMAT", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE)
+glmm.rvtests.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.prefix)), cohort.group.idx = NULL, group.file, group.file.sep = "\t", MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE)
 {
     if(.Platform$endian!="little") stop("Error: platform must be little endian.")
     n.cohort <- length(meta.files.prefix)
@@ -359,11 +361,11 @@ glmm.rvtests.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.fi
 	cohort.group.idx <- as.numeric(factor(cohort.group.idx))
 	n.cohort.groups <- length(unique(cohort.group.idx))
     }
-    if(any(!tests %in% c("Burden", "SKAT", "SKAT-O", "SMMAT"))) stop("Error: \"tests\" should only include \"Burden\", \"SKAT\", \"SKAT-O\" or \"SMMAT\".")
-    Burden <- "Burden" %in% tests
-    SKAT <- "SKAT" %in% tests
-    SKATO <- "SKAT-O" %in% tests
-    SMMAT <- "SMMAT" %in% tests
+    if(any(!tests %in% c("B", "S", "O", "E"))) stop("Error: \"tests\" should only include \"B\" for the burden test, \"S\" for SKAT, \"O\" for SKAT-O or \"E\" for the efficient hybrid test of the burden test and SKAT.")
+    Burden <- "B" %in% tests
+    SKAT <- "S" %in% tests
+    SKATO <- "O" %in% tests
+    SMMAT <- "E" %in% tests
     group.info <- try(read.table(group.file, header = FALSE, stringsAsFactors = FALSE, sep = group.file.sep), silent = TRUE)
     if (class(group.info) == "try-error") {
         stop("Error: cannot read group.file!")
@@ -482,6 +484,7 @@ glmm.rvtests.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.fi
 	}
     	tmp.weight <- tmp.group.info$weight[match(variant.indices, tmp.idx)]
 	if(use.minor.allele) tmp.weight[AF[include] > 0.5] <- -tmp.weight[AF[include] > 0.5]
+	tmp.weight <- tmp.weight * MAF.weights.beta.fun(AF[include], MAF.weights.beta[1], MAF.weights.beta[2])
 	if(!is.null(cohort.group.idx)) tmp.weight <- rep(tmp.weight, n.cohort.groups)
 	U <- U*tmp.weight
 	V <- t(V*tmp.weight)*tmp.weight
@@ -531,17 +534,17 @@ glmm.rvtests.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.fi
     for(i in 1:n.cohort) close(cons[[i]])
     out <- data.frame(group=unique(group.info$group), n.variants=n.variants)
     if(Burden | SKATO | SMMAT) {
-	out$Burden.score <- Burden.score
-	out$Burden.var <- Burden.var
-	out$Burden.pval <- Burden.pval
+	out$B.score <- Burden.score
+	out$B.var <- Burden.var
+	out$B.pval <- Burden.pval
     }
-    if(SKAT | SKATO) out$SKAT.pval <- SKAT.pval
+    if(SKAT | SKATO) out$S.pval <- SKAT.pval
     if(SKATO) {
-	out$SKATO.pval <- SKATO.pval
-	out$SKATO.minp <- SKATO.minp
-	out$SKATO.minp.rho <- SKATO.minp.rho
+	out$O.pval <- SKATO.pval
+	out$O.minp <- SKATO.minp
+	out$O.minp.rho <- SKATO.minp.rho
     }
-    if(SMMAT) out$SMMAT.pval <- SMMAT.pval
+    if(SMMAT) out$E.pval <- SMMAT.pval
     return(out[match(groups, out$group),])
 }
 
@@ -619,50 +622,53 @@ glmm.rvtests.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.fi
     return(pval)
 }
 
-.pKuonen<-function (x, lambda, delta = rep(0, length(lambda))) 
+.pKuonen<-function (x, lambda, delta = rep(0, length(lambda)), df = rep(1, length(lambda)))
 {
-    delta <- delta[lambda > 0]
-    lambda <- lambda[lambda > 0]
-    if (x <= 0) 
-        return(1)
+    delta <- delta[lambda != 0]
+    df <- df[lambda != 0]
+    lambda <- lambda[lambda != 0]
+    if(length(lambda) != length(delta)) stop("Error: inconsistent length in lambda and delta!")
+    if(length(lambda) != length(df)) stop("Error: inconsistent length in lambda and df!")
     if (length(lambda) == 1) {
-        pchisq(x/lambda, df = 1, ncp = delta, lower.tail = FALSE)
+        pchisq(x/lambda, df = df, ncp = delta, lower.tail = FALSE)
     }
     d <- max(lambda)
     lambda <- lambda/d
     x <- x/d
     k0 <- function(zeta) {
-        -sum(log(1 - 2 * zeta * lambda))/2 + sum((delta * lambda * 
+        -sum(df * log(1 - 2 * zeta * lambda))/2 + sum((delta * lambda *
             zeta)/(1 - 2 * zeta * lambda))
     }
     kprime0 <- function(zeta) {
         sapply(zeta, function(zz) {
-            sum(lambda/(1 - 2 * zz * lambda)) + sum((delta * 
-                lambda)/(1 - 2 * zz * lambda) + 2 * (delta * 
+            sum(((delta + df) * lambda)/(1 - 2 * zz * lambda) + 2 * (delta *
                 zz * lambda^2)/(1 - 2 * zz * lambda)^2)
         })
     }
     kpprime0 <- function(zeta) {
-        2 * sum(lambda^2/(1 - 2 * zeta * lambda)^2) + sum((4 * 
-            delta * lambda^2)/(1 - 2 * zeta * lambda)^2 + 8 * 
+        sum((2 * (2 * delta + df) * lambda^2)/(1 - 2 * zeta * lambda)^2 + 8 *
             delta * zeta * lambda^3/(1 - 2 * zeta * lambda)^3)
     }
-    n <- length(lambda)
     if (any(lambda < 0)) {
         lmin <- max(1/(2 * lambda[lambda < 0])) * 0.99999
     }
-    else if (x > sum(lambda)+sum(delta*lambda)) {
+    else if (x > sum((df+delta)*lambda)) {
         lmin <- -0.01
     }
     else {
-        lmin <- -length(lambda)*max(1+delta)/(2 * x)
+        lmin <- -length(lambda)*max(df+delta)/(2 * x)
     }
     lmax <- min(1/(2 * lambda[lambda > 0])) * 0.99999
-    hatzeta <- uniroot(function(zeta) kprime0(zeta) - x, lower = lmin, 
+    hatzeta <- uniroot(function(zeta) kprime0(zeta) - x, lower = lmin,
         upper = lmax, tol = 1e-08)$root
     w <- sign(hatzeta) * sqrt(2 * (hatzeta * x - k0(hatzeta)))
     v <- hatzeta * sqrt(kpprime0(hatzeta))
-    if (abs(hatzeta) < 1e-04) 
+    if (abs(hatzeta) < 1e-04)
         NA
     else pnorm(w + log(v/w)/w, lower.tail = FALSE)
+}
+
+MAF.weights.beta.fun <- function(freq, beta1, beta2) {
+    freq[freq > 0.5] <- 1 - freq[freq > 0.5]
+    ifelse(freq <= 0, 0, dbeta(freq, beta1, beta2))
 }

@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 0.9}
-\date{March 9, 2018}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 0.9.1}
+\date{May 13, 2018}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -48,7 +48,7 @@ morekeywords={}
 \section{Introduction}
 \textit{GMMAT} is an R package for performing association tests using generalized linear mixed models (GLMMs) \cite{Breslow1993} in genome-wide association studies (GWAS) and sequencing association studies. GLMMs provide a broad range of models for correlated data analysis. In the GWAS and sequencing association study context, examples of correlated data include those from family studies, samples with cryptic relatedness and/or shared environmental effects, as well as samples generated from complex sampling designs.
 
-\textit{GMMAT} first fits a GLMM with covariate adjustment and random effects to account for population structure and family or cryptic relatedness. For GWAS, \textit{GMMAT} performs score tests for each genetic variant. For candidate gene studies, \textit{GMMAT} can also perform Wald tests to get the effect size estimate for each genetic variant. For rare variant analysis from sequencing association studies, \textit{GMMAT} performs the burden test \cite{Morgenthaler2007, Li2008, Madsen2009, Morris2010}, the sequence kernel association test (SKAT) \cite{Wu2011}, SKAT-O \cite{Lee2012} and the variant Set Mixed Model Association Test (SMMAT, Chen \textit{et al.} 2018, manuscript in preparation), based on user-defined variant sets.
+\textit{GMMAT} first fits a GLMM with covariate adjustment and random effects to account for population structure and family or cryptic relatedness. For GWAS, \textit{GMMAT} performs score tests for each genetic variant. For candidate gene studies, \textit{GMMAT} can also perform Wald tests to get the effect size estimate for each genetic variant. For rare variant analysis from sequencing association studies, \textit{GMMAT} performs the burden test \cite{Morgenthaler2007, Li2008, Madsen2009, Morris2010}, the sequence kernel association test (SKAT) \cite{Wu2011}, SKAT-O \cite{Lee2012} and the efficient hybrid test of the burden test and SKAT, in the variant Set Mixed Model Association Tests (SMMAT, Chen \textit{et al.} 2018, manuscript in preparation) framework, based on user-defined variant sets.
 
 \section{The model}
 In the context of single variant test, \textit{GMMAT} works with the following GLMM
@@ -63,7 +63,7 @@ In the context of variant set tests (also known as gene-based tests or aggregate
 \begin{equation}
 \eta_i=g(\mu_i)=\mb{X}_i\bs\alpha+\mb{G}_i\bs\beta+b_i,\nonumber
 \end{equation}
-where $\mb{G}_i$ is now a $1\times q$ row vector of genotypes for $q$ variants in subject $i$, $\bs\beta$ is a $q\times 1$ column vector of genotype effects with mean$\beta_0$ and variance $\sigma^2$. The burden test is for $H_0: \beta_0=0$ versus $H_1: \beta_0\ne 0$ under the constraint $\sigma^2=0$, SKAT is for $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under the constraint $\beta_0=0$, SKAT-O is a linear combination of burden test and SKAT statistics, and SMMAT combines the burden test with an adjusted SKAT (which is asymptotically independent with the burden test) $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under no constraints on $\beta_0$ using Fisher's method. Of note, in all these tests, the null GLMM is the same as the null model in the single variant test, which only needs to be fitted once.
+where $\mb{G}_i$ is now a $1\times q$ row vector of genotypes for $q$ variants in subject $i$, $\bs\beta$ is a $q\times 1$ column vector of genotype effects with mean$\beta_0$ and variance $\sigma^2$. The following 4 tests in the SMMAT framework are implemented. The burden test is for $H_0: \beta_0=0$ versus $H_1: \beta_0\ne 0$ under the constraint $\sigma^2=0$, SKAT is for $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under the constraint $\beta_0=0$, SKAT-O is a linear combination of burden test and SKAT statistics, and the efficient hybrid test combines the burden test with an adjusted SKAT (which is asymptotically independent with the burden test) $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under no constraints on $\beta_0$ using Fisher's method. Of note, in all these tests, the null GLMM is the same as the null model in the single variant test, which only needs to be fitted once.
 
 \section{Getting started}
 \subsection{Downloading \textit{GMMAT}}
@@ -86,7 +86,7 @@ devtools::install_github("hanchenphd/GMMAT")
 @
 
 \subsection{Using \textit{GMMAT} in Analysis Commons}
-The current version of the \textit{GMMAT} package (version 0.9) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v0.9" App in Project "Commons\_Tools".
+The current version of the \textit{GMMAT} package (version 0.9.1) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v0.9.1" App in Project "Commons\_Tools".
 
 \section{Input}
 \textit{GMMAT} requires the phenotype and covariates in an R data frame, known $n\times n$ matrices $\mb{V}_k$ as an R matrix (in the case of single matrix) or an R list (in the case of multiple matrices), and genotypes saved in a plain text file (or in a compressed plain text file .gz or .bz2), a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or in a GDS format file. We describe how to prepare these data below.
@@ -332,25 +332,25 @@ Set1    1       4       G       A       6
 Set1    1       5       A       G       9
 Set1    1       6       C       A       9
 \end{verbatim}
-Note that each variant in the group definition file is matched by chromosome, position, reference allele and alternate allele with variants from the GDS file. One genetic variant can be included in different groups with possibly different weights. If no weights are needed in the analysis, simply replace the 6th column by all 1's.
+Note that each variant in the group definition file is matched by chromosome, position, reference allele and alternate allele with variants from the GDS file. One genetic variant can be included in different groups with possibly different weights. If no external weights are needed in the analysis, simply replace the 6th column by all 1's.
 
-Four variant set tests are supported: Burden, SKAT, SKAT-O and SMMAT. You can include one or more tests in a single analysis. If SKAT-O is selected, Burden and SKAT results will be automatically included; if SMMAT is selected, Burden results will be automatically included. Therefore, the following example gives all four test results:
+Four variant set tests are supported in the SMMAT framework: "B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT. You can include one or more tests in a single analysis. If "O" is selected, the burden test and SKAT results will be automatically included; if "E" is selected, the burden test results will be automatically included. Therefore, the following example gives all four test results:
 <<GMMATrvtests1>>=
 group.file <- system.file("extdata", "SetID.withweights.txt", 
         package = "GMMAT")
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
-        tests = c("SKAT-O", "SMMAT"))
+        tests = c("O", "E"))
 @
-It returns a data frame with first 8 columns showing the group (variant set) name, number of variants in each group, minimum, mean, maximum missing rate of variants in each group, minimum, mean, maximum effect allele frequency of variants in each group, followed by variant set test results. For Burden, 3 columns will be included to show the burden test score, variance of the score, and its \textit{P} value. For SKAT, the \textit{P} value column will be included. For SKAT-O, 3 columns will be included to show SKAT-O \textit{P} value, minimum \textit{P} value in the search grid, and the value of the mixing parameter $\rho$ at which the minimum \textit{P} value is observed. For SMMAT, the \textit{P} value column will be included.
+It returns a data frame with first 8 columns showing the group (variant set) name, number of variants in each group, minimum, mean, maximum missing rate of variants in each group, minimum, mean, maximum effect allele frequency of variants in each group, followed by variant set test results. For Burden, 3 columns will be included to show the burden test score, variance of the score, and its \textit{P} value. For SKAT, the \textit{P} value column will be included. For SKAT-O, 3 columns will be included to show SKAT-O \textit{P} value, minimum \textit{P} value in the search grid, and the value of the mixing parameter $\rho$ at which the minimum \textit{P} value is observed. For the efficient hybrid test, the \textit{P} value column will be included.
 
 For a single study, intermediate files containing single variant scores and their covariance matrices for each variant set (based on the group definition file) can be saved for future use in re-analysis and/or meta-analysis. For example, here we perform the burden test and save intermediate files:
 
 <<GMMATrvtests2>>=
 glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
-        tests = "Burden", meta.file.prefix = "glmm.rvtests.meta")
+        tests = "B", meta.file.prefix = "glmm.rvtests.meta")
 @
 In the example above, a space-delimited file "glmm.rvtests.meta.score.1" will be generated to save the single variant scores, and a binary file "glmm.rvtests.meta.var.1" will be generated to save the covariance matrices for the variant sets. Note that the binary file is not human-readable, but can be used by \textbf{glmm.rvtests.meta} in re-analysis and/or meta-analysis.
 
@@ -359,9 +359,9 @@ With intermediate files generated by \textbf{glmm.rvtests}, the function \textbf
 <<GMMATrvtestsmeta>>=
 glmm.rvtests.meta(meta.files.prefix = "glmm.rvtests.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
-        miss.cutoff = 1, method = "davies", tests = "SKAT")
+        miss.cutoff = 1, method = "davies", tests = "S")
 @
-The first argument, "meta.files.prefix", is a vector of intermediate files' prefix with length equal to the number of studies, and the second argument, "n.files", is a vector of integers showing how many sets of intermediate files each study has (also with length equal to the number of studies). In our above example of re-analysis, we have one set of intermediate files ("glmm.rvtests.meta.score.1" and "glmm.rvtests.meta.var.1") with prefix "glmm.rvtests.meta". The group definition file (passed to "group.file") should be the same as the one used to generate intermediate files by \textbf{glmm.rvtests} (with possibly different weights allowed). In the above example, only SKAT is performed, but four variant set tests are supported: Burden, SKAT, SKAT-O and SMMAT. You can include one or more tests by passing a vector to the argument "tests". If SKAT-O is selected, Burden and SKAT results will be automatically included; if SMMAT is selected, Burden results will be automatically included.
+The first argument, "meta.files.prefix", is a vector of intermediate files' prefix with length equal to the number of studies, and the second argument, "n.files", is a vector of integers showing how many sets of intermediate files each study has (also with length equal to the number of studies). In our above example of re-analysis, we have one set of intermediate files ("glmm.rvtests.meta.score.1" and "glmm.rvtests.meta.var.1") with prefix "glmm.rvtests.meta". The group definition file (passed to "group.file") should be the same as the one used to generate intermediate files by \textbf{glmm.rvtests} (with possibly different weights allowed). In the above example, only SKAT is performed, but four variant set tests are supported in the SMMAT framework: "B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT. You can include one or more tests by passing a vector to the argument "tests". If "O" is selected, the burden test and SKAT results will be automatically included; if "E" is selected, the burden test results will be automatically included.
 
 \section{Output}
 The single variant score test function \textbf{glmm.score} generates a tab-delimited plain text output file. Here we show the header and the first five rows of the example output "glmm.score.text.testoutfile.txt" from using a plain text genotype file "geno.txt" in the function \textbf{glmm.score}:
@@ -519,12 +519,19 @@ Sys.setenv(MKL_NUM_THREADS = 1)
 \subsection{Variant filters}
 Variants can be filtered in \textbf{glmm.score} and \textbf{glmm.rvtests} based on minor allele frequency (MAF) and missing rate filters. The argument "MAF.range" specifies the minimum and maximum MAFs for a variant to be included in the analysis. By default the minimum MAF is $1\times 10^{-7}$ and the maximum MAF is 0.5, meaning that only monomorphic markers in the sample will be excluded (if your sample size is no more than 5 million). The argument "miss.cutoff" specifies the maximum missing rate for a variant to be included in the analysis. By default it is set to 1, meaning that no variants will be removed due to high genotype missing rates.
 
+\subsection{Internal minor allele frequency weights}
+Internal weights are calculated based on the minor allele frequency (NOT the effect allele frequency, therefore, variants with effect allele frequencies 0.01 and 0.99 have the same weights) as a beta probability density function. Internal weights are multiplied by the external weights given in the last column of the group definition file. To turn off internal weights, use
+\begin{verbatim}
+MAF.weights.beta = c(1, 1)
+\end{verbatim}
+to assign flat weights, as a beta distribution with parameters 1 and 1 is a uniform distribution on the interval between 0 and 1.
+
 \subsection{Allele flipping}
 In variant set tests \textbf{glmm.rvtests}, by default the alt allele is used as the coding allele and variants in each variant set are matched strictly on chromosome, position, reference and alternate alleles.
 
 The argument "auto.flip" allows automatic allele flipping if a specified variant is not found in the genotype file, but a variant at the same chromosome and position with reference allele matching the alternate allele in the group definition file "group.file", and alternate allele matching the reference allele in the group definition file "group.file", to be included in the analysis. Please use with caution for whole genome sequence data, as both ref/alt and alt/ref variants at the same position are not uncommon, and they are likely two different variants, rather than allele flipping.
 
-The argument "use.minor.allele" allows using the minor allele instead of the alt allele as the coding allele in variant set tests. Note that this choice does not change SKAT results, but Burden, SKAT-O and SMMAT results will be affected. Generally the alt allele can either be the minor or the major allele. If in a variant set, different variants with alt allele frequencies 0.001 and 0.998 are combined together in a burden test, the results would be difficult to interpret. We generally recommend turning on the "use.minor.allele" option, unless you know the ancestry alleles explicitly and the specific scientific hypothesis clearly that you would like to test. Along with the MAF filter, this option is useful for combining rare mutations, assuming rare allele effects are in the same direction.
+The argument "use.minor.allele" allows using the minor allele instead of the alt allele as the coding allele in variant set tests. Note that this choice does not change "S" for SKAT results, but "B" for the burden test, "O" for SKAT-O and "E" for efficient hybrid test of the burden test and SKAT results will be affected. Generally the alt allele can either be the minor or the major allele. If in a variant set, different variants with alt allele frequencies 0.001 and 0.998 are combined together in a burden test, the results would be difficult to interpret. We generally recommend turning on the "use.minor.allele" option, unless you know the ancestry alleles explicitly and the specific scientific hypothesis clearly that you would like to test. Along with the MAF filter, this option is useful for combining rare mutations, assuming rare allele effects are in the same direction.
 
 \subsection{\textit{P} values of weighted sum of chi-squares}
 In variant set tests \textbf{glmm.rvtests}, you can use 3 methods in the "method" argument to compute \textit{P} values of weighted sum of chi-square distributions: "davies" \cite{davies1980}, "kuonen" \cite{kuonen1999} and "liu" \cite{liu2009}. By default "davies" is used, if it returns an error message in the calculation, or a \textit{P} value greater than 1, or less than $1\times 10^{-5}$, "kuonen" method will be used. If "kuonen" method fails to compute the \textit{P} value, "liu" method will be used.
@@ -586,11 +593,18 @@ that can be used as the "select" argument in \textbf{glmm.score}.
 \item Implemented heteroscedastic linear mixed models in \textbf{glmmkin} and \textbf{glmm.wald} by specifying "groups".
 \end{enumerate}
 
+\subsection{Version 0.9.1 (May 13, 2018)}
+\begin{enumerate}
+\item In variant set tests \textbf{glmm.rvtests} and \textbf{glmm.rvtests.meta}, tests "Burden", "SKAT", "SKAT-O" and "SMMAT" changed to "B", "S", "O" and "E", respectively, to denote 4 variant set tests in the SMMAT framework: the burden test, SKAT, SKAT-O and the efficient hybrid test of the burden test and SKAT.
+\item Implemented known weights (e.g. binomial denominator) in \textbf{glmmkin} and \textbf{glmm.wald} by passing the argument "weights" to the \textbf{glm} object "fixed"
+\item Implemented internal MAF-based weights, using the argument "MAF.weights.beta" to denote the two beta probability density function parameters. Note that the weights are calculated on the minor allele frequency (not the effect allele frequency). Internal weights are multiplied by the external weights given in the last column of the group definition file.
+\end{enumerate}
+
 \section{Contact}
 Please refer to the R help document of \textit{GMMAT} for specific questions about each function. For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 \section{Acknowledgments}
-We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Stephanie Gogarten for help with the GDS genotype format, and Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
+We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, and Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
 
 \begin{thebibliography}{}
 

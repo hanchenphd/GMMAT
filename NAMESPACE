@@ -4,9 +4,9 @@ import(SeqVarTools)
 import(foreach)
 import(parallel)
 import(doMC)
-importFrom("stats", "as.formula", "binomial", "glm", "model.frame",
+importFrom("stats", "as.formula", "binomial", "dbeta", "glm", "model.frame",
 "model.matrix", "na.omit", "na.pass", "pchisq", "dchisq", "qchisq", "var",
-"pnorm", "uniroot", "integrate")
+"pnorm", "uniroot", "integrate", "weights")
 importFrom("utils", "read.table", "write.table")
 importFrom("CompQuadForm", "davies", "liu")
 

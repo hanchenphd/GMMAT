@@ -4,7 +4,7 @@
 Performing GLMM based score tests
 }
 \description{
-Use a glmmkin class object from the null GLMM to perform score tests for association with genotypes in a plink .bed file (binary genotypes), or a plain text file (or compressed .gz or .bz2 file).
+Use a glmmkin class object from the null GLMM to perform score tests for association with genotypes in a plink .bed file (binary genotypes), a GDS file .gds, or a plain text file (or compressed .gz or .bz2 file).
 }
 \usage{
 glmm.score(obj, infile, outfile, center = T, select = NULL, 
@@ -71,7 +71,7 @@ a positive integer indicating the number of cores to be used in parallel computi
 }
 }
 \value{
-computational time in seconds, excluding I/O time.
+NULL if \code{infile} is a GDS file (.gds), otherwise computational time in seconds, excluding I/O time.
 }
 \references{
 Chen, H., Wang, C., Conomos, M.P., Stilp, A.M., Li, Z., Sofer, T., Szpiro, A.A., Chen, W., Brehm, J.M., Celedón, J.C., Redline, S., Papanicolaou, G.J., Thornton, T.A., Laurie, C.C., Rice, K. and Lin, X. (2016) Control forpopulation structure and relatedness for binary traits in genetic association studies via logistic mixed models. The American Journal of Human Genetics 98, 653-666.

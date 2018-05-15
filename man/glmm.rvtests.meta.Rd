@@ -4,15 +4,15 @@
 Set-based rare variant meta-analysis for generalized linear mixed models
 }
 \description{
-Set-based rare variant tests (burden test, SKAT, SKAT-O and SMMAT) in the meta-analysis.
+Set-based rare variant tests (SMMAT-B, SMMAT-S, SMMAT-O and SMMAT-E) in the meta-analysis.
 }
 \usage{
 glmm.rvtests.meta(meta.files.prefix, n.files = rep(1,
 		length(meta.files.prefix)), cohort.group.idx = NULL, 
 		group.file, group.file.sep = "\t", MAF.range = c(1e-7, 0.5), 
-		miss.cutoff = 1, method = "davies", tests = "SMMAT", 
-		rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), 
-		use.minor.allele = FALSE)
+		MAF.weights.beta = c(1, 25), miss.cutoff = 1, 
+		method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 
+		0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE)
 }
 \arguments{
   \item{meta.files.prefix}{
@@ -32,7 +32,11 @@ a plain text file with 6 columns defining the test units. There should be no hea
 the delimiter in group.file (default = "\\t").
 }
   \item{MAF.range}{
-a numeric vector of length 2 defining the minimum and maximum minor allele frequencies of variants that should be included in the analysis (default = c(1e-7, 0.5)). Filter applied to the combined samples.}
+a numeric vector of length 2 defining the minimum and maximum minor allele frequencies of variants that should be included in the analysis (default = c(1e-7, 0.5)). Filter applied to the combined samples.
+}
+  \item{MAF.weights.beta}{
+a numeric vector of length 2 defining the beta probability density function parameters on the minor allele frequencies. This internal minor allele frequency weight is multiplied by the external weight given by the group.file. To turn off internal minor allele frequency weight and only use the external weight given by the group.file, use c(1, 1) to assign flat weights (default = c(1, 25)). Applied to the combined samples.
+}
   \item{miss.cutoff}{
 the maximum missing rate allowed for a variant to be included (default = 1, including all variants). Filter applied to the combined samples.
 }
@@ -40,13 +44,13 @@ the maximum missing rate allowed for a variant to be included (default = 1, incl
 a method to compute p-values for SKAT-type test statistics (default = "davies"). "davies" represents an exact method that computes a p-value by inverting the characteristic function of the mixture chisq distribution, with an accuracy of 1e-6. When "davies" p-value is less than 1e-5, it defaults to method "kuonen". "kuonen" represents a saddlepoint approximation method that computes the tail probabilities of the mixture chisq distribution. When "kuonen" fails to compute a p-value, it defaults to method "liu". "liu" is a moment-matching approximation method for the mixture chisq distribution.
 }
   \item{tests}{
-a character vector indicating which tests should be performed ("Burden", "SKAT", "SKAT-O" and "SMMAT"). Burden test is automatically included when performing "SMMAT" (default = "SMMAT").
+a character vector indicating which SMMAT tests should be performed ("B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT). The burden test and SKAT are automatically included when performing "O", and the burden test is automatically included when performing "E" (default = "E").
 }
   \item{rho}{
-a numeric vector defining the search grid used in SKAT-O (see the SKAT-O paper for details). Not used for Burden, SKAT or SMMAT (default = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1)).
+a numeric vector defining the search grid used in SMMAT-O for SKAT-O (see the SKAT-O paper for details). Not used for SMMAT-B for the burden test, SMMAT-S for SKAT or SMMAT-E for the efficient hybrid test of the burden test and SKAT (default = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1)).
 }
   \item{use.minor.allele}{
-a logical switch for whether to use the minor allele (instead of the alt allele) as the coding allele (default = FALSE). It does not change SKAT results, but burden test (as well as hybrid tests such as SKAT-O and SMMAT) will be affected. Along with the MAF filter, this option is useful for combining rare mutations, assuming rare allele effects are in the same direction. Use with caution, as major/minor alleles may flip in different cohorts. In that case, minor allele will be determined based on the allele frequency in the combined samples.
+a logical switch for whether to use the minor allele (instead of the alt allele) as the coding allele (default = FALSE). It does not change SMMAT-S results, but SMMAT-B (as well as SMMAT-O and SMMAT-E) will be affected. Along with the MAF filter, this option is useful for combining rare mutations, assuming rare allele effects are in the same direction. Use with caution, as major/minor alleles may flip in different cohorts. In that case, minor allele will be determined based on the allele frequency in the combined samples.
 }
 }
 \value{
@@ -57,29 +61,29 @@ name of the test unit group.
   \item{n.variants}{
 number of variants in the test unit group that pass the missing rate and allele frequency filters.
 }
-  \item{Burden.score}{
+  \item{B.score}{
 burden test score statistic.
 }
-  \item{Burden.var}{
+  \item{B.var}{
 variance of burden test score statistic.
 }
-  \item{Burden.pval}{
+  \item{B.pval}{
 burden test p-value.
 }
-  \item{SKAT.pval}{
+  \item{S.pval}{
 SKAT p-value.
 }
-  \item{SKATO.pval}{
+  \item{O.pval}{
 SKAT-O p-value.
 }
-  \item{SKATO.minp}{
+  \item{O.minp}{
 minimum p-value in the SKAT-O search grid.
 }
-  \item{SKATO.minp.rho}{
+  \item{O.minp.rho}{
 rho value at the minimum p-value in the SKAT-O search grid.
 }
-  \item{SMMAT.pval}{
-SMMAT p-value.
+  \item{E.pval}{
+SMMAT efficient hybrid test of the burden test and SKAT p-value.
 }
 }
 \references{

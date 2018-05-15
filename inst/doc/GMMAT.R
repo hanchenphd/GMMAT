@@ -181,7 +181,7 @@ group.file <- system.file("extdata", "SetID.withweights.txt",
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
-        tests = c("SKAT-O", "SMMAT"))
+        tests = c("O", "E"))
 
 
 ###################################################
@@ -189,7 +189,7 @@ glmm.rvtests(model0, group.file = group.file, geno.file = geno.file,
 ###################################################
 glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
-        tests = "Burden", meta.file.prefix = "glmm.rvtests.meta")
+        tests = "B", meta.file.prefix = "glmm.rvtests.meta")
 
 
 ###################################################
@@ -197,7 +197,7 @@ glmm.rvtests(model0, group.file = group.file, geno.file = geno.file,
 ###################################################
 glmm.rvtests.meta(meta.files.prefix = "glmm.rvtests.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
-        miss.cutoff = 1, method = "davies", tests = "SKAT")
+        miss.cutoff = 1, method = "davies", tests = "S")
 
 
 ###################################################
