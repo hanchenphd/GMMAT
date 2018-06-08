@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 0.9.1}
-\date{May 13, 2018}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 0.9.2}
+\date{June 8, 2018}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -598,6 +598,11 @@ that can be used as the "select" argument in \textbf{glmm.score}.
 \item In variant set tests \textbf{glmm.rvtests} and \textbf{glmm.rvtests.meta}, tests "Burden", "SKAT", "SKAT-O" and "SMMAT" changed to "B", "S", "O" and "E", respectively, to denote 4 variant set tests in the SMMAT framework: the burden test, SKAT, SKAT-O and the efficient hybrid test of the burden test and SKAT.
 \item Implemented known weights (e.g. binomial denominator) in \textbf{glmmkin} and \textbf{glmm.wald} by passing the argument "weights" to the \textbf{glm} object "fixed"
 \item Implemented internal MAF-based weights, using the argument "MAF.weights.beta" to denote the two beta probability density function parameters. Note that the weights are calculated on the minor allele frequency (not the effect allele frequency). Internal weights are multiplied by the external weights given in the last column of the group definition file.
+\end{enumerate}
+
+\subsection{Version 0.9.2 (June 8, 2018)}
+\begin{enumerate}
+\item In variant set tests \textbf{glmm.rvtests} and \textbf{glmm.rvtests.meta}, test "O" (SKAT-O in the SMMAT framework) p-value switched to minimum p-value multipled by the number of points on the search grid if the integration result is larger than the latter (consistent with implementation in the SKAT package).
 \end{enumerate}
 
 \section{Contact}

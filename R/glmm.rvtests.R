@@ -595,7 +595,7 @@ glmm.rvtests.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.fi
     	    return(re)
 	}, lower = 0, upper = 40, subdivisions = 2000, abs.tol = 10^-25)
     }, error=function(e) NA)
-    return(list(p = 1-re[[1]], minp = minp, minp.rho = rho[which.min(pval)],
+    return(list(p = min(1-re[[1]], minp*n.r), minp = minp, minp.rho = rho[which.min(pval)],
     Burden.score=Burden.score, Burden.var=Burden.var, Burden.pval=Burden.pval,
     SKAT.pval=SKAT.pval))
 }

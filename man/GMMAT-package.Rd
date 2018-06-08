@@ -12,8 +12,8 @@ An R package for performing association tests using generalized linear mixed mod
 \tabular{ll}{
 Package: \tab GMMAT\cr
 Type: \tab Package\cr
-Version: \tab 0.9\cr
-Date: \tab 2018-05-13\cr
+Version: \tab 0.9.2\cr
+Date: \tab 2018-06-08\cr
 License: \tab GPL-3\cr
 }
 }
