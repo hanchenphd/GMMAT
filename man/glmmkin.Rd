@@ -66,6 +66,7 @@ Generalized linear mixed models (GLMM) are fitted using the penalized quasi-like
   \item{linear.predictors}{a vector of length equal to the sample size for the linear predictors.}
   \item{fitted.values}{a vector of length equal to the sample size for the fitted mean values on the original scale.}
   \item{Y}{a vector of length equal to the sample size for the final working vector.}
+  \item{X}{model matrix for the fixed effects.}
   \item{P}{the projection matrix with dimensions equal to the sample size. Used in score tests.}
   \item{residuals}{a vector of length equal to the sample size for the residuals on the original scale. NOT rescaled by the dispersion parameter.}
   \item{scaled.residuals}{a vector of length equal to the sample size for the scaled residuals, calculated as the original residuals divided by the dispersion parameter (in heteroscedastic linear mixed models, corresponding residual variance estimates by each group).}

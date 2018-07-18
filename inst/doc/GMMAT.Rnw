@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 0.9.2}
-\date{June 8, 2018}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 0.9.3}
+\date{July 18, 2018}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -86,7 +86,7 @@ devtools::install_github("hanchenphd/GMMAT")
 @
 
 \subsection{Using \textit{GMMAT} in Analysis Commons}
-The current version of the \textit{GMMAT} package (version 0.9.1) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v0.9.1" App in Project "Commons\_Tools".
+The current version of the \textit{GMMAT} package (version 0.9.3) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v0.9.3" App in Project "Commons\_Tools".
 
 \section{Input}
 \textit{GMMAT} requires the phenotype and covariates in an R data frame, known $n\times n$ matrices $\mb{V}_k$ as an R matrix (in the case of single matrix) or an R list (in the case of multiple matrices), and genotypes saved in a plain text file (or in a compressed plain text file .gz or .bz2), a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or in a GDS format file. We describe how to prepare these data below.
@@ -603,6 +603,12 @@ that can be used as the "select" argument in \textbf{glmm.score}.
 \subsection{Version 0.9.2 (June 8, 2018)}
 \begin{enumerate}
 \item In variant set tests \textbf{glmm.rvtests} and \textbf{glmm.rvtests.meta}, test "O" (SKAT-O in the SMMAT framework) p-value switched to minimum p-value multipled by the number of points on the search grid if the integration result is larger than the latter (consistent with implementation in the SKAT package).
+\end{enumerate}
+
+\subsection{Version 0.9.3 (July 18, 2018)}
+\begin{enumerate}
+\item In the null model fitting function \textbf{glmmkin}, prior weights (e.g. binomial denominators for binomial distributions) coerced to a vector.
+\item In the null model fitting function \textbf{glmmkin}, model matrix X for fixed effects now included in the returned object.
 \end{enumerate}
 
 \section{Contact}

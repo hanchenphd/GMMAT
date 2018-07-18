@@ -110,7 +110,7 @@ glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(g
 	mu <- fit0$fitted.values
 	mu.eta <- family$mu.eta(eta)
 	Y <- eta - offset + (y - mu)/mu.eta
-	sqrtW <- mu.eta/sqrt(1/weights(fit0)*family$variance(mu))
+	sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*family$variance(mu))
 	X <- model.matrix(fit0)
 	alpha <- fit0$coef
 	if(verbose) {
@@ -168,7 +168,7 @@ glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(g
 		mu <- family$linkinv(eta)
 		mu.eta <- family$mu.eta(eta)
 		Y <- eta - offset + (y - mu)/mu.eta
-		sqrtW <- mu.eta/sqrt(1/weights(fit0)*family$variance(mu))
+		sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*family$variance(mu))
 		if(2*max(abs(alpha - alpha0)/(abs(alpha) + abs(alpha0) + tol), abs(tau - tau0)/(abs(tau) + abs(tau0) + tol)) < tol) break
 		if(max(tau) > tol^(-2)) {
 			warning("Large variance estimate observed in the iterations, model not converged...", call. = FALSE)
@@ -181,8 +181,8 @@ glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(g
 	res.var <- rep(1, n)
 	for(i in 1:ng) res.var[group.idx[[i]]] <- tau[i]
 	return(list(theta=tau, n.groups=ng, coefficients=alpha,
-	linear.predictors=eta, fitted.values=mu, Y=Y, P=fit$P, residuals=res,
-	scaled.residuals=res*weights(fit0)/res.var, cov=cov, converged=converged))
+	linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=fit$P, residuals=res,
+	scaled.residuals=res*as.vector(weights(fit0))/res.var, cov=cov, converged=converged))
 }
 
 glmmkin.brent <- function(fit0, kins, method = "REML", tau = 1, fixtau = 0, maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE) {
@@ -195,7 +195,7 @@ glmmkin.brent <- function(fit0, kins, method = "REML", tau = 1, fixtau = 0, maxi
 	mu <- fit0$fitted.values
 	mu.eta <- family$mu.eta(eta)
 	Y <- eta - offset + (y - mu)/mu.eta
-	sqrtW <- mu.eta/sqrt(1/weights(fit0)*fit0$family$variance(mu))
+	sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*fit0$family$variance(mu))
 	X <- model.matrix(fit0)
 	alpha <- fit0$coef
 	if(verbose) {
@@ -222,7 +222,7 @@ glmmkin.brent <- function(fit0, kins, method = "REML", tau = 1, fixtau = 0, maxi
 		mu <- family$linkinv(eta)
 		mu.eta <- family$mu.eta(eta)
 		Y <- eta - offset + (y - mu)/mu.eta
-		sqrtW <- mu.eta/sqrt(1/weights(fit0)*family$variance(mu))
+		sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*family$variance(mu))
 		if(2*max(abs(alpha - alpha0)/(abs(alpha) + abs(alpha0) + tol), abs(tau - tau0)/(abs(tau) + abs(tau0) + tol)) < tol) break
 		if(family$family == "gaussian") break
 	}
@@ -241,8 +241,8 @@ glmmkin.brent <- function(fit0, kins, method = "REML", tau = 1, fixtau = 0, maxi
 		cov <- phi*cov
 	}
 	return(list(theta=theta, n.groups=1, coefficients=alpha,
-	linear.predictors=eta, fitted.values=mu, Y=Y, P=P, residuals=res,
-	scaled.residuals=res*weights(fit0)/theta[1], cov=cov, converged=converged))
+	linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=P, residuals=res,
+	scaled.residuals=res*as.vector(weights(fit0))/theta[1], cov=cov, converged=converged))
 }
 
 glmmkin.nm <- function(fit0, kins, method = "REML", tau = rep(1, length(kins)), fixtau = rep(0, length(kins)), maxiter = 500, tol = 1e-5, verbose = FALSE) {
@@ -255,7 +255,7 @@ glmmkin.nm <- function(fit0, kins, method = "REML", tau = rep(1, length(kins)), 
 	mu <- fit0$fitted.values
 	mu.eta <- family$mu.eta(eta)
 	Y <- eta - offset + (y - mu)/mu.eta
-	sqrtW <- mu.eta/sqrt(1/weights(fit0)*fit0$family$variance(mu))
+	sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*fit0$family$variance(mu))
 	X <- model.matrix(fit0)
 	alpha <- fit0$coef
 	if(verbose) {
@@ -282,7 +282,7 @@ glmmkin.nm <- function(fit0, kins, method = "REML", tau = rep(1, length(kins)), 
 		mu <- family$linkinv(eta)
 		mu.eta <- family$mu.eta(eta)
 		Y <- eta - offset + (y - mu)/mu.eta
-		sqrtW <- mu.eta/sqrt(1/weights(fit0)*family$variance(mu))
+		sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*family$variance(mu))
 		if(2*max(abs(alpha - alpha0)/(abs(alpha) + abs(alpha0) + tol), abs(tau - tau0)/(abs(tau) + abs(tau0) + tol)) < tol) break
 		if(family$family == "gaussian") break
 	}
@@ -301,6 +301,6 @@ glmmkin.nm <- function(fit0, kins, method = "REML", tau = rep(1, length(kins)), 
 		cov <- phi*cov
 	}
 	return(list(theta=theta, n.groups=1, coefficients=alpha,
-	linear.predictors=eta, fitted.values=mu, Y=Y, P=P, residuals=res,
-	scaled.residuals=res*weights(fit0)/theta[1], cov=cov, converged=converged))
+	linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=P, residuals=res,
+	scaled.residuals=res*as.vector(weights(fit0))/theta[1], cov=cov, converged=converged))
 }
