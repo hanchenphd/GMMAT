@@ -47,7 +47,7 @@
 #include <RcppArmadillo.h>
 #include <R.h>
 #include <Rmath.h>
-#include <R_ext/Applic.h>
+//#include <R_ext/Applic.h>
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h> 
@@ -215,7 +215,6 @@ double use_brent(double ax, double bx, double (*f)(double, void *),
     return x;
 }
 /* end of use_brent */
-
 
 // For calculation of UtXY: mat(n, (p+1)*(p+2)/2); 0 <= i <= j <= p
 size_t index2 (const size_t p, const size_t i, const size_t j) {
@@ -385,13 +384,11 @@ extern "C"
   SEXP fitglmm_brent(SEXP Y_in, SEXP X_in, SEXP Phi_in, SEXP sqrtW_in, SEXP method_in, SEXP dispersion_in, SEXP tau_in, SEXP fixtau_in, SEXP tol_in, SEXP taumin_in, SEXP taumax_in, SEXP tauregion_in)
 {
 	try {
-		Rcpp::NumericMatrix X_r(X_in);
-		Rcpp::NumericMatrix Phi_r(Phi_in);
-		size_t n = X_r.nrow(), p = X_r.ncol();
+	        mat X = as<mat>(X_in);
+		size_t n = X.n_rows, p = X.n_cols;
 		Rcpp::NumericVector Y_r(Y_in);
 		Rcpp::NumericVector sqrtW_r(sqrtW_in);
-		arma::mat X(X_r.begin(), n, p, false);
-		arma::mat Phi(Phi_r.begin(), n, n, false);
+		mat Phi = as<mat>(Phi_in);
 		arma::vec Y(Y_r.begin(), Y_r.size(), false);
 		arma::vec sqrtW(sqrtW_r.begin(), sqrtW_r.size(), false);
 		const char method = Rcpp::as<char>(method_in);
@@ -408,7 +405,7 @@ extern "C"
 		Y %= sqrtW;
 		X.each_col() %= sqrtW;
 		Phi.each_col() %= sqrtW;
-		Phi.each_row() %= sqrtW;
+		Phi.each_row() %= sqrtW.t();
 		mat U;
 		vec eval;
 		eig_sym(eval, U, Phi, "dc");
@@ -465,6 +462,12 @@ extern "C"
 	}
 	return R_NilValue;
 }
+
+typedef double optimfn(int, double *, void *);
+void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
+           int *fail, double abstol, double intol, void *ex,
+           double alpha, double bet, double gamm, int trace,
+           int *fncount, int maxit);
 
   SEXP fitglmm_nm(SEXP Y_in, SEXP X_in, SEXP q_in, SEXP Phi_in, SEXP W_in, SEXP method_in, SEXP dispersion_in, SEXP tau_in, SEXP fixtau_in, SEXP maxiter_in, SEXP tol_in)
 {
@@ -537,7 +540,7 @@ extern "C"
 		const uvec fixtau = as<uvec>(fixtau_in);
 		const size_t q2 = sum(fixtau == 0);
 		const double tol = Rcpp::as<double>(tol_in);
-		uvec ZERO = (tau < tol);
+		//uvec ZERO = (tau < tol);
 		mat cov(p, p);
 		vec alpha(p), eta(n);
 		vec diagP = zeros<vec>(n);
@@ -587,18 +590,20 @@ extern "C"
 				}
 			}
 			vec Dtau = solve(AI, score);
-			vec tau0 = tau;
-			tau.elem( idxtau ) = tau0.elem( idxtau ) + Dtau;
-			tau.elem( find(ZERO % (tau < tol)) ).zeros();
-			double step = 1.0;
-			while(any(tau < 0.0)) {
-			        step *= 0.5;
-				tau.elem( idxtau ) = tau0.elem( idxtau ) + step * Dtau;
-				tau.elem( find(ZERO % (tau < tol)) ).zeros();
-			}
-			tau.elem( find(tau < tol) ).zeros();
+			//vec tau0 = tau;
+			//tau.elem( idxtau ) = tau0.elem( idxtau ) + Dtau;
+			//tau.elem( find(ZERO % (tau < tol)) ).zeros();
+			//double step = 1.0;
+			//while(any(tau < 0.0)) {
+			//        step *= 0.5;
+			//	tau.elem( idxtau ) = tau0.elem( idxtau ) + step * Dtau;
+			//	tau.elem( find(ZERO % (tau < tol)) ).zeros();
+			//}
+			//tau.elem( find(tau < tol) ).zeros();
+			return List::create(Named("Dtau") = Dtau, Named("P") = P, Named("cov") = cov, Named("alpha") = alpha, Named("eta") = eta);
+		} else {
+			return List::create(Named("Dtau") = R_NilValue, Named("P") = P, Named("cov") = cov, Named("alpha") = alpha, Named("eta") = eta);
 		}
-		return List::create(Named("tau") = tau, Named("P") = P, Named("cov") = cov, Named("alpha") = alpha, Named("eta") = eta);
 	} catch( std::exception &ex ) {
 		forward_exception_to_r( ex );
 	} catch(...) {

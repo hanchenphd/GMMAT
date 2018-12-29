@@ -1,8 +1,6 @@
-glmm.wald <- function(fixed, data = parent.frame(), kins, groups = NULL, family = binomial(link = "logit"), infile, snps, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, center = T, select = NULL, missing.method = "impute2mean", infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", verbose = FALSE, ...) {
-	if(!class(kins) %in% c("matrix", "list"))
+glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), infile, snps, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, center = T, select = NULL, missing.method = "impute2mean", infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", verbose = FALSE, ...) {
+	if(!is.null(kins) && !class(kins) %in% c("matrix", "list"))
 		stop("Error: \"kins\" must be a matrix or a list.")
-	if(class(kins) == "list" && length(table(sapply(kins, dim))) != 1)
-		stop("Error: when \"kins\" is a list, all its elements must be square matrices of the same size.")
 	if(!method %in% c("REML", "ML"))
 		stop("Error: \"method\" must be \"REML\" or \"ML\".")
 	method.optim <- try(match.arg(method.optim, c("AI", "Brent", "Nelder-Mead")))
@@ -15,41 +13,32 @@ glmm.wald <- function(fixed, data = parent.frame(), kins, groups = NULL, family 
 	if(class(family) != "family")
 		stop("Error: \"family\" must be an object of class \"family\".")
 	if(!family$family %in% c("binomial", "gaussian", "Gamma", "inverse.gaussian", "poisson", "quasi", "quasibinomial", "quasipoisson"))
-		stop("Error: family must be one of the following: binomial, gaussian, Gamma, inverse.gaussian, poisson, quasi, quasibinomial, quasipoisson.")
+		stop("Error: \"family\" must be one of the following: binomial, gaussian, Gamma, inverse.gaussian, poisson, quasi, quasibinomial, quasipoisson.")
         if(!is.null(groups)) {
                 if(family$family != "gaussian") stop("Error: heteroscedastic linear mixed models are only applicable when \"family\" is gaussian.")
                 if(method.optim != "AI") stop("Error: heteroscedastic linear mixed models are currently only implemented for method.optim \"AI\".")
                 if(!groups %in% names(data)) stop("Error: \"groups\" must be one of the variables in the names of \"data\".")
         }
+        if(!id %in% names(data)) stop("Error: \"id\" must be one of the variables in the names of \"data\".")
+        if(!is.null(random.slope)) {
+                if(method.optim != "AI") stop("Error: random slope for longitudinal data is currently only implemented for method.optim \"AI\".")
+                if(!random.slope %in% names(data)) stop("Error: \"random.slope\" must be one of the variables in the names of \"data\".")
+        }
         if(method.optim != "Brent" && class(kins) == "matrix") kins <- list(kins1 = kins)
 	miss.method <- try(match.arg(missing.method, c("impute2mean", "omit")))
 	if(class(miss.method) == "try-error") stop("Error: missing.method should be one of the following: impute2mean, omit!")
 	miss.method <- substr(miss.method, 1, 1)
-	nn <- ifelse(class(kins) == "matrix", nrow(kins), nrow(kins[[1]]))
-	if(is.null(select)) select <- 1:nn
-	select2 <- select[select > 0]
-	if(length(select2) != nn | any(sort(select2) != 1:nn)) stop("Error: select is a vector of orders, individuals not in kins should be coded 0!")
-	idx <- match(rownames(model.frame(formula = fixed, data = data, na.action = na.omit)), rownames(model.frame(formula = fixed, data = data, na.action = na.pass)))
-	nn <- length(idx)
-	data <- data[idx, ]
-        group.id <- if(is.null(groups)) rep(1, nn) else data[, groups]
-	select2 <- match(idx, select)
-	select[-select2] <- 0
-	select[select2] <- 1:nn
-	if(class(kins) == "matrix") kins <- kins[idx, idx]
-	else {
-	        for(i in 1:length(kins)) kins[[i]] <- kins[[i]][idx, idx]
-	}
 	is.plinkfiles <- all(file.exists(paste(infile, c("bim", "bed", "fam"), sep=".")))
 	is.gds <- grepl("\\.gds$", infile)
 	if(is.plinkfiles) {
 		bimfile <- paste(infile, "bim", sep=".")
 		bedfile <- paste(infile, "bed", sep=".")
 		famfile <- paste(infile, "fam", sep=".")
-		if(length(select) != as.integer(system(paste("wc -l", famfile, "| awk '{print $1}'"), intern = T))) stop("Error: number of individuals in plink fam file incorrect!")
+		sample.id <- read.table(famfile, as.is=T)[,2]
 		snpinfo <- matrix(NA, length(snps), 6)
 	} else if(is.gds) { # GDS genotype file
 	        gds <- SeqArray::seqOpen(infile)
+		sample.id <- SeqArray::seqGetData(gds, "sample.id")
 		variant.idx <- SeqArray::seqGetData(gds, "variant.id")
 		variant.id <- SeqArray::seqGetData(gds, "annotation/id")
 		snpinfo <- matrix(NA, length(snps), 5)
@@ -74,6 +63,54 @@ glmm.wald <- function(fixed, data = parent.frame(), kins, groups = NULL, family 
 		if(any(infile.ncol.print != sort(infile.ncol.print)))
 			stop("Error: col indices must be sorted increasingly in infile.ncol.print!")
 		snpinfo <- matrix(NA, length(snps), length(infile.header.print))
+		if(is.null(select)) select <- 1:length(unique(data[, id]))
+	}
+	if(is.null(select)) {
+		if(any(is.na(match(unique(data[, id]), sample.id)))) warning("Check your data... Some individuals in data are missing in sample.id of infile!")
+		select <- match(sample.id, unique(data[, id]))
+                select[is.na(select)] <- 0
+		if(all(select == 0)) stop("Error: ID in data does not match sample.id in infile!")
+	}
+	if((is.plinkfiles || is.gds) && length(select) != length(sample.id)) stop("Error: number of individuals in select does not match infile!")
+	select2 <- select[select > 0]
+	if(any(duplicated(select2)) || max(select2) > length(unique(data[, id]))) stop("Error: select is a vector of orders, individuals not in the phenotype data should be coded 0!")
+	data <- data[data[, id] %in% unique(data[, id])[select2], ]
+	select[select > 0] <- rank(select[select > 0])
+	idx <- match(rownames(model.frame(formula = fixed, data = data, na.action = na.omit)), rownames(model.frame(formula = fixed, data = data, na.action = na.pass)))
+        group.id <- if(is.null(groups)) rep(1, length(idx)) else data[idx, groups]
+        time.var <- if(is.null(random.slope)) NULL else data[idx, random.slope]
+	nn <- length(unique(data[idx, id]))
+	select2 <- match(unique(data[idx, id]), unique(data[, id]))
+	select[!select %in% select2] <- 0
+	select[select > 0] <- rank(select[select > 0])
+	data <- data[idx, ]
+	data.idx <- match(data[, id], unique(data[, id]))
+        if(any(duplicated(data[, id]))) {
+                cat("Duplicated id detected...\nAssuming longitudinal data with repeated measures...\n")
+                if(method.optim == "Brent") {
+                        if(is.null(kins)) {
+                                kins <- diag(length(unique(data[, id])))
+                                rownames(kins) <- colnames(kins) <- unique(data[, id])
+                        } else stop("Error: method.optim \"Brent\" can only be applied to unrelated individuals in longitudinal data analysis.")
+                } else {
+                        kins[[length(kins) + 1]] <- diag(length(unique(data[, id])))
+                        rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[, id])
+                }
+        } else if(!is.null(random.slope)) stop("Error: \"random.slope\" must be used for longitudinal data with duplicated \"id\".")
+	if(class(kins) == "matrix") {
+		match.idx1 <- match(data[, id], rownames(kins))
+		match.idx2 <- match(data[, id], colnames(kins))
+		if(any(is.na(c(match.idx1, match.idx2)))) stop("Error: kins matrix does not include all individuals in the data.")
+		kins <- kins[match.idx1, match.idx2]
+	} else if(class(kins) == "list") {
+	        for(i in 1:length(kins)) {
+		      	match.idx1 <- match(data[, id], rownames(kins[[i]]))
+			match.idx2 <- match(data[, id], colnames(kins[[i]]))
+			if(any(is.na(c(match.idx1, match.idx2)))) stop("Error: kins matrix ", i, " does not include all individuals in the data.")
+			kins[[i]] <- kins[[i]][match.idx1, match.idx2]
+		}
+        } else {
+                if(!is.null(groups)) stop("Error: heteroscedastic linear models for unrelated observations have not been implemented.")
 	}
 	N <- AF <- BETA <- SE <- PVAL <- converged <- rep(NA, length(snps))
 	for(ii in 1:length(snps)) {
@@ -120,16 +157,24 @@ glmm.wald <- function(fixed, data = parent.frame(), kins, groups = NULL, family 
 			N[ii] <- readfile$N
 			AF[ii] <- readfile$AF
 			if(readfile$skip != 1) { # snp
-				data$SNP__ <- as.numeric(readfile$G)
+				data$SNP__ <- as.numeric(readfile$G)[data.idx]
 				data$SNP__[data$SNP__ < (-999)] <- NA
 				fit0 <- glm(formula = as.formula(paste(deparse(fixed), "SNP__", sep=" + ")), data = data, family = family, ...)
+				if(is.null(kins)) {
+					coef <- summary(fit0)$coef
+                                        BETA[ii] <- coef[nrow(coef), 1]
+                                        SE[ii] <- coef[nrow(coef), 2]
+                                        PVAL[ii] <- coef[nrow(coef), 4]
+					converged[ii] <- TRUE
+					next
+				}
 				idx <- match(rownames(model.frame(formula = as.formula(paste(deparse(fixed), "SNP__", sep=" + ")), data = data, na.action = na.omit)), rownames(model.frame(formula = as.formula(paste(deparse(fixed), "SNP__", sep=" + ")), data = data, na.action = na.pass)))
 				tmpkins <- kins
 				if(class(tmpkins) == "matrix") tmpkins <- tmpkins[idx, idx]
 				else {
 				        for(i in 1:length(tmpkins)) tmpkins[[i]] <- tmpkins[[i]][idx, idx]
 				}
-				fit <- try(glmmkin.fit(fit0, tmpkins, group.id, method = method, method.optim = method.optim, maxiter = maxiter, tol = tol, taumin = taumin, taumax = taumax, tauregion = tauregion, verbose = verbose))
+				fit <- try(glmmkin.fit(fit0, tmpkins, time.var, group.id, method = method, method.optim = method.optim, maxiter = maxiter, tol = tol, taumin = taumin, taumax = taumax, tauregion = tauregion, verbose = verbose))
 				if(class(fit) != "try-error") {
 					BETA[ii] <- fit$coefficients[length(fit$coefficients)]
 					SE[ii] <- sqrt(diag(fit$cov)[length(fit$coefficients)])

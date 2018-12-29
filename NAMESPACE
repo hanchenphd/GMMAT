@@ -6,11 +6,11 @@ import(parallel)
 import(doMC)
 importFrom("stats", "as.formula", "binomial", "dbeta", "glm", "model.frame",
 "model.matrix", "na.omit", "na.pass", "pchisq", "dchisq", "qchisq", "var",
-"pnorm", "uniroot", "integrate", "weights")
+"pnorm", "uniroot", "integrate", "weights", "vcov")
 importFrom("utils", "read.table", "write.table")
 importFrom("CompQuadForm", "davies", "liu")
 
 useDynLib(GMMAT, .registration = TRUE, .fixes = "C_")
 
 # functions
-export(glmmkin, glmm.score, glmm.wald, glmm.score.meta, glmm.rvtests, glmm.rvtests.meta)
+export(glmmkin, glmm.score, glmm.wald, glmm.score.meta, SMMAT, SMMAT.meta)

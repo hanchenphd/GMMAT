@@ -1,9 +1,7 @@
-glmmkin <- function(fixed, data = parent.frame(), kins, groups = NULL, family = binomial(link = "logit"), method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE, ...) {
+glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE, ...) {
 	call <- match.call()
-	if(!class(kins) %in% c("matrix", "list"))
+	if(!is.null(kins) && !class(kins) %in% c("matrix", "list"))
 		stop("Error: \"kins\" must be a matrix or a list.")
-	if(class(kins) == "list" && length(table(sapply(kins, dim))) != 1)
-		stop("Error: when \"kins\" is a list, all its elements must be square matrices of the same size.")
 	if(!method %in% c("REML", "ML"))
 		stop("Error: \"method\" must be \"REML\" or \"ML\".")
 	method.optim <- try(match.arg(method.optim, c("AI", "Brent", "Nelder-Mead")))
@@ -22,22 +20,69 @@ glmmkin <- function(fixed, data = parent.frame(), kins, groups = NULL, family = 
 		if(method.optim != "AI") stop("Error: heteroscedastic linear mixed models are currently only implemented for method.optim \"AI\".")
 		if(!groups %in% names(data)) stop("Error: \"groups\" must be one of the variables in the names of \"data\".")
 	}
+	if(!id %in% names(data)) stop("Error: \"id\" must be one of the variables in the names of \"data\".")
+	if(!is.null(random.slope)) {
+		if(method.optim != "AI") stop("Error: random slope for longitudinal data is currently only implemented for method.optim \"AI\".")
+		if(!random.slope %in% names(data)) stop("Error: \"random.slope\" must be one of the variables in the names of \"data\".")
+	}
 	if(method.optim != "Brent" && class(kins) == "matrix") kins <- list(kins1 = kins)
 	fit0 <- glm(formula = fixed, data = data, family = family, ...)
 	idx <- match(rownames(model.frame(formula = fixed, data = data, na.action = na.omit)), rownames(model.frame(formula = fixed, data = data, na.action = na.pass)))
-	if(class(kins) == "matrix") kins <- kins[idx, idx]
-	else {
-	        for(i in 1:length(kins)) kins[[i]] <- kins[[i]][idx, idx]
+	if(any(duplicated(data[idx, id]))) {
+		cat("Duplicated id detected...\nAssuming longitudinal data with repeated measures...\n")
+		if(method.optim == "Brent") {
+			if(is.null(kins)) {
+				kins <- diag(length(unique(data[idx, id])))
+				rownames(kins) <- colnames(kins) <- unique(data[idx, id])
+			} else stop("Error: method.optim \"Brent\" can only be applied to unrelated individuals in longitudinal data analysis.")
+	     	} else {
+			kins[[length(kins) + 1]] <- diag(length(unique(data[idx, id])))
+			rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[idx, id])
+		}
+	} else if(!is.null(random.slope)) stop("Error: no duplicated \"id\" found, \"random.slope\" must be used for longitudinal data with duplicated \"id\".")
+	if(class(kins) == "matrix") {
+		match.idx1 <- match(data[idx, id], rownames(kins))
+		match.idx2 <- match(data[idx, id], colnames(kins))
+		if(any(is.na(c(match.idx1, match.idx2)))) stop("Error: kins matrix does not include all individuals in the data.")
+		kins <- kins[match.idx1, match.idx2]
+	} else if(class(kins) == "list") {
+	        for(i in 1:length(kins)) {
+		      	match.idx1 <- match(data[idx, id], rownames(kins[[i]]))
+			match.idx2 <- match(data[idx, id], colnames(kins[[i]]))
+			if(any(is.na(c(match.idx1, match.idx2)))) stop("Error: kins matrix ", i, " does not include all individuals in the data.")
+			kins[[i]] <- kins[[i]][match.idx1, match.idx2]
+		}
+	} else {
+		if(!is.null(groups)) stop("Error: heteroscedastic linear models for unrelated observations have not been implemented.")
+		y <- fit0$y
+		n <- length(y)
+		offset <- fit0$offset
+		if(is.null(offset)) offset <- rep(0, n)
+		family <- fit0$family
+		eta <- fit0$linear.predictors
+		mu <- fit0$fitted.values
+		mu.eta <- family$mu.eta(eta)
+		Y <- eta - offset + (y - mu)/mu.eta
+		sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*family$variance(mu))
+		X <- model.matrix(fit0)
+		X2 <- X * sqrtW
+		alpha <- fit0$coef
+		res <- y - mu
+		tau <- summary(fit0)$dispersion
+		fit <- list(theta=tau, n.groups=1, coefficients=alpha, linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=t((diag(n) - crossprod(t(X2), tcrossprod(solve(crossprod(X2)), X2))) * sqrtW) * sqrtW/tau, residuals=res, scaled.residuals=res*as.vector(weights(fit0))/tau, cov=vcov(fit0), converged=TRUE, call = call, id_include = data[idx, id])
+		class(fit) <- "glmmkin"
+		return(fit)
 	}
 	group.id <- if(is.null(groups)) rep(1, length(idx)) else data[idx, groups]
-	fit <- glmmkin.fit(fit0, kins, group.id, method = method, method.optim = method.optim, maxiter = maxiter, tol = tol, taumin = taumin, taumax = taumax, tauregion = tauregion, verbose = verbose)
+	time.var <- if(is.null(random.slope)) NULL else data[idx, random.slope]
+	fit <- glmmkin.fit(fit0, kins, time.var, group.id, method = method, method.optim = method.optim, maxiter = maxiter, tol = tol, taumin = taumin, taumax = taumax, tauregion = tauregion, verbose = verbose)
 	fit$call <- call
-	fit$id_include <- idx
+	fit$id_include <- data[idx, id]
 	class(fit) <- "glmmkin"
 	return(fit)
 }
 
-glmmkin.fit <- function(fit0, kins, group.id, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE) {
+glmmkin.fit <- function(fit0, kins, time.var, group.id, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE) {
 	if(method.optim == "Brent") {
 		fit <- glmmkin.brent(fit0, kins, method = method, maxiter = maxiter, tol = tol, taumin = taumin, taumax = taumax, tauregion = tauregion, verbose = verbose)
 		if(fit$theta[2]/fit$theta[1] < 1.01 * tol) {
@@ -50,17 +95,43 @@ glmmkin.fit <- function(fit0, kins, group.id, method = "REML", method.optim = "A
 			group.unique <- unique(group.id)
 			group.idx <- list()
 			for(i in 1:length(group.unique)) group.idx[[i]] <- which(group.id == group.unique[i])
+			covariance.idx <- fixrho.old <- fixrho.new <- NULL
+			if(!is.null(time.var)) {
+				q <- length(kins)
+				covariance.idx <- matrix(0, q, 3)
+				for(i in 1:q) kins[[q + i]] <- kins[[i]] * time.var + t(kins[[i]] * time.var)
+				for(i in 1:q) {
+				        kins[[2*q + i]] <- t(kins[[i]] * time.var) * time.var
+					covariance.idx[i, ] <- c(q + i, i, 2*q + i) + length(group.idx)
+				}
+				names(kins) <- paste("kins", 1:length(kins), sep="")
+				fixrho.old <- rep(0, q)
+			}
 			fixtau.old <- rep(0, length(kins)+length(group.idx))
-			fit <- glmmkin.ai(fit0, kins, group.idx, maxiter = maxiter, tol = tol, verbose = verbose)
+			fit <- glmmkin.ai(fit0 = fit0, kins = kins, covariance.idx = covariance.idx, group.idx = group.idx, maxiter = maxiter, tol = tol, verbose = verbose)
 			fixtau.new <- 1*(fit$theta < 1.01 * tol)
-			while(any(fixtau.new != fixtau.old)) {
-				warning("Variance estimate 0 observed, refitting model...", call. = FALSE)
+			if(!is.null(covariance.idx)) {
+				fixtau.new[covariance.idx[, 1]] <- 0
+				fixrho.new <- rep(0, nrow(covariance.idx))
+				fixrho.idx <- apply(covariance.idx, 1, function(x) abs(fit$theta[x[1]]) > (1 - 1.01 * tol) * sqrt(fit$theta[x[2]] * fit$theta[x[3]]))
+				fixrho.new[fixrho.idx] <- sign(fit$theta[covariance.idx[fixrho.idx, 1]])
+			}
+			while(any(fixtau.new != fixtau.old) || (!is.null(fixrho.new) && any(fixrho.new != fixrho.old))) {
+				warning("Variance estimate on the boundary of the parameter space observed, refitting model...", call. = FALSE)
 				fixtau.old <- fixtau.new
-				fit <- glmmkin.ai(fit0, kins, group.idx, fixtau = fixtau.old, maxiter = maxiter, tol = tol, verbose = verbose)
+				if(!is.null(covariance.idx)) fixrho.old <- fixrho.new
+				fit <- glmmkin.ai(fit0 = fit0, kins = kins, covariance.idx = covariance.idx, group.idx = group.idx, fixtau = fixtau.old, fixrho = fixrho.old, maxiter = maxiter, tol = tol, verbose = verbose)
 				fixtau.new <- 1*(fit$theta < 1.01 * tol)
+				if(!is.null(covariance.idx)) {
+					fixtau.new[covariance.idx[, 1]] <- 0
+					fixrho.new <- rep(0, nrow(covariance.idx))
+					fixrho.idx <- apply(covariance.idx, 1, function(x) abs(fit$theta[x[1]]) > (1 - 1.01 * tol) * sqrt(fit$theta[x[2]] * fit$theta[x[3]]))
+					fixrho.new[fixrho.idx] <- sign(fit$theta[covariance.idx[fixrho.idx, 1]])
+				}
 			}
 			if(!fit$converged) {
 				if(length(group.idx) != 1) stop("Error: Average Information REML not converged, cannot refit heteroscedastic linear mixed model using Brent or Nelder-Mead methods.")
+				if(!is.null(time.var)) stop("Error: Average Information REML not converged, cannot refit random slope model for longitudinal data using Brent or Nelder-Mead methods.")
 				if(length(kins) == 1) {
 					warning("Average Information REML not converged, refitting model using Brent method...", call. = FALSE)
 					fit <- glmmkin.brent(fit0, kins[[1]], method = method, maxiter = maxiter, tol = tol, taumin = taumin, taumax = taumax, tauregion = tauregion, verbose = verbose)
@@ -100,7 +171,7 @@ glmmkin.fit <- function(fit0, kins, group.id, method = "REML", method.optim = "A
 	return(fit)
 }
 
-glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(group.idx)), fixtau = rep(0, length(kins)+length(group.idx)), maxiter = 500, tol = 1e-5, verbose = FALSE) {
+glmmkin.ai <- function(fit0, kins, covariance.idx = NULL, group.idx, tau = rep(0, length(kins)+length(group.idx)), fixtau = rep(0, length(kins)+length(group.idx)), fixrho = NULL, maxiter = 500, tol = 1e-5, verbose = FALSE) {
 	y <- fit0$y
 	n <- length(y)
 	offset <- fit0$offset
@@ -124,13 +195,18 @@ glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(g
 	q <- length(kins)
 	ng <- length(group.idx)
 	idxtau <- which(fixtau == 0)
+	if(!is.null(covariance.idx)) idxtau2 <- intersect(covariance.idx[, 1], idxtau)
 	q2 <- sum(fixtau == 0)
 	if(q2 > 0) {
-	        tau[fixtau == 0] <- rep(var(Y)/(q+ng), q2)
+	        tau[idxtau] <- rep(var(Y)/(q+ng), q2)
+		if(!is.null(covariance.idx)) tau[idxtau2] <- 0
 		diagSigma <- rep(0, n)
 		for(i in 1:ng) diagSigma[group.idx[[i]]] <- tau[i]/sqrtW[group.idx[[i]]]^2
 		Sigma <- diag(diagSigma)
-		for(i in 1:q) Sigma <- Sigma + tau[i+ng]*kins[[i]]
+		for(i in 1:q) {
+		      	tau[i+ng] <- tau[i+ng]/mean(diag(kins[[i]]))
+			Sigma <- Sigma + tau[i+ng]*kins[[i]]
+		}
 		Sigma_i <- chol2inv(chol(Sigma))
 		rm(Sigma, diagSigma)
 		gc()
@@ -144,7 +220,8 @@ glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(g
 		        if(idxtau[i] <= ng) tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (sum((PY/sqrtW)[group.idx[[idxtau[i]]]]^2) - sum((diag(P)/sqrtW^2)[group.idx[[idxtau[i]]]]))/n)
 			else {
 	        	        PAPY <- crossprod(P, crossprod(kins[[idxtau[i]-ng]], PY))
-				tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (crossprod(Y, PAPY) - sum(P*kins[[idxtau[i]-ng]]))/n)
+				if(!is.null(covariance.idx)) tau[idxtau[i]] <- if(idxtau[i] %in% idxtau2) 0 else max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (crossprod(Y, PAPY) - sum(P*kins[[idxtau[i]-ng]]))/n)
+				else tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (crossprod(Y, PAPY) - sum(P*kins[[idxtau[i]-ng]]))/n)
 			}
 		}
 		rm(P)
@@ -155,7 +232,41 @@ glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(g
 		alpha0 <- alpha
 		tau0 <- tau
 		fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau, tol)
-		tau <- as.numeric(fit$tau)
+		if(q2 > 0) {
+		        Dtau <- as.numeric(fit$Dtau)
+		      	tau[idxtau] <- tau0[idxtau] + Dtau
+			if(is.null(covariance.idx)) {
+				tau[tau < tol & tau0 < tol] <- 0
+				while(any(tau < 0)) {
+					Dtau <- Dtau / 2
+					tau[idxtau] <- tau0[idxtau] + Dtau
+					tau[tau < tol & tau0 < tol] <- 0
+				}
+				tau[tau < tol] <- 0
+			} else {
+				fixrho.idx0 <- apply(covariance.idx, 1, function(x) abs(tau0[x[1]]) > (1 - 1.01 * tol) * sqrt(tau0[x[2]] * tau0[x[3]]))
+			        tau[-covariance.idx[, 1]][tau[-covariance.idx[, 1]] < tol & tau0[-covariance.idx[, 1]] < tol] <- 0
+				if(any(fixrho != 0)) {
+					idxrho <- which(fixrho != 0)
+					tau[covariance.idx[idxrho, 1]] <- suppressWarnings(fixrho[idxrho] * sqrt(tau[covariance.idx[idxrho, 2]] * tau[covariance.idx[idxrho, 3]]))
+				}
+				fixrho.idx <- suppressWarnings(apply(covariance.idx, 1, function(x) abs(tau[x[1]]) > (1 - 1.01 * tol) * sqrt(tau[x[2]] * tau[x[3]])))
+				tau[covariance.idx[fixrho.idx & fixrho.idx0, 1]] <- sign(tau[covariance.idx[fixrho.idx & fixrho.idx0, 1]]) * sqrt(tau[covariance.idx[fixrho.idx & fixrho.idx0, 2]] * tau[covariance.idx[fixrho.idx & fixrho.idx0, 3]])
+				while(any(tau[-covariance.idx[, 1]] < 0) || any(apply(covariance.idx, 1, function(x) abs(tau[x[1]]) > sqrt(tau[x[2]] * tau[x[3]])))) {
+					Dtau <- Dtau / 2
+					tau[idxtau] <- tau0[idxtau] + Dtau
+			        	tau[-covariance.idx[, 1]][tau[-covariance.idx[, 1]] < tol & tau0[-covariance.idx[, 1]] < tol] <- 0
+					if(any(fixrho != 0)) {
+						idxrho <- which(fixrho != 0)
+						tau[covariance.idx[idxrho, 1]] <- suppressWarnings(fixrho[idxrho] * sqrt(tau[covariance.idx[idxrho, 2]] * tau[covariance.idx[idxrho, 3]]))
+					}
+					fixrho.idx <- suppressWarnings(apply(covariance.idx, 1, function(x) abs(tau[x[1]]) > (1 - 1.01 * tol) * sqrt(tau[x[2]] * tau[x[3]])))
+					tau[covariance.idx[fixrho.idx & fixrho.idx0, 1]] <- sign(tau[covariance.idx[fixrho.idx & fixrho.idx0, 1]]) * sqrt(tau[covariance.idx[fixrho.idx & fixrho.idx0, 2]] * tau[covariance.idx[fixrho.idx & fixrho.idx0, 3]])
+			 	}
+			        tau[-covariance.idx[, 1]][tau[-covariance.idx[, 1]] < tol] <- 0
+				tau[covariance.idx[fixrho.idx, 1]] <- sign(tau[covariance.idx[fixrho.idx, 1]]) * sqrt(tau[covariance.idx[fixrho.idx, 2]] * tau[covariance.idx[fixrho.idx, 3]])
+			}
+		}
 		cov <- as.matrix(fit$cov)
 		alpha <- as.numeric(fit$alpha)
 		eta <- as.numeric(fit$eta) + offset
@@ -170,7 +281,7 @@ glmmkin.ai <- function(fit0, kins, group.idx, tau = rep(0, length(kins)+length(g
 		Y <- eta - offset + (y - mu)/mu.eta
 		sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*family$variance(mu))
 		if(2*max(abs(alpha - alpha0)/(abs(alpha) + abs(alpha0) + tol), abs(tau - tau0)/(abs(tau) + abs(tau0) + tol)) < tol) break
-		if(max(tau) > tol^(-2)) {
+		if(max(abs(tau)) > tol^(-2)) {
 			warning("Large variance estimate observed in the iterations, model not converged...", call. = FALSE)
 			i <- maxiter
 			break

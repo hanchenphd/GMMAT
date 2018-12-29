@@ -12,8 +12,8 @@ An R package for performing association tests using generalized linear mixed mod
 \tabular{ll}{
 Package: \tab GMMAT\cr
 Type: \tab Package\cr
-Version: \tab 0.9.3\cr
-Date: \tab 2018-07-18\cr
+Version: \tab 1.0.0\cr
+Date: \tab 2018-12-28\cr
 License: \tab GPL-3\cr
 }
 }
@@ -26,6 +26,8 @@ Maintainer: Han Chen <Han.Chen.2@uth.tmc.edu>
 Brent, R.P. (1973) "Chapter 4: An Algorithm with Guaranteed Convergence for Finding a Zero of a Function", Algorithms for Minimization without Derivatives, Englewood Cliffs, NJ: Prentice-Hall, ISBN 0-13-022335-2.
 
 Breslow, N.E. and Clayton, D.G. (1993) Approximate Inference in Generalized Linear Mixed Models. Journal of the American Statistical Association 88, 9-25.
+
+Chen, H., Huffman, J.E., Brody, J.A., Wang, C., Lee, S., Li, Z., Gogarten, S.M., Sofer, T., Bielak, L.F., Bis, J.C., et al. (2019) Efficient variant set mixed model association tests for continuous and binary traits in large-scale whole-genome sequencing studies. The American Journal of Human Genetics (in press).
 
 Chen, H., Wang, C., Conomos, M.P., Stilp, A.M., Li, Z., Sofer, T., Szpiro, A.A., Chen, W., Brehm, J.M., Celedón, J.C., Redline, S., Papanicolaou, G.J., Thornton, T.A., Laurie, C.C., Rice, K. and Lin, X. (2016) Control forpopulation structure and relatedness for binary traits in genetic association studies via logistic mixed models. The American Journal of Human Genetics 98, 653-666.
 

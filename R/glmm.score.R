@@ -1,18 +1,33 @@
 glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", ncores = 1) {
 	if(class(obj) != "glmmkin") stop("Error: obj must be a class glmmkin object!")
-	res <- obj$scaled.residuals
+	if(any(duplicated(obj$id_include))) {
+		J <- sapply(unique(obj$id_include), function(x) 1*(obj$id_include==x))
+		res <- crossprod(J, obj$scaled.residuals)
+		obj$P <- crossprod(J, crossprod(obj$P, J))
+		rm(J)
+	} else res <- obj$scaled.residuals
 	miss.method <- try(match.arg(missing.method, c("impute2mean", "omit")))
 	if(class(miss.method) == "try-error") stop("Error: missing.method should be one of the following: impute2mean, omit!")
 	miss.method <- substr(miss.method, 1, 1)
-	if(is.null(select)) select <- 1:length(res)
-	select2 <- select[select > 0]
-	if(length(select2) != length(res) | any(sort(select2) != 1:length(res))) stop("Error: select is a vector of orders, individuals not in res should be coded 0!")
 	if(all(file.exists(paste(infile, c("bim", "bed", "fam"), sep=".")))) {
 		if(ncores != 1) stop("Error: parallel computing currently not implemented for PLINK binary format genotypes.")
 		bimfile <- paste(infile, "bim", sep=".")
 		bedfile <- paste(infile, "bed", sep=".")
 		famfile <- paste(infile, "fam", sep=".")
-		if(length(select) != as.integer(system(paste("wc -l", famfile, "| awk '{print $1}'"), intern = T))) stop("Error: number of individuals in plink fam file incorrect!")
+		sample.id <- read.table(famfile, as.is=T)[,2]
+		if(is.null(select)) {
+			if(any(is.na(match(unique(obj$id_include), sample.id)))) warning("Check your data... Some id_include in obj are missing in sample.id of infile!")
+			select <- match(sample.id, unique(obj$id_include))
+			select[is.na(select)] <- 0
+			if(all(select == 0)) stop("Error: id_include in obj does not match sample.id in infile!")
+		}
+		if(length(select) != length(sample.id)) stop("Error: number of individuals in select does not match infile!")
+		select2 <- select[select > 0]
+		if(any(duplicated(select2)) || max(select2) > length(unique(obj$id_include))) stop("Error: select is a vector of orders, individuals not in obj should be coded 0!")
+		res <- res[select2]
+		obj$P <- obj$P[select2, select2]
+		select[select > 0] <- 1:sum(select > 0)
+		rm(select2)
 		if(center) {
 			time <- .Call(C_glmm_score_bed, res, obj$P, bimfile, bedfile, outfile, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
 		} else {
@@ -24,7 +39,15 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 	        ncores <- min(c(ncores, parallel::detectCores(logical = TRUE)))
 	        gds <- SeqArray::seqOpen(infile)
 		sample.id <- SeqArray::seqGetData(gds, "sample.id")
-		if(length(select) != length(sample.id)) stop("Error: number of individuals in gds file does not match the vector select!")
+		if(is.null(select)) {
+			if(any(is.na(match(unique(obj$id_include), sample.id)))) warning("Check your data... Some id_include in obj are missing in sample.id of infile!")
+			select <- match(sample.id, unique(obj$id_include))
+			select[is.na(select)] <- 0
+			if(all(select == 0)) stop("Error: id_include in obj does not match sample.id in infile!")
+		}
+		if(length(select) != length(sample.id)) stop("Error: number of individuals in select does not match infile!")
+		select2 <- select[select > 0]
+		if(any(duplicated(select2)) || max(select2) > length(unique(obj$id_include))) stop("Error: select is a vector of orders, individuals not in obj should be coded 0!")
 		res <- res[select2]
 		obj$P <- obj$P[select2, select2]
 		rm(select2)
@@ -39,14 +62,14 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 				variant.idx <- if(b <= n.p.percore_1) variant.idx.all[((b-1)*(p.percore-1)+1):(b*(p.percore-1))] else variant.idx.all[(n.p.percore_1*(p.percore-1)+(b-n.p.percore_1-1)*p.percore+1):(n.p.percore_1*(p.percore-1)+(b-n.p.percore_1)*p.percore)]
 				p <- length(variant.idx)
 				gds <- SeqArray::seqOpen(infile)
-				SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0])
+				SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0], verbose = FALSE)
 				rm(sample.id); rm(select)
 				nbatch.flush <- (p-1) %/% 100000 + 1
 				ii <- 0
 				for(i in 1:nbatch.flush) {
 		                        gc()
 		        		tmp.variant.idx <- if(i == nbatch.flush) variant.idx[((i-1)*100000+1):p] else variant.idx[((i-1)*100000+1):(i*100000)]
-					SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx)
+					SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx, verbose = FALSE)
 					MISSRATE <- SeqVarTools::missingGenotypeRate(gds, margin = "by.variant")
 					AF <- 1 - SeqVarTools::alleleFrequency(gds)
 					include <- (MISSRATE <= miss.cutoff & ((AF >= MAF.range[1] & AF <= MAF.range[2]) | (AF >= 1-MAF.range[2] & AF <= 1-MAF.range[1])))
@@ -54,7 +77,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 					ii <- ii + 1
 					tmp.variant.idx <- tmp.variant.idx[include]
 					tmp.p <- length(tmp.variant.idx)
-					SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx)
+					SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx, verbose = FALSE)
 					SNP <- SeqArray::seqGetData(gds, "annotation/id")
 					SNP[SNP == ""] <- NA
 					out <- data.frame(SNP = SNP, CHR = SeqArray::seqGetData(gds, "chromosome"), POS = SeqArray::seqGetData(gds, "position"))
@@ -102,7 +125,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 			rm(variant.idx.all)
 			p <- length(variant.idx)
 			gds <- SeqArray::seqOpen(infile)
-			SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0])
+			SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0], verbose = FALSE)
 			rm(sample.id); rm(select)
 			nbatch.flush <- (p-1) %/% 100000 + 1
 			ii <- 0
@@ -110,7 +133,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		                gc()
 		        	tmp.variant.idx <- if(i == nbatch.flush) variant.idx[((i-1)*100000+1):p] else variant.idx[((i-1)*100000+1):(i*100000)]
 				tmp.p <- length(tmp.variant.idx)
-				SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx)
+				SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx, verbose = FALSE)
 				MISSRATE <- SeqVarTools::missingGenotypeRate(gds, margin = "by.variant")
 				AF <- 1 - SeqVarTools::alleleFrequency(gds)
 				include <- (MISSRATE <= miss.cutoff & ((AF >= MAF.range[1] & AF <= MAF.range[2]) | (AF >= 1-MAF.range[2] & AF <= 1-MAF.range[1])))
@@ -118,7 +141,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 				ii <- ii + 1
 				tmp.variant.idx <- tmp.variant.idx[include]
 				tmp.p <- length(tmp.variant.idx)
-				SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx)
+				SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx, verbose = FALSE)
 				SNP <- SeqArray::seqGetData(gds, "annotation/id")
 				SNP[SNP == ""] <- NA
 				out <- data.frame(SNP = SNP, CHR = SeqArray::seqGetData(gds, "chromosome"), POS = SeqArray::seqGetData(gds, "position"))
@@ -177,6 +200,13 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 			stop("Error: cols selected to print have incorrect indices!")
 		if(any(infile.ncol.print != sort(infile.ncol.print)))
 			stop("Error: col indices must be sorted increasingly in infile.ncol.print!")
+		if(is.null(select)) select <- 1:length(unique(obj$id_include))
+		select2 <- select[select > 0]
+		if(any(duplicated(select2)) || max(select2) > length(unique(obj$id_include))) stop("Error: select is a vector of orders, individuals not in obj should be coded 0!")
+		res <- res[select2]
+		obj$P <- obj$P[select2, select2]
+		select[select > 0] <- 1:sum(select > 0)
+		rm(select2)
 		if(center) {
 			time <- .Call(C_glmm_score_text, res, obj$P, infile, outfile, tol, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
 		} else {

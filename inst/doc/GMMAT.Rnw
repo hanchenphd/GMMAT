@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 0.9.3}
-\date{July 18, 2018}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.0.0}
+\date{December 28, 2018}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -48,7 +48,7 @@ morekeywords={}
 \section{Introduction}
 \textit{GMMAT} is an R package for performing association tests using generalized linear mixed models (GLMMs) \cite{Breslow1993} in genome-wide association studies (GWAS) and sequencing association studies. GLMMs provide a broad range of models for correlated data analysis. In the GWAS and sequencing association study context, examples of correlated data include those from family studies, samples with cryptic relatedness and/or shared environmental effects, as well as samples generated from complex sampling designs.
 
-\textit{GMMAT} first fits a GLMM with covariate adjustment and random effects to account for population structure and family or cryptic relatedness. For GWAS, \textit{GMMAT} performs score tests for each genetic variant. For candidate gene studies, \textit{GMMAT} can also perform Wald tests to get the effect size estimate for each genetic variant. For rare variant analysis from sequencing association studies, \textit{GMMAT} performs the burden test \cite{Morgenthaler2007, Li2008, Madsen2009, Morris2010}, the sequence kernel association test (SKAT) \cite{Wu2011}, SKAT-O \cite{Lee2012} and the efficient hybrid test of the burden test and SKAT, in the variant Set Mixed Model Association Tests (SMMAT, Chen \textit{et al.} 2018, manuscript in preparation) framework, based on user-defined variant sets.
+\textit{GMMAT} first fits a GLMM with covariate adjustment and random effects to account for population structure and family or cryptic relatedness. For GWAS, \textit{GMMAT} performs score tests for each genetic variant. For candidate gene studies, \textit{GMMAT} can also perform Wald tests to get the effect size estimate for each genetic variant. For rare variant analysis from sequencing association studies, \textit{GMMAT} performs the burden test \cite{Morgenthaler2007, Li2008, Madsen2009, Morris2010}, the sequence kernel association test (SKAT) \cite{Wu2011}, SKAT-O \cite{Lee2012} and the efficient hybrid test of the burden test and SKAT, in the variant Set Mixed Model Association Tests (SMMAT) framework \cite{Chen2019}, based on user-defined variant sets.
 
 \section{The model}
 In the context of single variant test, \textit{GMMAT} works with the following GLMM
@@ -63,7 +63,31 @@ In the context of variant set tests (also known as gene-based tests or aggregate
 \begin{equation}
 \eta_i=g(\mu_i)=\mb{X}_i\bs\alpha+\mb{G}_i\bs\beta+b_i,\nonumber
 \end{equation}
-where $\mb{G}_i$ is now a $1\times q$ row vector of genotypes for $q$ variants in subject $i$, $\bs\beta$ is a $q\times 1$ column vector of genotype effects with mean$\beta_0$ and variance $\sigma^2$. The following 4 tests in the SMMAT framework are implemented. The burden test is for $H_0: \beta_0=0$ versus $H_1: \beta_0\ne 0$ under the constraint $\sigma^2=0$, SKAT is for $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under the constraint $\beta_0=0$, SKAT-O is a linear combination of burden test and SKAT statistics, and the efficient hybrid test combines the burden test with an adjusted SKAT (which is asymptotically independent with the burden test) $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under no constraints on $\beta_0$ using Fisher's method. Of note, in all these tests, the null GLMM is the same as the null model in the single variant test, which only needs to be fitted once.
+where $\mb{G}_i$ is now a $1\times q$ row vector of genotypes for $q$ variants in subject $i$, $\bs\beta$ is a $q\times 1$ column vector of genotype effects with mean $\beta_0$ and variance $\sigma^2$. The following 4 tests in the SMMAT framework are implemented. The burden test is for $H_0: \beta_0=0$ versus $H_1: \beta_0\ne 0$ under the constraint $\sigma^2=0$, SKAT is for $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under the constraint $\beta_0=0$, SKAT-O is a linear combination of burden test and SKAT statistics, and the efficient hybrid test combines the burden test with an adjusted SKAT (which is asymptotically independent with the burden test) $H_0: \sigma^2=0$ versus $H_1: \sigma^2>0$ under no constraints on $\beta_0$ using Fisher's method \cite{Chen2019}. Of note, in all these tests, the null GLMM is the same as the null model in the single variant test, which only needs to be fitted once.
+
+For longitudinal data, two types of models can be applied: random intercept only models, and random intercept and random slope models. The random intercept only model is appropriate for analyzing repeated measures with no time trends, and observations for the same individual $i$ at different time points $j$ are assumed to be exchangeable. In the context of single variant test, \textit{GMMAT} works with the following GLMM for repeated measures
+\begin{equation}
+\eta_i=g(\mu_i)=\mb{X}_i\bs\alpha+G_i\beta+b_i.\nonumber
+\end{equation}
+The notations are similarly defined as the cross-sectional data above, except that now we have for each observation $j$ of individual $i$ the mean $E(y_{ij}|\mb{b})=\mu_i$ and variance $Var(y_{ij}|\mb{b})=\phi a^{-1}_i v(\mu_i)$. The random effects $\mb{b}$, which is a length $n$ vector of $b_i$ ($n$ is the number of individuals), is assumed to follow $\mb{b}\sim N(0, \sum_{k=1}^K\tau_k\mb{V}_k + \tau_{K+1}\mb{I}_n)$, where the first $K$ terms account for between-subject relatedness attributable to $n\times n$ matrices $\mb{V}_k$, and the last term accounts for random individual effects not attributable to relatedness matrices $\mb{V}_k$. For example, for unrelated individuals, we would not have any between-subject relatedness matrices $\mb{V}_k$, but only the last term for random individual effects. Let $\mb{Z}$ be the $N\times n$ design matrix indicating which observation is from which individual ($N$ is the total number of observations, $N > n$ but we do not need the same numbers of observations from each individual), the random effects for all observations $\mb{Zb}\sim N(0, \sum_{k=1}^K\tau_k\mb{ZV}_k\mb{Z}^T + \tau_{K+1}\mb{ZZ}^T)$ accounts for all sources of correlation, and the observed outcome $y_{ij}$ are assumed to be independent conditioning on that.
+
+The random intercept and random slope model is appropriate for analyzing longitudinal data with individual-specific time trends (therefore, a random slope for time effect, in addition to the random intercept described above). In the context of single variant test, \textit{GMMAT} works with the following GLMM for time trends
+\begin{equation}
+\eta_{ij}=g(\mu_{ij})=\mb{X}_{ij}\bs\alpha+G_i\beta+b_{0i}+b_{1i}T_{ij}.\nonumber
+\end{equation}
+Typically, the time-dependent variable of interest $T_{ij}$ should be included in the fixed effect covariates $\mb{X}_{ij}$. The random effects of the intercept $\mb{b}_0$, which is a length $n$ vector of $b_{0i}$ ($n$ is the number of individuals), is assumed to follow $\mb{b}_0\sim N(0, \sum_{k=1}^K\tau_k\mb{V}_k + \tau_{K+1}\mb{I}_n)$, where the first $K$ terms account for random individual effects of the intercept attributable to $n\times n$ matrices $\mb{V}_k$, and the last term accounts for random individual effects of the intercept not attributable to relatedness matrices $\mb{V}_k$. In addition, we assume $Cov(\mb{b}_0, \mb{b}_1) = \sum_{k=1}^K\tau_{K+1+k}\mb{V}_k + \tau_{2K+2}\mb{I}_n)$, where $\mb{b}_1$ is a length $n$ vector of the random effects of the slope $b_{1i}$. The first $K$ terms account for the covariance of the random individual effects of the intercept and the slope attributable to $n\times n$ matrices $\mb{V}_k$, and the last term accounts for the covariance of the random individual effects of the intercept and the slope not attributable to relatedness matrices $\mb{V}_k$. Finally, we assume $\mb{b}_1\sim N(0, \sum_{k=1}^K\tau_{2K+2+k}\mb{V}_k + \tau_{3K+3}\mb{I}_n)$, where the first $K$ terms account for random individual effects of the slope attributable to $n\times n$ matrices $\mb{V}_k$, and the last term accounts for random individual effects of the slope not attributable to relatedness matrices $\mb{V}_k$. For example, with $K=1$, let $\mb{b}=(\mb{b}_0^T, \mb{b}_1^T)^T$ be the stacked random individual effects (for both the intercept and the slope), $\mb{Z}$ be the $N\times 2n$ design matrix for linking observations with their corresponding random intercept and random slope ($N$ is the total number of observations, again we do not need the same numbers of observations from each individual), the random effects for all observations $\mb{Zb}\sim N(0, \mb{Z}\{
+\begin{pmatrix}
+\tau_1 & \tau_3 \\
+\tau_3 & \tau_5
+\end{pmatrix}
+\otimes\mb{V}_k + 
+\begin{pmatrix}
+\tau_2 & \tau_4 \\
+\tau_4 & \tau_6
+\end{pmatrix}
+\otimes\mb{I}_n\}\mb{Z}^T)$ accounts for all sources of correlation, and the observed outcome $y_{ij}$ are assumed to be independent conditioning on that.
+
+Variant set tests for longitudinal data in the SMMAT framework are similarly defined, for both random intercept only models (repeated, exchangeable measures), and random intercept and random slope models (time trends).
 
 \section{Getting started}
 \subsection{Downloading \textit{GMMAT}}
@@ -86,25 +110,25 @@ devtools::install_github("hanchenphd/GMMAT")
 @
 
 \subsection{Using \textit{GMMAT} in Analysis Commons}
-The current version of the \textit{GMMAT} package (version 0.9.3) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v0.9.3" App in Project "Commons\_Tools".
+The current version of the \textit{GMMAT} package (version 1.0.0) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v1.0.0" App in Project "Commons\_Tools".
 
 \section{Input}
-\textit{GMMAT} requires the phenotype and covariates in an R data frame, known $n\times n$ matrices $\mb{V}_k$ as an R matrix (in the case of single matrix) or an R list (in the case of multiple matrices), and genotypes saved in a plain text file (or in a compressed plain text file .gz or .bz2), a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or in a GDS format file. We describe how to prepare these data below.
+\textit{GMMAT} requires the phenotype and covariates in an R data frame, known positive semi-definite matrices $\mb{V}_k$ as an R matrix (in the case of a single matrix) or an R list (in the case of multiple matrices), and genotypes saved in a plain text file (or in a compressed plain text file .gz or .bz2), a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or in a GDS format file. We describe how to prepare these data below.
 
 \subsection{Phenotype and covariates}
 Phenotype and covariates should be either saved as a data frame in R, or recorded in a text file that can be read into R as a data frame. The rows of the data frame represent different individuals, and the columns represent different variables. For example, here we show the header and first 6 rows of the example text file pheno.txt:
 \begin{verbatim}
-disease trait   age     sex
-1       5.45    61      0
-1       5.61    50      1
-0       3.1     54      0
-1       6.22    48      1
-1       5.42    49      0
-0       6.22    50      1
+id      disease trait   age     sex
+1       1       5.45    61      0
+2       1       5.61    50      1
+3       0       3.1     54      0
+4       1       6.22    48      1
+5       1       5.42    49      0
+6       0       6.22    50      1
 ...
 \end{verbatim}
 
-In this example, there are one binary phenotype (disease), one quantitative phenotype (trait) and two covariates (age and sex). There can be additional columns for unused variables, and the order of columns does not matter. To read it into R as a data frame, you can use
+In this example, there are an ID column (id), one binary phenotype (disease), one quantitative phenotype (trait) and two covariates (age and sex). There can be additional columns for unused variables, and the order of columns does not matter. To read it into R as a data frame, you can use
 <<pheno>>=
 pheno.file <- system.file("extdata", "pheno.txt", package = "GMMAT")
 pheno <- read.table(pheno.file, header = TRUE)
@@ -116,21 +140,18 @@ pheno <- read.table(pheno.file, header = TRUE, na.strings = ".")
 @
 
 \subsection{Matrices of covariance structure}
-\textit{GMMAT} requires at least one $n\times n$ matrix $\mb{V}_k$ to model the covariance structure of the random effects. In the simplest case, this is usually a GRM estimated from the genotype data. Currently \textit{GMMAT} does not provide a function to calculate the GRM, but there are many software packages that can do this job. For example, \href{http://www.xzlab.org/software.html}{GEMMA} \cite{Zhou2012} can be used to estimate either the centered GRM or the standardized GRM. GRM saved in an external file must be read into R as a matrix. For example,
+\textit{GMMAT} requires at least one positive semi-definite matrix $\mb{V}_k$ to model the covariance structure of the random effects (for cross-sectional data). In the simplest case, this is usually a GRM estimated from the genotype data. Currently \textit{GMMAT} does not provide a function to calculate the GRM, but there are many software packages that can do this job. For example, \href{http://www.xzlab.org/software.html}{GEMMA} \cite{Zhou2012} can be used to estimate either the centered GRM or the standardized GRM. GRM saved in an external file must be read into R as a matrix. For example,
 <<GRM>>=
 GRM.file <- system.file("extdata", "GRM.txt.bz2", package = "GMMAT")
-GRM <- as.matrix(read.table(GRM.file))
-## scan is much faster than read.table if the matrix size is known:
-## GRM <- matrix(scan(GRM.file, n = 400^2), nrow = 400, ncol = 400, 
-##         byrow = TRUE)
+GRM <- as.matrix(read.table(GRM.file, check.names = FALSE))
 @
 
-Multiple $n\times n$ matrices can be used to allow multiple components of random effects. In such cases, the matrices should be constructed as a list of $n\times n$ matrices. For example, if you have 3 R matrices Mat1, Mat2 and Mat3, you can construct the R list
+This matrix can include more than $n$ individuals in practice, but the rownames and colnames must include all individuals' id in the phenotype and covariates data frame. Multiple matrices can be used to allow multiple components of random effects. In such cases, the matrices should be constructed as a list of matrices, and each matrix should comply with the rownames and colnames requirements described above (although they don't have to be in the same order). For example, if you have 3 R matrices Mat1, Mat2 and Mat3, you can construct the R list
 <<Mats, eval=FALSE, echo=TRUE>>=
 Mats <- list(Mat1, Mat2, Mat3)
 @
 
-All matrices must be positive semi-definite. Before running the analysis, it is very important to make sure that the dimensions of these matrices must match the row number of the phenotype data frame, and the order of individuals in the rows and columns of these matrices must also match the order of individuals in the phenotype data frame. If not, it is usually easier to sort the phenotype data frame to match the order of individuals in the matrices.
+All matrices must be positive semi-definite.
 
 \subsection{Genotypes}
 \textit{GMMAT} can take genotype files either in plain text format (or the compressed version .gz or .bz2), \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED format}, or in the GDS format. Non-integer imputed genotypes (dosages) should be saved in plain text files (or the compressed version .gz or .bz2). The plain text file can be space-, tab-, comma-, or even special character-delimited, and there can be additional rows (e.g., comments) and/or columns before the genotype data matrix. Here is an example of part of a tab-delimited plain text genotype file geno.txt:
@@ -159,7 +180,6 @@ SeqArray::seqBED2GDS("BED_file_name", "FAM_file_name", "BIM_file_name",
         "GDS_file_name")
 @
 
-
 \section{Running \textit{GMMAT}}
 If \textit{GMMAT} has been successfully installed, you can load it in an R session using
 
@@ -167,16 +187,16 @@ If \textit{GMMAT} has been successfully installed, you can load it in an R sessi
 library(GMMAT)
 @
 
-We provide 6 functions in \textit{GMMAT}: \textbf{glmmkin} for fitting the GLMM with known $\mb{V}_k$, \textbf{glmm.score} for running score tests, \textbf{glmm.wald} for Wald tests, \textbf{glmm.score.meta} for performing meta-analysis on score test results, \textbf{glmm.rvtests} for running variant set tests (also known as gene-based tests or aggregate variant tests), and \textbf{glmm.rvtests.meta} for performing variant set tests meta-analysis using intermediate files (single variant scores and their covariance matrices in each variant set). Details about how to use these functions, their arguments and returned values can be found in the R help document of \textit{GMMAT}. For example, to learn more about \textbf{glmmkin}, in an R session you can type
+We provide 6 functions in \textit{GMMAT}: \textbf{glmmkin} for fitting the GLMM with known $\mb{V}_k$, \textbf{glmm.score} for running single variant score tests, \textbf{glmm.wald} for single variant Wald tests, \textbf{glmm.score.meta} for performing meta-analysis on score test results, \textbf{SMMAT} for running variant set tests SMMAT (also known as gene-based tests or aggregate variant tests), and \textbf{SMMAT.meta} for performing variant set tests meta-analysis using intermediate files (single variant scores and their covariance matrices in each variant set, from the \textbf{SMMAT} function). Details about how to use these functions, their arguments and returned values can be found in the R help document of \textit{GMMAT}. For example, to learn more about \textbf{glmmkin}, in an R session you can type
 <<help, eval=FALSE, echo=TRUE>>=
 ?glmmkin
 @
 
 \subsection{Fitting GLMM}
-Here we provide a simple example of fitting GLMM using \textbf{glmmkin}. We have the binary phenotype disease, the quantitative phenotype trait, and two covariates age and sex, saved in a plain text file pheno.txt. We also have computed the GRM externally and saved it in a compressed file GRM.txt.bz2, and have checked to make sure the order of individuals in the GRM matches the order of individuals in the phenotype data (VERY IMPORTANT). In this example we fit a GLMM assuming Bernoulli distribution of the disease and logit link function (also known as a logistic mixed model). We adjust for age and sex, and use one $n\times n$ matrix as $\mb{V}_k$ (the GRM) to model the covariance structure of the random effects.
+Here we provide a simple example of fitting GLMM using \textbf{glmmkin}. We have the binary phenotype disease, the quantitative phenotype trait, and two covariates age and sex, saved in a plain text file pheno.txt. We also have computed the GRM externally and saved it in a compressed file GRM.txt.bz2. In this example we fit a GLMM assuming Bernoulli distribution of the disease and logit link function (also known as a logistic mixed model). We adjust for age and sex, and use one $n\times n$ matrix as $\mb{V}_k$ (the GRM) to model the covariance structure of the random effects.
 <<GMMAT0>>=
-model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"))
+model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, 
+        id = "id", family = binomial(link = "logit"))
 model0$theta
 model0$coefficients
 model0$cov
@@ -184,20 +204,21 @@ model0$cov
 
 Note that pheno and GRM must be read into R as a data frame and a matrix, respectively. When using the function \textbf{glmmkin}, the data frame of phenotype and covariates (in our example, pheno) should be passed to the argument "data", and the matrix or the list of matrices for random effects (in our example, the matrix GRM) should be passed to the argument "kins". The first argument of the function \textbf{glmmkin} is "fixed", which requires a formula for fixed effects. The syntax of the formula is the same as the formula used in a linear model \textbf{lm} and a generalized linear model \textbf{glm}. The example model above is equivalent to
 <<GMMAT01, eval=FALSE, echo=TRUE>>=
-model0 <- glmmkin(fixed = disease ~ age + sex, data = pheno, 
-        kins = GRM, family = binomial(link = "logit"))
+model0 <- glmmkin(fixed = disease ~ age + sex, data = pheno, kins = GRM, 
+        id = "id", family = binomial(link = "logit"))
 @
-The argument "family" takes the same syntax as used in a generalized linear model \textbf{glm}. For example, if you would like to fit a LMM for a quantitative trait, you can use
+The argument "id" specifies the ID column name in the data frame pheno. The argument "family" takes the same syntax as used in a generalized linear model \textbf{glm}. For example, if you would like to fit a LMM for a quantitative trait, you can use
 <<GMMAT1>>=
-model1 <- glmmkin(fixed = trait ~ age + sex, data = pheno, 
-        kins = GRM, family = gaussian(link = "identity"))
+model1 <- glmmkin(fixed = trait ~ age + sex, data = pheno, kins = GRM, 
+        id = "id", family = gaussian(link = "identity"))
 @
 Please avoid using LMMs for binary traits.
 
 To fit a heteroscedastic LMM for a quantitative trait (allowing heterogeneous residual variances among different groups) \cite{Conomos2016}, you can use
 <<GMMAT2>>=
 model2 <- glmmkin(fixed = trait ~ age + sex, data = pheno, kins = GRM, 
-        groups = "disease", family = gaussian(link = "identity"))
+        id = "id", groups = "disease", 
+        family = gaussian(link = "identity"))
 model2$theta
 @
 In this example, groups are defined by disease status. Therefore, disease cases and controls are assumed to have different residual variances on the quantitative trait, after adjusting for age and sex.
@@ -221,9 +242,15 @@ quasipoisson & log & count & $\phi\mu$\\
 \end{tabular}
 \end{center}
 
-The function \textbf{glmmkin} returns a list. Except for the heteroscedastic LMM, the first element in the vector theta is the estimate of the dispersion parameter $\phi$ (for binary and Poisson data we have a fixed $\phi=1$), and the remaining elements are variance component estimates for each matrix modeling the covariance structure of the random effects (in the same order as in the list of matrices passed to "kins"). In our binary disease example model0 above, we have only one such matrix (the GRM), and the results show that the estimate of the variance component parameter $\tau_k$ is 0.337731. The vector coefficients gives the fixed effect estimates, and the order matches the order of covariates in the formula passed to "fixed". In our binary disease example above, we have an intercept 0.472081177, and an age effect estimate $-$0.006818634, a sex effect estimate $-$0.086444746. The matrix cov is the covariance matrix of the fixed effect estimates.
+The function \textbf{glmmkin} returns a list. Except for the heteroscedastic
+LMM, the first element in the vector theta is the estimate of the dispersion
+parameter $\phi$ (for binary and Poisson data we have a fixed $\phi=1$), and
+the remaining elements are variance component estimates for each matrix
+modeling the covariance structure of the random effects (in the same order as
+in the list of matrices passed to "kins"). In our binary disease example
+model0 above, we have only one such matrix (the GRM, therefore $K=1$), and the results show that the estimate of the variance component parameter $\tau_1$ is 0.3377331. The vector coefficients gives the fixed effect estimates, and the order matches the order of covariates in the formula passed to "fixed". In our binary disease example above, we have an intercept 0.472081189, and an age effect estimate $-$0.006818634, a sex effect estimate $-$0.086444746. The matrix cov is the covariance matrix of the fixed effect estimates.
 
-When a heteroscedastic LMM is fitted using the function \textbf{glmmkin}, the first elements (with length equal to the number of groups) in the vector theta are the estimated residual variances for each group (in the same order as the levels of groups appearing in the data), followed by variance component estimates for each matrix modeling the covariance structure of the random effects (in the same order as in the list of matrices passed to "kins"). In our heteroscedastic LMM model2 above, 0.9082505 is the residual variance estimate for cases, 1.0589986 is the residual variance estimate for controls (since in the data pheno, disease 1 appears before disease 0), and 1.0853532 is the estimate of the variance component parameter for the GRM.
+When a heteroscedastic LMM is fitted using the function \textbf{glmmkin}, the first elements (with length equal to the number of groups) in the vector theta are the estimated residual variances for each group (in the same order as the levels of groups appearing in the data), followed by variance component estimates for each matrix modeling the covariance structure of the random effects (in the same order as in the list of matrices passed to "kins"). In our heteroscedastic LMM model2 above, 0.9082504 is the residual variance estimate for cases, 1.0589985 is the residual variance estimate for controls (since in the data pheno, disease 1 appears before disease 0), and 1.0853533 is the estimate of the variance component parameter for the GRM.
 
 In the following example, we have the same binary phenotype disease, covariates age and sex, and the same GRM as in the previous example. In addition to the GRM, we have another $n\times n$ matrix to model the covariance structure of the random effects. The GLMM is
 \begin{equation}
@@ -234,17 +261,43 @@ where $\mb{b}\sim N(0, \tau_1\mb{V}_1+\tau_2\mb{V}_2)$, $\mb{V}_1$ is the GRM, $
 \log(\frac{P(disease_i=1|age_i,sex_i,b_{1i},b_{2j})}{1-P(disease_i=1|age_i,sex_i,b_{1i},b_{2j})})=\alpha_0+\alpha_1\times age_i+\alpha_2\times sex_i+b_{1i}+b_{2j},\nonumber
 \end{equation}
 where $\mb{b}_1\sim N(0, \tau_1\mb{V}_1)$, $b_{2j}\sim N(0, \tau_2)$. All 10 individuals in a cluster share a common $b_{2j}$, and $b_{2j}$ are independent and identically distributed across clusters.
-
 <<GMMAT3>>=
 M10 <- matrix(0, 400, 400)
 for(i in 1:40) M10[(i-1)*10+(1:10), (i-1)*10+(1:10)] <- 1
+rownames(M10) <- colnames(M10) <- 1:400
 Mats <- list(GRM, M10)
-model3 <- glmmkin(fixed = disease ~ age + sex, data = pheno, 
+model3 <- glmmkin(fixed = disease ~ age + sex, data = pheno, id = "id",
         kins = Mats, family = binomial(link = "logit"))
 model3$theta
 @
+In this example, the dispersion parameter $\phi$ is fixed to 1, the variance component estimates $\hat\tau_1=0.2199087$, $\hat\tau_2=0.1219592$, corresponding to the $n\times n$ matrices $\mb{V}_1$ (the GRM) and $\mb{V}_2$ (the block diagonal matrix M10), respectively.
 
-In this example, the dispersion parameter $\phi$ is fixed to 1, the variance component estimates $\hat\tau_1=0.2199086$, $\hat\tau_2=0.1219592$, corresponding to the $n\times n$ matrices $\mb{V}_1$ (the GRM) and $\mb{V}_2$ (the block diagonal matrix M10), respectively. Note that the order of individuals in $\mb{V}_1$ and $\mb{V}_2$ must match, and should also match the order of individuals in the phenotype data frame.
+For longitudinal data, the following example illustrates a random intercept only model, which is appropriate for analyzing repeated measures with no time trends. We have 5 exchangeable observations of the continuous phenotype y.repeated for each individual, adjusting for sex as a fixed effects covariate. The model is
+\begin{equation}
+y_{ij}=\alpha_0+\alpha_1\times sex_i+b_i+\epsilon_{ij},\nonumber
+\end{equation}
+where the random individual effects $\mb{b}\sim N(0, \tau_1\mb{V}_1 + \tau_2\mb{I}_n)$,
+$\mb{V}_1$ is the GRM, and the error $\epsilon_{ij}\sim N(0, \phi)$.
+<<GMMAT4>>=
+pheno2.file <- system.file("extdata", "pheno2.txt", package = "GMMAT")
+pheno2 <- read.table(pheno2.file, header = TRUE)
+model4 <- glmmkin(y.repeated ~ sex, data = pheno2, kins = GRM, id = "id",
+        family = gaussian(link = "identity"))
+model4$theta
+@
+In this example, the dispersion parameter estimate is $\hat\phi=0.5089983$, and the variance component estimates $\hat\tau_1=0.2410866$, $\hat\tau_2=0.2129918$, corresponding to the GRM and the identity matrix, respectively, for the random intercept of individual effects.
+
+The last example of this section illustrates a random intercept and random slope model, which is appropriate for analyzing longitudinal data with individual-specific time trends. We have observations of the continuous phenotype y.trend at 5 time points for each individual, adjusting for sex and time as fixed effects covariates. The model is
+\begin{equation}
+y_{ij}=\alpha_0+\alpha_1\times sex_i+\alpha_2\times time_{ij}+b_{0i}+b_{1i}\times time_{ij}+\epsilon_{ij},\nonumber
+\end{equation}
+where the random effects of the intercept $\mb{b}_0\sim N(0, \tau_1\mb{V}_1 + \tau_2\mb{I}_n)$, the covariance $Cov(\mb{b}_0, \mb{b}_1) = \tau_3\mb{V}_1 + \tau_4\mb{I}_n)$, the random effects of the time slope $\mb{b}_1\sim N(0, \tau_5\mb{V}_1 + \tau_6\mb{I}_n)$, $\mb{V}_1$ is the GRM, and the error $\epsilon_{ij}\sim N(0, \phi)$.
+<<GMMAT5>>=
+model5 <- glmmkin(y.trend ~ sex + time, data = pheno2, kins = GRM, id = "id",
+        random.slope = "time", family = gaussian(link = "identity"))
+model5$theta
+@
+In this example, the dispersion parameter estimate is $\hat\phi=2.0139758$, the variance component estimates $\hat\tau_1=1.5056896$, $\hat\tau_2=0.5443516$, corresponding to the GRM and the identity matrix, for the random intercept of individual effects, the covariance estimates $\hat\tau_3=1.2539355$, $\hat\tau_4=-0.2469170$, corresponding to the GRM and the identity matrix, and the variance component estimates $\hat\tau_5=1.1690890$, $\hat\tau_6=0.6931902$, corresponding to the GRM and the identity matrix, for the random slope of individual time effects.
 
 \subsection{Single variant tests}
 \subsubsection{Score tests}
@@ -281,11 +334,10 @@ When performing Wald tests for candidate SNPs to get effect size estimates, we n
 <<GMMATwaldtxt>>=
 geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
 snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
-glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"), infile = geno.file, 
-        snps = snps, infile.nrow.skip = 5, infile.ncol.skip = 3, 
-        infile.ncol.print = 1:3, infile.header.print = 
-        c("SNP", "Allele1", "Allele2"))
+glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+        family = binomial(link = "logit"), infile = geno.file, snps = snps, 
+	infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, 
+	infile.header.print = c("SNP", "Allele1", "Allele2"))
 @
 The syntax is a hybrid of \textbf{glmmkin} and \textbf{glmm.score}. Note that the argument "fixed" is a formula including the covariates but NOT the test SNPs. The argument "snps" is a character vector of the names of the test SNPs. If "infile" is a plain text genotype file (or compressed files .gz and .bz2), the function \textbf{glmm.wald} returns a data frame with first columns copied from the genotype file using "infile.ncol.print" and names specified using "infile.header.print", followed by the sample size N, the allele frequency (AF) of the effect allele (Allele2 in this example, but you can also define Allele1 as the effect allele in your coded genotype file), effect size estimate BETA of the effect allele, standard error SE, Wald test \textit{P} value PVAL, and an indicator for whether the GLMM is converged. Note that in the example above, SNP0 is not actually included in the genotype file, so all results are missing.
 
@@ -293,18 +345,16 @@ If your genotype information is saved in a \href{http://zzz.bwh.harvard.edu/plin
 <<GMMATwaldbed>>=
 geno.file <- strsplit(system.file("extdata", "geno.bed", 
         package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
-glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"), infile = geno.file, 
-        snps = snps)
+glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+        family = binomial(link = "logit"), infile = geno.file, snps = snps)
 @
 It returns a data frame with first 6 columns copied from the .bim file (in our example, "geno.bim"), followed by the sample size N, the allele frequency (AF) of A2 allele (the effect allele, note that A1 allele in .bim is coded 0 and A2 allele is coded 1), effect size estimate BETA of A2 allele, standard error SE, Wald test \textit{P} value PVAL, and an indicator for whether the GLMM is converged.
 
 Alternatively, if your genotype information is saved in a GDS file "geno.gds", you can use:
 <<GMMATwaldgds>>=
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"), infile = geno.file, 
-        snps = snps)
+glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+        family = binomial(link = "logit"), infile = geno.file, snps = snps)
 @
 It returns a data frame with first 5 columns information extracted from the GDS file, followed by the sample size N, the allele frequency (AF) of ALT allele, effect size estimate BETA of ALT allele, standard error SE, Wald test \textit{P} value PVAL, and an indicator for whether the GLMM is converged.
 
@@ -323,7 +373,7 @@ glmm.score.meta(files = c(meta1.file, meta2.file, meta3.file),
 
 \subsection{Variant set tests}
 \subsubsection{Pooled analysis}
-Variant set tests (also known as gene-based tests or aggregate variant tests) in a single study (or a pooled analysis of multiple studies) can be performed using the function \textbf{glmm.rvtests}. Currently only the GDS genotype format is supported. In addition to a glmmkin class object returned from the function \textbf{glmmkin} for the null GLMM and the GDS format genotype file, a group definition file with no header and 6 columns (variant set id, variant chromosome, variant position, variant reference allele, variant alternate allele, weight) is also required. For example, here we show the first 6 rows of the example group definition file "SetID.withweights.txt":
+Variant set tests (also known as gene-based tests or aggregate variant tests) in a single study (or a pooled analysis of multiple studies) can be performed using the function \textbf{SMMAT}. Currently only the GDS genotype format is supported. In addition to a glmmkin class object returned from the function \textbf{glmmkin} for the null GLMM and the GDS format genotype file, a group definition file with no header and 6 columns (variant set id, variant chromosome, variant position, variant reference allele, variant alternate allele, weight) is also required. For example, here we show the first 6 rows of the example group definition file "SetID.withweights.txt":
 \begin{verbatim}
 Set1    1       1       T       A       1
 Set1    1       2       A       C       4
@@ -335,11 +385,11 @@ Set1    1       6       C       A       9
 Note that each variant in the group definition file is matched by chromosome, position, reference allele and alternate allele with variants from the GDS file. One genetic variant can be included in different groups with possibly different weights. If no external weights are needed in the analysis, simply replace the 6th column by all 1's.
 
 Four variant set tests are supported in the SMMAT framework: "B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT. You can include one or more tests in a single analysis. If "O" is selected, the burden test and SKAT results will be automatically included; if "E" is selected, the burden test results will be automatically included. Therefore, the following example gives all four test results:
-<<GMMATrvtests1>>=
+<<SMMAT1>>=
 group.file <- system.file("extdata", "SetID.withweights.txt", 
         package = "GMMAT")
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
+SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
         tests = c("O", "E"))
 @
@@ -347,21 +397,21 @@ It returns a data frame with first 8 columns showing the group (variant set) nam
 
 For a single study, intermediate files containing single variant scores and their covariance matrices for each variant set (based on the group definition file) can be saved for future use in re-analysis and/or meta-analysis. For example, here we perform the burden test and save intermediate files:
 
-<<GMMATrvtests2>>=
-glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
+<<SMMAT2>>=
+SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
-        tests = "B", meta.file.prefix = "glmm.rvtests.meta")
+        tests = "B", meta.file.prefix = "SMMAT.meta")
 @
-In the example above, a space-delimited file "glmm.rvtests.meta.score.1" will be generated to save the single variant scores, and a binary file "glmm.rvtests.meta.var.1" will be generated to save the covariance matrices for the variant sets. Note that the binary file is not human-readable, but can be used by \textbf{glmm.rvtests.meta} in re-analysis and/or meta-analysis.
+In the example above, a space-delimited file "SMMAT.meta.score.1" will be generated to save the single variant scores, and a binary file "SMMAT.meta.var.1" will be generated to save the covariance matrices for the variant sets. Note that the binary file is not human-readable, but can be used by \textbf{SMMAT.meta} in re-analysis and/or meta-analysis.
 
 \subsubsection{Meta-analysis}
-With intermediate files generated by \textbf{glmm.rvtests}, the function \textbf{glmm.rvtests.meta} can be used in re-analysis of single study results, and/or meta-analysis to combine multiple studies. Here we show an example of rerunning SKAT using intermediate files generated above in the burden test:
-<<GMMATrvtestsmeta>>=
-glmm.rvtests.meta(meta.files.prefix = "glmm.rvtests.meta", n.files = 1,
+With intermediate files generated by \textbf{SMMAT}, the function \textbf{SMMAT.meta} can be used in re-analysis of single study results, and/or meta-analysis to combine multiple studies. Here we show an example of rerunning SKAT using intermediate files generated above in the burden test:
+<<SMMATmeta>>=
+SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
         miss.cutoff = 1, method = "davies", tests = "S")
 @
-The first argument, "meta.files.prefix", is a vector of intermediate files' prefix with length equal to the number of studies, and the second argument, "n.files", is a vector of integers showing how many sets of intermediate files each study has (also with length equal to the number of studies). In our above example of re-analysis, we have one set of intermediate files ("glmm.rvtests.meta.score.1" and "glmm.rvtests.meta.var.1") with prefix "glmm.rvtests.meta". The group definition file (passed to "group.file") should be the same as the one used to generate intermediate files by \textbf{glmm.rvtests} (with possibly different weights allowed). In the above example, only SKAT is performed, but four variant set tests are supported in the SMMAT framework: "B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT. You can include one or more tests by passing a vector to the argument "tests". If "O" is selected, the burden test and SKAT results will be automatically included; if "E" is selected, the burden test results will be automatically included.
+The first argument, "meta.files.prefix", is a vector of intermediate files' prefix with length equal to the number of studies, and the second argument, "n.files", is a vector of integers showing how many sets of intermediate files each study has (also with length equal to the number of studies). In our above example of re-analysis, we have one set of intermediate files ("SMMAT.meta.score.1" and "SMMAT.meta.var.1") with prefix "SMMAT.meta". The group definition file (passed to "group.file") should be the same as the one used to generate intermediate files by \textbf{SMMAT} (with possibly different weights allowed). In the above example, only SKAT is performed, but four variant set tests are supported in the SMMAT framework: "B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT. You can include one or more tests by passing a vector to the argument "tests". If "O" is selected, the burden test and SKAT results will be automatically included; if "E" is selected, the burden test results will be automatically included.
 
 \section{Output}
 The single variant score test function \textbf{glmm.score} generates a tab-delimited plain text output file. Here we show the header and the first five rows of the example output "glmm.score.text.testoutfile.txt" from using a plain text genotype file "geno.txt" in the function \textbf{glmm.score}:
@@ -405,11 +455,11 @@ SNP4    1       4       G       A       400    0        0.70125
 SNP5    1       5       A       G       400    0        0.59375 
 ...
 SCORE                   VAR                   PVAL
--1.98499783214996       4.55635423431794      0.352406178302761
-3.51031635867184        46.3327709012496      0.606059815778752
-0.533400489551472       30.6022850154632      0.923185358927845
-3.11494101606552        40.5127615345412      0.62456656152105
--4.0013509071669        42.2757215856855      0.538287192500612
+-1.98499773964117       4.55635419833128      0.352406198841659
+3.51031642022882        46.3327704279554      0.606059807621643
+0.533400376138446       30.6022846771608      0.923185374786553
+3.11494101139992        40.5127610067912      0.624566559783622
+-4.00135050079485       42.2757210650549      0.538287231263494
 ...
 \end{verbatim}
 The first 5 columns are extracted from the GDS file: SNP ("annotation/id"), CHR ("chromosome"), POS ("position"), reference and alternate alleles ("allele"). Results are included in 6 columns: the sample size N (with non-missing genotypes), the genotype missing rate MISSRATE, the allele frequency (AF) of ALT allele, the score statistic SCORE of ALT allele, the variance of the score VAR, and score test \textit{P} value PVAL.
@@ -426,7 +476,7 @@ L35     A      C      10000   0.78425 14.3376  387.091  0.466163476535903
 \end{verbatim}
 The first 3 columns are set by the function \textbf{glmm.score.meta} to denote SNP name and alleles (your choice of either A1 or A2 as the effect allele). N is the total sample size, AF is the effect allele frequency, SCORE is the summary score statistic of the effect allele, VAR is the variance of the summary score statistic, and PVAL is the meta-analysis \textit{P} value.
 
-In variant set tests \textbf{glmm.rvtests}, if "meta.file.prefix" is specified, space-delimited intermediate files for single variant scores and binary intermediate files for covariance matrices will be generated. Here are the header and the first 5 rows of the example intermediate file "glmm.rvtests.meta.score.1":
+In variant set tests \textbf{SMMAT}, if "meta.file.prefix" is specified, space-delimited intermediate files for single variant scores and binary intermediate files for covariance matrices will be generated. Here are the header and the first 5 rows of the example intermediate file "SMMAT.meta.score.1":
 \begin{verbatim}
 group chr pos ref alt N missrate altfreq 
 Set1 1 1 T A 393 0.0175 0.974554707379135 
@@ -436,11 +486,11 @@ Set1 1 4 G A 400 0 0.70125
 Set1 1 5 A G 400 0 0.59375 
 ...
 SCORE VAR PVAL
--1.98499783213792 4.55635423431748 0.352406178305658
-3.51031635867802 46.3327709012495 0.606059815778118
-0.533400489561255 30.6022850154629 0.92318535892644
-3.11494101607418 40.5127615345409 0.624566561520085
--4.00135090715957 42.2757215856853 0.538287192501356
+-1.98499773963038 4.55635419833203 0.352406198844316
+3.51031642023436 46.3327704279556 0.606059807621076
+0.533400376147224 30.6022846771614 0.923185374785294
+3.11494101140768 40.5127610067916 0.62456655978276
+-4.00135050078827 42.2757210650552 0.538287231264163
 ...
 \end{verbatim}
 The first 5 columns are copied from the group definition file, indicating the variant set (group) id, variant chromosome, variant position, variant reference allele, variant alternate allele, respectively. Results are included in 6 columns: the sample size N (with non-missing genotypes), the genotype missing rate missrate, the alt allele frequency altfreq, the score statistic SCORE of alt allele, the variance of the score VAR, and single variant score test \textit{P} value PVAL.
@@ -476,7 +526,7 @@ By default we set the maximum number of iteration to 500 and tolerance to declar
 \begin{verbatim}
 maxiter = 500, tol = 1e-5
 \end{verbatim}
-These parameters can be changed. When using the Brent method for maximizing the likelihood (or restricted likelihood), we specify the search range of the ratio of the variance component parameter $\tau_k$ over the dispersion parameter $\phi$ to be between 1e-5 and 1e5, and we divide the search region evenly into 10 regions on the log scale:
+These parameters can be changed. When using the Brent method for maximizing the likelihood (or restricted likelihood), we specify the search range of the ratio of the variance component parameter $\tau_1$ over the dispersion parameter $\phi$ to be between 1e-5 and 1e5, and we divide the search region evenly into 10 regions on the log scale:
 \begin{verbatim}
 taumin = 1e-5, taumax = 1e5, tauregion = 10
 \end{verbatim}
@@ -487,7 +537,7 @@ It is recommended to perform genotype quality control prior to analysis to imput
 \begin{verbatim}
 missing.method = "omit"
 \end{verbatim}
-In variant set tests using \textbf{glmm.rvtests}, instead of imputing missing genotypes to the mean value, you can impute missing genotypes to 0 (homozygous reference allele) using
+In variant set tests using \textbf{SMMAT}, instead of imputing missing genotypes to the mean value, you can impute missing genotypes to 0 (homozygous reference allele) using
 \begin{verbatim}
 missing.method = "impute2zero"
 \end{verbatim}
@@ -495,16 +545,16 @@ missing.method = "impute2zero"
 If using a plain text (or compressed .gz and .bz2) genotype file, missing genotypes should be coded as "NA". If you have missing genotypes coded in a different way, you can specify this in the argument "infile.na".
 
 \subsection{Reordered genotypes}
-The genotype file (either a plain text file, a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or a GDS file) can include more individuals than in the phenotype and covariates data frame or the matrices, and they can be in different orders. \textit{GMMAT} handles this issue using an argument "select" in both \textbf{glmm.score} and \textbf{glmm.wald}. For example, if the order of individuals in your genotype file is A, B, C, D, but you only have 3 individuals in the phenotype and covariates data frame and the matrices (with order C, A, B), then you can specify
+The genotype file (either a plain text file, a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or a GDS file) can include more individuals than in the phenotype and covariates data frame, and they can be in different orders. \textit{GMMAT} handles this issue using an argument "select" in both \textbf{glmm.score} and \textbf{glmm.wald}. For example, if the order of individuals in your genotype file is A, B, C, D, but you only have 3 unique individuals (with order C, A, B) in the fitted "obj" (for \textbf{glmm.score}) or in the data frame "data" (for \textbf{glmm.wald}), then you can specify
 \begin{verbatim}
 select = c(2, 3, 1, 0)
 \end{verbatim}
-to reflect the order of individuals. Note that since individual D is not included in the phenotype and covariates data frame or the matrices, its order is assigned to 0. The length of the vector must match the number of individuals in your genotype file. The order of individuals in the phenotype and covariates data frame and the covariance structure matrices must be the same.
+to reflect the order of individuals. Note that since individual D is not included, its order is assigned to 0. The length of the vector must match the number of individuals in your genotype file. Also note that if there are observations with missing phenotype/covariates in "data", "select" for \textbf{glmm.wald} should match to "data" before removing any missing values, while "select" for \textbf{glmm.score} should match to "obj" (in which missing values have been excluded).
 
-In variant set tests \textbf{glmm.rvtests}, the order of individuals is matched using the argument "null.obj.id" to indicate the ID of individuals in the \textbf{glmmkin} fitted object from the null GLMM, passed to the argument "null.obj". By default "null.obj.id" is NULL, \textbf{glmm.rvtests} will extract ID from "null.obj" using "id\_include" returned in the \textbf{glmmkin} fitted null model object. The ID will be matched to "sample.id" in the GDS genotype file.
+In variant set tests, \textbf{SMMAT} will extract ID from "null.obj" using "id\_include" returned in the \textbf{glmmkin} fitted null model object. The ID will be matched to "sample.id" in the GDS genotype file.
 
 \subsection{Parallel computing}
-Parallel computing can be enabled in \textbf{glmm.score} and \textbf{glmm.rvtests} using the argument "ncores" to specify how many cores you would like to use on a computing node. By default "ncores" is 1, meaning that these functions will run in a single thread. Currently parallel computing is only implemented for GDS format genotype files.
+Parallel computing can be enabled in \textbf{glmm.score} and \textbf{SMMAT} using the argument "ncores" to specify how many cores you would like to use on a computing node. By default "ncores" is 1, meaning that these functions will run in a single thread. Currently parallel computing is only implemented for GDS format genotype files.
 
 If you enable parallel computing and save intermediate files, you will get multiple sets of intermediate files. For example, if your "ncores" is 12 and you specified "meta.file.prefix" to "study1", then you will get 12 sets of (totaling 24) intermediate files "study1.score.1", "study1.var.1", "study1.score.2", "study1.var.2", ..., "study1.score.12", "study1.var.12". Later in the meta-analysis to combine with 2 sets of intermediate files "study2.score.1", "study2.var.1", "study2.score.2", "study2.var.2", you will need to use
 \begin{verbatim}
@@ -517,7 +567,7 @@ Sys.setenv(MKL_NUM_THREADS = 1)
 @
 
 \subsection{Variant filters}
-Variants can be filtered in \textbf{glmm.score} and \textbf{glmm.rvtests} based on minor allele frequency (MAF) and missing rate filters. The argument "MAF.range" specifies the minimum and maximum MAFs for a variant to be included in the analysis. By default the minimum MAF is $1\times 10^{-7}$ and the maximum MAF is 0.5, meaning that only monomorphic markers in the sample will be excluded (if your sample size is no more than 5 million). The argument "miss.cutoff" specifies the maximum missing rate for a variant to be included in the analysis. By default it is set to 1, meaning that no variants will be removed due to high genotype missing rates.
+Variants can be filtered in \textbf{glmm.score} and \textbf{SMMAT} based on minor allele frequency (MAF) and missing rate filters. The argument "MAF.range" specifies the minimum and maximum MAFs for a variant to be included in the analysis. By default the minimum MAF is $1\times 10^{-7}$ and the maximum MAF is 0.5, meaning that only monomorphic markers in the sample will be excluded (if your sample size is no more than 5 million). The argument "miss.cutoff" specifies the maximum missing rate for a variant to be included in the analysis. By default it is set to 1, meaning that no variants will be removed due to high genotype missing rates.
 
 \subsection{Internal minor allele frequency weights}
 Internal weights are calculated based on the minor allele frequency (NOT the effect allele frequency, therefore, variants with effect allele frequencies 0.01 and 0.99 have the same weights) as a beta probability density function. Internal weights are multiplied by the external weights given in the last column of the group definition file. To turn off internal weights, use
@@ -527,17 +577,17 @@ MAF.weights.beta = c(1, 1)
 to assign flat weights, as a beta distribution with parameters 1 and 1 is a uniform distribution on the interval between 0 and 1.
 
 \subsection{Allele flipping}
-In variant set tests \textbf{glmm.rvtests}, by default the alt allele is used as the coding allele and variants in each variant set are matched strictly on chromosome, position, reference and alternate alleles.
+In variant set tests \textbf{SMMAT}, by default the alt allele is used as the coding allele and variants in each variant set are matched strictly on chromosome, position, reference and alternate alleles.
 
 The argument "auto.flip" allows automatic allele flipping if a specified variant is not found in the genotype file, but a variant at the same chromosome and position with reference allele matching the alternate allele in the group definition file "group.file", and alternate allele matching the reference allele in the group definition file "group.file", to be included in the analysis. Please use with caution for whole genome sequence data, as both ref/alt and alt/ref variants at the same position are not uncommon, and they are likely two different variants, rather than allele flipping.
 
 The argument "use.minor.allele" allows using the minor allele instead of the alt allele as the coding allele in variant set tests. Note that this choice does not change "S" for SKAT results, but "B" for the burden test, "O" for SKAT-O and "E" for efficient hybrid test of the burden test and SKAT results will be affected. Generally the alt allele can either be the minor or the major allele. If in a variant set, different variants with alt allele frequencies 0.001 and 0.998 are combined together in a burden test, the results would be difficult to interpret. We generally recommend turning on the "use.minor.allele" option, unless you know the ancestry alleles explicitly and the specific scientific hypothesis clearly that you would like to test. Along with the MAF filter, this option is useful for combining rare mutations, assuming rare allele effects are in the same direction.
 
 \subsection{\textit{P} values of weighted sum of chi-squares}
-In variant set tests \textbf{glmm.rvtests}, you can use 3 methods in the "method" argument to compute \textit{P} values of weighted sum of chi-square distributions: "davies" \cite{davies1980}, "kuonen" \cite{kuonen1999} and "liu" \cite{liu2009}. By default "davies" is used, if it returns an error message in the calculation, or a \textit{P} value greater than 1, or less than $1\times 10^{-5}$, "kuonen" method will be used. If "kuonen" method fails to compute the \textit{P} value, "liu" method will be used.
+In variant set tests \textbf{SMMAT}, you can use 3 methods in the "method" argument to compute \textit{P} values of weighted sum of chi-square distributions: "davies" \cite{davies1980}, "kuonen" \cite{kuonen1999} and "liu" \cite{liu2009}. By default "davies" is used, if it returns an error message in the calculation, or a \textit{P} value greater than 1, or less than $1\times 10^{-5}$, "kuonen" method will be used. If "kuonen" method fails to compute the \textit{P} value, "liu" method will be used.
 
 \subsection{Heterogeneous genetic effects in variant set meta-analysis}
-Heterogeneous genetic effects \cite{lee2013} are allowed in variant set tests meta-analysis function \textbf{glmm.rvtests.meta}, by specifying groups using the "cohort.group.idx" argument. By default all studies are assumed to share the same genetic effects in the meta-analysis, and this can be changed by assigning different group indices to studies. For example,
+Heterogeneous genetic effects \cite{lee2013} are allowed in variant set tests meta-analysis function \textbf{SMMAT.meta}, by specifying groups using the "cohort.group.idx" argument. By default all studies are assumed to share the same genetic effects in the meta-analysis, and this can be changed by assigning different group indices to studies. For example,
 \begin{verbatim}
 cohort.group.idx = c("a","b","a","a","b")
 \end{verbatim}
@@ -552,11 +602,11 @@ in both \textbf{glmm.score} and \textbf{glmm.wald} functions to use raw genotype
 
 If your genotype file is a plain text (or a compressed .gz and .bz2 file), and you want to read in fewer lines than all lines included in the file, you can use the "infile.nrow" argument to specify how many lines (including lines to be skipped using "infile.nrow.skip") you want to read in. By default the delimiter is assumed to be a tab, but you can change it using the "infile.sep" argument. These options are implemented in \textbf{glmm.score} and \textbf{glmm.wald}.
 
-In the score test function \textbf{glmm.score}, by default 100 SNPs are tested in a batch. You can change it using the "nperbatch" argument, but the computational time can increase substantially if it is either too small or too large, depending on the performance of your system.
+In the score test function \textbf{glmm.score}, by default 100 SNPs are tested in a batch. You can change it using the "nperbatch" argument, but the computational time can increase substantially if it is either too small or too large, depending on the performance of your computing system.
 
 If you perform Wald tests \textbf{glmm.wald} and use a plain text (or a compressed .gz and .bz2) file, and your SNPs are not in your first column, you can change "snp.col" in \textbf{glmm.wald} to indicate which column is your SNP name.
 
-In the variant set tests \textbf{glmm.rvtests}, by default the group definition file "group.file" should be tab delimited, but you can change it using the "group.file.sep" argument. Also there is a "Garbage.Collection" argument (default FALSE), if turned on, \textbf{glmm.rvtests} will call the function \textbf{gc} for each variant set tested. It helps save memory footprint, but the computation speed might be slower.
+In the variant set tests \textbf{SMMAT}, by default the group definition file "group.file" should be tab delimited, but you can change it using the "group.file.sep" argument. Also there is a "Garbage.Collection" argument (default FALSE), if turned on, \textbf{SMMAT} will call the function \textbf{gc} for each variant set tested. It helps save memory footprint, but the computation speed might be slower.
 
 \section{Version}
 \subsection{Version 0.6 (October 12, 2015)}
@@ -611,6 +661,26 @@ that can be used as the "select" argument in \textbf{glmm.score}.
 \item In the null model fitting function \textbf{glmmkin}, model matrix X for fixed effects now included in the returned object.
 \end{enumerate}
 
+\subsection{Version 1.0.0 (December 28, 2018)}
+\begin{enumerate}
+\item Implemented ID matching for the phenotype data frame and relatedness matrices in \textbf{glmmkin} and \textbf{glmm.wald}. The argument "id" is required for a column indicating ID in the phenotype data frame, and the relatedness matrices must have rownames and colnames, and they must at least include all samples as specified in the "id" column of the phenotype data frame "data".
+\item Changed the definition of "id\_include" in \textbf{glmmkin} returned object to indicate the original "id" of observations in the data that have nonmissing outcome/covariates and are included in the model fit, which is useful to create
+<<select2, eval=FALSE, echo=TRUE>>=
+select <- match(geno_ID, unique(obj$id_include))
+select[is.na(select)] <- 0
+@
+that can be used as the "select" argument in \textbf{glmm.score} to match the order of individuals in the plain text (or a compressed .gz and .bz2) genotype file "infile" (assuming "geno\_ID" is a vector of the ID's for "infile"). Note that this is not necessary if the genotype file is a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or a GDS file (in these cases, "select" is NULL by default, and the genotype ID information will be extracted automatically and matched to "id\_include" in \textbf{glmmkin} returned object).
+\item Implemented genotype ID matching in \textbf{glmm.wald} if the genotype file "infile" is a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or a GDS file. Similarly to \textbf{glmm.score}, "select" is NULL by default and the genotype ID information will be extracted automatically and matched to unique "id" in the phenotype data frame "data" (but before removing any missing outcome/covariates). Note that it is usually necessary to create
+<<select3, eval=FALSE, echo=TRUE>>=
+select <- match(geno_ID, unique(data[, id]))
+select[is.na(select)] <- 0
+@
+that can be used as the "select" argument in \textbf{glmm.wald} to match the order of individuals in the plain text (or a compressed .gz and .bz2) genotype file "infile" (assuming "geno\_ID" is a vector of the ID's for "infile"). Otherwise, it is assumed that the genotype ID is equal to unique "id" in the phenotype data frame "data".
+\item Renamed variant set test functions in the SMMAT framework \textbf{glmm.rvtests} and \textbf{glmm.rvtests.meta} to \textbf{SMMAT} and \textbf{SMMAT.meta}, respectively.
+\item Set the default of the argument "kins" to NULL, assuming individuals are unrelated.
+\item Implemented model fitting for longitudinal data in \textbf{glmmkin} and \textbf{glmm.wald}. Duplicated "id" in the phenotype data frame "data" are allowed and assumed to be longitudinal data (exchangeable repeated measures, or observations from multiple time points with time trends).
+\end{enumerate}
+
 \section{Contact}
 Please refer to the R help document of \textit{GMMAT} for specific questions about each function. For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
@@ -632,6 +702,8 @@ We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and sug
 \bibitem{Wu2011} Wu, M. C., Lee, S., Cai, T., Li, Y., Boehnke, M. and Lin, X. Rare-variant association testing for sequencing data with the sequence kernel association test. \textit{The American Journal of Human Genetics} \textbf{89,} 82--93 (2011).
 
 \bibitem{Lee2012} Lee, S., Wu, M. C. and Lin, X. Optimal tests for rare variant effects in sequencing association studies. \textit{Biostatistics} \textbf{13,} 762--775 (2012).
+
+\bibitem{Chen2019} Chen, H., Huffman, J. E., Brody, J. A., Wang, C., Lee, S., Li, Z., Gogarten, S. M., Sofer, T., Bielak, L. F., Bis, J. C., \textit{et al.} Efficient variant set mixed model association tests for continuous and binary traits in large-scale whole-genome sequencing studies. \textit{The American Journal of Human Genetics} (in press 2019).
 
 \bibitem{Chen2016} Chen, H., Wang, C., Conomos, M. P., Stilp, A. M., Li, Z., Sofer, T., Szpiro, A. A., Chen, W., Brehm, J. M., Celed\'{o}n, J. C., Redline, S., Papanicolaou, G. J., Thornton, T. A., Laurie, C. C., Rice, K. and Lin, X. Control for Population Structure and Relatedness for Binary Traits in Genetic Association Studies via Logistic Mixed Models. \textit{The American Journal of Human Genetics} \textbf{98,} 653--666 (2016).
 

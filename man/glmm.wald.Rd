@@ -7,11 +7,11 @@ Performing GLMM based Wald tests
 Fit a GLMM under the alternative hypothesis to perform Wald tests for association with genotypes in a plink .bed file (binary genotypes), a GDS file .gds, or a plain text file (or compressed .gz or .bz2 file).
 }
 \usage{
-glmm.wald(fixed, data = parent.frame(), kins, groups = NULL,
-	family = binomial(link = "logit"), infile, snps, method = "REML", 
-	method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, 
-	taumax = 1e5, tauregion = 10, center = T, select = NULL,
-	missing.method = "impute2mean", infile.nrow = NULL, 
+glmm.wald(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, 
+	groups = NULL, family = binomial(link = "logit"), infile, snps, 
+	method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, 
+	taumin = 1e-5, taumax = 1e5, tauregion = 10, center = T, 
+	select = NULL, missing.method = "impute2mean", infile.nrow = NULL, 
 	infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", 
 	snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, 
 	infile.header.print = "SNP", verbose = FALSE, ...)
@@ -24,9 +24,15 @@ an object of class \code{\link{formula}} (or one that can be coerced to that cla
 a data frame or list (or object coercible by \code{\link{as.data.frame}} to a data frame) containing the variables in the model.
 }
   \item{kins}{
-a known relationship matrix (e.g. kinship matrix in genetic association studies) or a list of known relationship matrices. When supplied with a matrix, this matrix should be a positive semi-definite matrix with dimensions equal to the sample size in \code{data}, and the order of subjects in this matrix should also match the order of subjects in \code{data}. When supplied with a list of matrices, each matrix should be a positive semi-definite matrix with dimensions equal to the sample size in \code{data}, and the order of subjects in each matrix should also match the order of subjects in \code{data}. Currently there is no ID checking feature implemented, and it is the user's responsibility to match the orders.
+a known positive semi-definite relationship matrix (e.g. kinship matrix in genetic association studies) or a list of known positive semi-definite relationship matrices. The rownames and colnames of these matrices must at least include all samples as specified in the \code{id} column of the data frame \code{data}. If not provided, glmmkin will switch to the generalized linear model with no random effects (default = NULL).
 }
-  \item{groups}{
+  \item{id}{
+a column in the data frame \code{data}, indicating the id of samples. When there are duplicates in id, the data is assumed to be longitudinal with repeated measures.
+}
+  \item{random.slope}{
+an optional column indicating the random slope for time effect used in a mixed effects model for longitudinal data. It must be included in the names of \code{data}. There must be duplicates in \code{id} and \code{method.optim} must be "AI" (default = NULL).
+}
+\item{groups}{
 an optional categorical variable indicating the groups used in a heteroscedastic linear mixed model (allowing residual variances in different groups to be different). This variable must be included in the names of \code{data}, and \code{family} must be "gaussian" and \code{method.optim} must be "AI" (default = NULL).
 }
 \item{family}{
@@ -63,7 +69,7 @@ the number of search intervals for the REML or ML estimate of the variance compo
 a logical switch for centering genotypes before tests. If TRUE, genotypes will be centered to have mean 0 before tests, otherwise raw values will be directly used in tests (default = TRUE).
 }
   \item{select}{
-an optional vector indicating the order of individuals in \code{infile}. If supplied, the length must match the number of individuals in \code{infile} (default = NULL). Individuals to be excluded should be coded 0. For example, \code{select = c(2, 3, 1, 0)} means the 1st individual in \code{infile} corresponds to the 2nd individual in \code{kins}, the 2nd individual in \code{infile} corresponds to the 3rd individual in \code{kins}, the 3rd individual in \code{infile} corresponds to the 1st individual in \code{kins}, the 4th individual in \code{infile} is not included in \code{kins}.
+an optional vector indicating the order of individuals in \code{infile}. If supplied, the length must match the number of individuals in \code{infile} (default = NULL). Individuals to be excluded should be coded 0. For example, \code{select = c(2, 3, 1, 0)} means the 1st individual in \code{infile} corresponds to the 2nd individual in \code{data}, the 2nd individual in \code{infile} corresponds to the 3rd individual in \code{data}, the 3rd individual in \code{infile} corresponds to the 1st individual in \code{data}, the 4th individual in \code{infile} is not included in \code{data}. If there are any duplicated \code{id} in \code{data} (longitudinal data analysis), indices in \code{select} should match the order of individuals with unique \code{id} in \code{data}. For plink binary genotype files and GDS files, this argument is not required and the sample ID's are automatically matched.
 }
   \item{missing.method}{
 method of handling missing genotypes. Either "impute2mean" or "omit" (default = "impute2mean").
@@ -155,21 +161,23 @@ Han Chen, Matthew P. Conomos
 \code{\link{glmmkin}}, \code{\link{glmm.score}}
 }
 \examples{
+\dontrun{
 data(example)
 attach(example)
 snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
 plinkfiles <- strsplit(system.file("extdata", "geno.bed", package = "GMMAT"), 
        ".bed", fixed = TRUE)[[1]]
-glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, 
+glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 	family = binomial(link = "logit"), infile = plinkfiles, snps = snps) 
 infile <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, 
+glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 	family = binomial(link = "logit"), infile = infile, snps = snps) 
 infile <- system.file("extdata", "geno.txt", package = "GMMAT")
-glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, 
+glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 	family = binomial(link = "logit"), infile = infile, snps = snps, 
 	infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, 
 	infile.header.print = c("SNP", "Allele1", "Allele2"))
+}
 }
 \keyword{ generalized linear mixed model }
 \keyword{ Wald test }

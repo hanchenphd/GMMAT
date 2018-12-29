@@ -29,10 +29,7 @@ pheno <- read.table(pheno.file, header = TRUE)
 ### code chunk number 4: GRM
 ###################################################
 GRM.file <- system.file("extdata", "GRM.txt.bz2", package = "GMMAT")
-GRM <- as.matrix(read.table(GRM.file))
-## scan is much faster than read.table if the matrix size is known:
-## GRM <- matrix(scan(GRM.file, n = 400^2), nrow = 400, ncol = 400, 
-##         byrow = TRUE)
+GRM <- as.matrix(read.table(GRM.file, check.names = FALSE))
 
 
 ###################################################
@@ -64,8 +61,8 @@ library(GMMAT)
 ###################################################
 ### code chunk number 9: GMMAT0
 ###################################################
-model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"))
+model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, 
+        id = "id", family = binomial(link = "logit"))
 model0$theta
 model0$coefficients
 model0$cov
@@ -74,22 +71,23 @@ model0$cov
 ###################################################
 ### code chunk number 10: GMMAT01 (eval = FALSE)
 ###################################################
-## model0 <- glmmkin(fixed = disease ~ age + sex, data = pheno, 
-##         kins = GRM, family = binomial(link = "logit"))
+## model0 <- glmmkin(fixed = disease ~ age + sex, data = pheno, kins = GRM, 
+##         id = "id", family = binomial(link = "logit"))
 
 
 ###################################################
 ### code chunk number 11: GMMAT1
 ###################################################
-model1 <- glmmkin(fixed = trait ~ age + sex, data = pheno, 
-        kins = GRM, family = gaussian(link = "identity"))
+model1 <- glmmkin(fixed = trait ~ age + sex, data = pheno, kins = GRM, 
+        id = "id", family = gaussian(link = "identity"))
 
 
 ###################################################
 ### code chunk number 12: GMMAT2
 ###################################################
 model2 <- glmmkin(fixed = trait ~ age + sex, data = pheno, kins = GRM, 
-        groups = "disease", family = gaussian(link = "identity"))
+        id = "id", groups = "disease", 
+        family = gaussian(link = "identity"))
 model2$theta
 
 
@@ -98,14 +96,33 @@ model2$theta
 ###################################################
 M10 <- matrix(0, 400, 400)
 for(i in 1:40) M10[(i-1)*10+(1:10), (i-1)*10+(1:10)] <- 1
+rownames(M10) <- colnames(M10) <- 1:400
 Mats <- list(GRM, M10)
-model3 <- glmmkin(fixed = disease ~ age + sex, data = pheno, 
+model3 <- glmmkin(fixed = disease ~ age + sex, data = pheno, id = "id",
         kins = Mats, family = binomial(link = "logit"))
 model3$theta
 
 
 ###################################################
-### code chunk number 14: GMMATscoretxt
+### code chunk number 14: GMMAT4
+###################################################
+pheno2.file <- system.file("extdata", "pheno2.txt", package = "GMMAT")
+pheno2 <- read.table(pheno2.file, header = TRUE)
+model4 <- glmmkin(y.repeated ~ sex, data = pheno2, kins = GRM, id = "id",
+        family = gaussian(link = "identity"))
+model4$theta
+
+
+###################################################
+### code chunk number 15: GMMAT5
+###################################################
+model5 <- glmmkin(y.trend ~ sex + time, data = pheno2, kins = GRM, id = "id",
+        random.slope = "time", family = gaussian(link = "identity"))
+model5$theta
+
+
+###################################################
+### code chunk number 16: GMMATscoretxt
 ###################################################
 geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
 glmm.score(model0, infile = geno.file, outfile =
@@ -115,7 +132,7 @@ glmm.score(model0, infile = geno.file, outfile =
 
 
 ###################################################
-### code chunk number 15: GMMATscorebed
+### code chunk number 17: GMMATscorebed
 ###################################################
 geno.file <- strsplit(system.file("extdata", "geno.bed", 
         package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
@@ -124,7 +141,7 @@ glmm.score(model0, infile = geno.file, outfile =
 
 
 ###################################################
-### code chunk number 16: GMMATscoregds
+### code chunk number 18: GMMATscoregds
 ###################################################
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.score(model0, infile = geno.file, outfile = 
@@ -132,38 +149,35 @@ glmm.score(model0, infile = geno.file, outfile =
 
 
 ###################################################
-### code chunk number 17: GMMATwaldtxt
+### code chunk number 19: GMMATwaldtxt
 ###################################################
 geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
 snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
-glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"), infile = geno.file, 
-        snps = snps, infile.nrow.skip = 5, infile.ncol.skip = 3, 
-        infile.ncol.print = 1:3, infile.header.print = 
-        c("SNP", "Allele1", "Allele2"))
+glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+        family = binomial(link = "logit"), infile = geno.file, snps = snps, 
+	infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, 
+	infile.header.print = c("SNP", "Allele1", "Allele2"))
 
 
 ###################################################
-### code chunk number 18: GMMATwaldbed
+### code chunk number 20: GMMATwaldbed
 ###################################################
 geno.file <- strsplit(system.file("extdata", "geno.bed", 
         package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
-glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"), infile = geno.file, 
-        snps = snps)
+glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+        family = binomial(link = "logit"), infile = geno.file, snps = snps)
 
 
 ###################################################
-### code chunk number 19: GMMATwaldgds
+### code chunk number 21: GMMATwaldgds
 ###################################################
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM,
-        family = binomial(link = "logit"), infile = geno.file, 
-        snps = snps)
+glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+        family = binomial(link = "logit"), infile = geno.file, snps = snps)
 
 
 ###################################################
-### code chunk number 20: GMMATscoremeta
+### code chunk number 22: GMMATscoremeta
 ###################################################
 meta1.file <- system.file("extdata", "meta1.txt", package = "GMMAT")
 meta2.file <- system.file("extdata", "meta2.txt", package = "GMMAT")
@@ -174,42 +188,56 @@ glmm.score.meta(files = c(meta1.file, meta2.file, meta3.file),
 
 
 ###################################################
-### code chunk number 21: GMMATrvtests1
+### code chunk number 23: SMMAT1
 ###################################################
 group.file <- system.file("extdata", "SetID.withweights.txt", 
         package = "GMMAT")
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
+SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
         tests = c("O", "E"))
 
 
 ###################################################
-### code chunk number 22: GMMATrvtests2
+### code chunk number 24: SMMAT2
 ###################################################
-glmm.rvtests(model0, group.file = group.file, geno.file = geno.file, 
+SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
-        tests = "B", meta.file.prefix = "glmm.rvtests.meta")
+        tests = "B", meta.file.prefix = "SMMAT.meta")
 
 
 ###################################################
-### code chunk number 23: GMMATrvtestsmeta
+### code chunk number 25: SMMATmeta
 ###################################################
-glmm.rvtests.meta(meta.files.prefix = "glmm.rvtests.meta", n.files = 1,
+SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
         miss.cutoff = 1, method = "davies", tests = "S")
 
 
 ###################################################
-### code chunk number 24: MKL (eval = FALSE)
+### code chunk number 26: MKL (eval = FALSE)
 ###################################################
 ## Sys.setenv(MKL_NUM_THREADS = 1)
 
 
 ###################################################
-### code chunk number 25: select (eval = FALSE)
+### code chunk number 27: select (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, pheno_ID[obj$id_include])
+## select[is.na(select)] <- 0
+
+
+###################################################
+### code chunk number 28: select2 (eval = FALSE)
+###################################################
+## select <- match(geno_ID, unique(obj$id_include))
+## select[is.na(select)] <- 0
+
+
+###################################################
+### code chunk number 29: select3 (eval = FALSE)
+###################################################
+## select <- match(geno_ID, unique(data[, id]))
 ## select[is.na(select)] <- 0
 
 

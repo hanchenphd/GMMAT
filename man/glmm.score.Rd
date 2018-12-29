@@ -28,7 +28,7 @@ the output file name.
 a logical switch for centering genotypes before tests. If TRUE, genotypes will be centered to have mean 0 before tests, otherwise raw values will be directly used in tests (default = TRUE).
 }
   \item{select}{
-an optional vector indicating the order of individuals in \code{infile}. If supplied, the length must match the number of individuals in \code{infile} (default = NULL). Individuals to be excluded should be coded 0. For example, \code{select = c(2, 3, 1, 0)} means the 1st individual in \code{infile} corresponds to the 2nd individual in \code{obj}, the 2nd individual in \code{infile} corresponds to the 3rd individual in \code{obj}, the 3rd individual in \code{infile} corresponds to the 1st individual in \code{obj}, the 4th individual in \code{infile} is not included in \code{obj}.
+an optional vector indicating the order of individuals in \code{infile}. If supplied, the length must match the number of individuals in \code{infile} (default = NULL). Individuals to be excluded should be coded 0. For example, \code{select = c(2, 3, 1, 0)} means the 1st individual in \code{infile} corresponds to the 2nd individual in \code{obj}, the 2nd individual in \code{infile} corresponds to the 3rd individual in \code{obj}, the 3rd individual in \code{infile} corresponds to the 1st individual in \code{obj}, the 4th individual in \code{infile} is not included in \code{obj}. If there are any duplicated \code{id_include} in \code{obj} (longitudinal data analysis), indices in \code{select} should match the order of individuals with unique \code{id_include} in \code{obj}. For plink binary genotype files and GDS files, this argument is not required and the sample ID's are automatically matched.
 }
   \item{MAF.range}{
 a numeric vector of length 2 defining the minimum and maximum minor allele frequencies of variants that should be included in the analysis (default = c(1e-7, 0.5)).
@@ -83,9 +83,10 @@ Han Chen
 \code{\link{glmmkin}}, \code{\link{glmm.wald}}
 }
 \examples{
+\dontrun{
 data(example)
 attach(example)
-model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, 
+model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
        family = binomial(link = "logit"))
 plinkfiles <- strsplit(system.file("extdata", "geno.bed", package = "GMMAT"), 
        ".bed", fixed = TRUE)[[1]]
@@ -99,6 +100,7 @@ outfile <- "glmm.score.text.testoutfile.txt"
 glmm.score(model0, infile = infile, outfile = outfile, infile.nrow.skip = 5, 
 	infile.ncol.skip = 3, infile.ncol.print = 1:3, 
 	infile.header.print = c("SNP", "Allele1", "Allele2"))
+}
 }
 \keyword{ generalized linear mixed model }
 \keyword{ score test }

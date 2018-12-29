@@ -1,6 +1,6 @@
 Package: GMMAT
-Version: 0.9.3
-Date: 2018-07-18
+Version: 1.0.0
+Date: 2018-12-28
 Title: Generalized Linear Mixed Model Association Tests
 Author: Han Chen, Matthew P. Conomos
 Maintainer: Han Chen <Han.Chen.2@uth.tmc.edu>

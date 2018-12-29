@@ -3,9 +3,11 @@ geno.gds: GDS format genotype file for 400 individuals and 100 SNPs
 geno.bed, geno.bim, geno.fam: plink format genotype file for 400 individuals and 100 SNPs
 meta1.txt, meta2.txt, meta3.txt: example input files for glmm.score.meta( )
 GRM.txt.bz2: genetic relationship matrix for 400 individuals, also available in example.rda
-pheno.txt: phenotype and covariate file for 400 individuals, also available in example.rda
-SetID.withweights.txt: set ID file with user-defined weights for variant-set analysis (burden test, SKAT, SKAT-O, SMMAT)
+pheno.txt: phenotype and covariate file for 400 individuals from a cross-sectional study, also available in example.rda
+pheno2.txt: phenotype and covariate file for 2,000 observations from a longitudinal study with 400 individuals, also available in example.rda
+SetID.withweights.txt: set ID file with user-defined weights for variant-set analysis (SMMAT)
 
 In example.rda:
-GRM <- as.matrix(read.table("GRM.txt.bz2"))
+GRM <- as.matrix(read.table("GRM.txt.bz2", check.names = FALSE))
 pheno <- read.table("pheno.txt", header = T)
+pheno2 <- read.table("pheno2.txt", header = T)
