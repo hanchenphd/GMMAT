@@ -33,7 +33,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		} else {
 			time <- .Call(C_glmm_score_bed, res, obj$P, bimfile, bedfile, outfile, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
 		}
-		print(sprintf("Computational time: %.2f seconds", time))
+		#print(sprintf("Computational time: %.2f seconds", time))
 		return(invisible(time))
 	} else if(grepl("\\.gds$", infile)) { # GDS genotype file
 	        ncores <- min(c(ncores, parallel::detectCores(logical = TRUE)))
@@ -212,7 +212,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		} else {
 			time <- .Call(C_glmm_score_text, res, obj$P, infile, outfile, tol, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
 		}
-		print(sprintf("Computational time: %.2f seconds", time))
+		#print(sprintf("Computational time: %.2f seconds", time))
 		return(invisible(time))
 	}
 }

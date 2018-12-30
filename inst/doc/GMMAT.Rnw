@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.0.0}
-\date{December 28, 2018}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.0.1}
+\date{December 29, 2018}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -679,6 +679,11 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Renamed variant set test functions in the SMMAT framework \textbf{glmm.rvtests} and \textbf{glmm.rvtests.meta} to \textbf{SMMAT} and \textbf{SMMAT.meta}, respectively.
 \item Set the default of the argument "kins" to NULL, assuming individuals are unrelated.
 \item Implemented model fitting for longitudinal data in \textbf{glmmkin} and \textbf{glmm.wald}. Duplicated "id" in the phenotype data frame "data" are allowed and assumed to be longitudinal data (exchangeable repeated measures, or observations from multiple time points with time trends).
+\end{enumerate}
+
+\subsection{Version 1.0.1 (December 29, 2018)}
+\begin{enumerate}
+\item Added "LinkingTo: BH" to improve portability with boost library headers.
 \end{enumerate}
 
 \section{Contact}
