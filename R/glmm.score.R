@@ -1,4 +1,8 @@
 glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", ncores = 1) {
+	if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
+	 	warning("The package doMC is not available on Windows... Switching to single thread...")
+		ncores <- 1
+	}
 	if(class(obj) != "glmmkin") stop("Error: obj must be a class glmmkin object!")
 	if(any(duplicated(obj$id_include))) {
 		J <- sapply(unique(obj$id_include), function(x) 1*(obj$id_include==x))

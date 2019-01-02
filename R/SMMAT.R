@@ -1,5 +1,9 @@
 SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, auto.flip = FALSE, Garbage.Collection = FALSE, ncores = 1)
 {
+    if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
+        warning("The package doMC is not available on Windows... Switching to single thread...")
+        ncores <- 1
+    }
     missing.method <- try(match.arg(missing.method, c("impute2mean", "impute2zero")))
     if(class(missing.method) == "try-error") stop("Error: \"missing.method\" must be \"impute2mean\" or \"impute2zero\".")
     if(any(!tests %in% c("B", "S", "O", "E"))) stop("Error: \"tests\" should only include \"B\" for the burden test, \"S\" for SKAT, \"O\" for SKAT-O or \"E\" for the efficient hybrid test of the burden test and SKAT.")

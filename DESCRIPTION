@@ -1,14 +1,14 @@
 Package: GMMAT
-Version: 1.0.1
-Date: 2019-01-01
+Version: 1.0.2
+Date: 2019-01-02
 Title: Generalized Linear Mixed Model Association Tests
 Author: Han Chen, Matthew P. Conomos
 Maintainer: Han Chen <Han.Chen.2@uth.tmc.edu>
 Description: An R package for performing association tests using generalized linear mixed models (GLMMs) in genome-wide association studies (GWAS) and sequencing association studies. First, GMMAT fits a GLMM with covariate adjustment and random effects to account for population structure and familial or cryptic relatedness. For GWAS, GMMAT performs score tests for each genetic variant. For candidate gene studies, GMMAT can also perform Wald tests to get the effect size estimate for each genetic variant. For rare variant analysis from sequencing association studies, GMMAT performs the variant Set Mixed Model Association Tests (SMMAT), including the burden test, the sequence kernel association test (SKAT), SKAT-O and an efficient hybrid test of the burden test and SKAT, based on user-defined variant sets.
 License: GPL-3
 Copyright: See COPYRIGHTS for details.
-Imports: Rcpp, SeqArray, SeqVarTools, CompQuadForm, foreach, doMC, parallel
-Suggests: testthat
+Imports: Rcpp, SeqArray, SeqVarTools, CompQuadForm, foreach, parallel
+Suggests: doMC, testthat
 LinkingTo: Rcpp, RcppArmadillo, BH
 Encoding: UTF-8
 NeedsCompilation: yes

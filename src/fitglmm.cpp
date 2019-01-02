@@ -496,7 +496,9 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		if(q2 > 0) {
 		        const uvec idxtau = find(fixtau == 0);
 		        int fail = 0, fncount = 0;
-			double xin[q2], x[q2];
+			//double xin[q2], x[q2];
+			double *xin = new double[q2];
+			double *x = new double[q2];
 			for(size_t i=0; i<q2; ++i) {
 			        xin[i] = tau[idxtau[i]];
 				x[i] = tau[idxtau[i]];
@@ -508,6 +510,8 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 			for(size_t i=0; i<q2; ++i) {
 			        tau[idxtau[i]] = x[i];
 			}
+			delete [] xin;
+			delete [] x;
 		} else {
 		        Fmin = Loglikelihood2(&parameters);
 		}
@@ -989,10 +993,11 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		ifstream readbedfile (bedfile.c_str(), ios::binary);
 		if (!readbedfile) {Rcout << "Error reading bedfile: " << bedfile << "\n"; return R_NilValue;}
 		int nblocks = (ns + 3) / 4, pos;
-		unsigned char magic[3], temp[2], buffer[nblocks];
+		unsigned char magic[3], temp[2];
+		unsigned char *buffer = new unsigned char[nblocks];
 		readbedfile.read((char *)magic, 3);
-		if(magic[0] != 0b01101100 || magic[1] != 0b00011011) {Rcout << "Error: " << bedfile << " is not a plink binary file!\n"; return R_NilValue;}
-		if(magic[2] != 0b00000001) {Rcout << "Error: SNP major mode expected in " << bedfile << "\n"; return R_NilValue;}
+		if(magic[0] != 0x6C || magic[1] != 0x1B) {Rcout << "Error: " << bedfile << " is not a plink binary file!\n"; return R_NilValue;}
+		if(magic[2] != 0x1) {Rcout << "Error: SNP major mode expected in " << bedfile << "\n"; return R_NilValue;}
 		writefile << "CHR\tSNP\tcM\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
 		for(size_t i=0; i<p; ++i) {
 		      stringstream writeout;
@@ -1078,6 +1083,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		      if((i+1) % 100000 == 0) {writefile << flush;}
 		}
 		if(p % 100000 != 0) {writefile << flush;}
+		delete [] buffer;
 		delete [] tmpout;
 		writefile.close();
 		writefile.clear();
@@ -1318,10 +1324,11 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 		      ifstream readfile (bedfile.c_str(), ios::binary);
 		      if (!readfile) {Rcout << "Error reading bedfile: " << bedfile << "\n"; return R_NilValue;}
 		      int nblocks = (ns + 3) / 4, pos;
-		      unsigned char magic[3], temp[2], buffer[nblocks];
+		      unsigned char magic[3], temp[2];
+		      unsigned char *buffer = new unsigned char[nblocks];
 		      readfile.read((char *)magic, 3);
-		      if(magic[0] != 0b01101100 || magic[1] != 0b00011011) {Rcout << "Error: " << bedfile << " is not a plink binary file!\n"; return R_NilValue;}
-		      if(magic[2] != 0b00000001) {Rcout << "Error: SNP major mode expected in " << bedfile << "\n"; return R_NilValue;}
+		      if(magic[0] != 0x6C || magic[1] != 0x1B) {Rcout << "Error: " << bedfile << " is not a plink binary file!\n"; return R_NilValue;}
+		      if(magic[2] != 0x1) {Rcout << "Error: SNP major mode expected in " << bedfile << "\n"; return R_NilValue;}
 		      gmean=0.0;
 		      gmax=-100.0;
 		      gmin=100.0;
@@ -1358,6 +1365,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 				  ncount++;
 			    }
 		      }
+		      delete [] buffer;
 		      gmean/=(double)(n-nmiss);
 		      for (size_t j=0; j<n; ++j) {
 			    if (gmiss[j]==1) {
