@@ -38,7 +38,7 @@ morekeywords={}
 
 \begin{document}
 \title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.0.1}
-\date{December 29, 2018}
+\date{January 1, 2019}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -91,10 +91,10 @@ Variant set tests for longitudinal data in the SMMAT framework are similarly def
 
 \section{Getting started}
 \subsection{Downloading \textit{GMMAT}}
-\textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package on a UNIX operating system. Currently we do not support Mac or Windows versions.
+\textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package.
 
 \subsection{Installing \textit{GMMAT}}
-Before installing \textit{GMMAT}, please check your system to make sure C++ libraries \href{http://www.boost.org/}{boost} and \href{http://arma.sourceforge.net/}{Armadillo} have been installed appropriately. \textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. These dependencies should be installed before installing \textit{GMMAT}.
+Before installing \textit{GMMAT}, please check your system to make sure C++ libraries \href{http://www.boost.org/}{boost} and \href{http://arma.sourceforge.net/}{Armadillo} have been installed appropriately. \textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo} and \href{https://cran.r-project.org/web/packages/BH/index.html}{BH}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development. These dependencies should be installed before installing \textit{GMMAT}.
 
 For optimal computational performance, it is recommended to use an R version configured with the Intel Math Kernel Library (or other fast BLAS/LAPACK libraries). See the instructions on building R use with Intel MKL (\url{https://software.intel.com/en-us/articles/using-intel-mkl-with-r}).
 
@@ -103,7 +103,7 @@ Here is an example for installing \textit{GMMAT} and all its dependencies in an 
 <<installation, eval=FALSE, echo=TRUE>>=
 ## try http:// if https:// URLs are not supported
 install.packages(c("devtools", "RcppArmadillo", "CompQuadForm", "doMC", 
-        "foreach"), repos = "https://cran.r-project.org/")
+        "foreach", "testthat", "BH"), repos = "https://cran.r-project.org/")
 source("https://bioconductor.org/biocLite.R")
 biocLite(c("SeqArray", "SeqVarTools"))
 devtools::install_github("hanchenphd/GMMAT")
@@ -681,9 +681,11 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Implemented model fitting for longitudinal data in \textbf{glmmkin} and \textbf{glmm.wald}. Duplicated "id" in the phenotype data frame "data" are allowed and assumed to be longitudinal data (exchangeable repeated measures, or observations from multiple time points with time trends).
 \end{enumerate}
 
-\subsection{Version 1.0.1 (December 29, 2018)}
+\subsection{Version 1.0.1 (January 1, 2019)}
 \begin{enumerate}
 \item Added "LinkingTo: BH" to improve portability with boost library headers.
+\item Added "Suggests: testthat" to conduct code tests.
+\item Made minor code changes to improve portability to the Windows operating system.
 \end{enumerate}
 
 \section{Contact}

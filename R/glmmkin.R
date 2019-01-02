@@ -231,7 +231,8 @@ glmmkin.ai <- function(fit0, kins, covariance.idx = NULL, group.idx, tau = rep(0
 		if(verbose) cat("\nIteration ", i, ":\n")
 		alpha0 <- alpha
 		tau0 <- tau
-		fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau, tol)
+		#fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau, tol)
+		fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
 		if(q2 > 0) {
 		        Dtau <- as.numeric(fit$Dtau)
 		      	tau[idxtau] <- tau0[idxtau] + Dtau

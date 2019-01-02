@@ -1,5 +1,5 @@
 /*  GMMAT : An R Package for Generalized linear Mixed Model Association Tests
- *  Copyright (C) 2014--2018  Han Chen, Matthew P. Conomos
+ *  Copyright (C) 2014--2019  Han Chen, Matthew P. Conomos
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -361,7 +361,7 @@ double Loglikelihood2 (int q2, double *x, void *params)
 {
 	Params2 *par = (Params2 *) params;
 	vec tau = par->tau;
-	size_t i, q = tau.n_elem;
+	int i, q = tau.n_elem;
 	const uvec idxtau = find(par->fixtau == 0);
 	for(i=0; i<q2; ++i) {
 		if(x[i]<0.0) {x[i] = 0.0;}
@@ -522,7 +522,8 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 	return R_NilValue;
 }
 
-  SEXP fitglmm_ai(SEXP Y_in, SEXP X_in, SEXP q_in, SEXP Phi_in, SEXP ng_in, SEXP group_in, SEXP W_in, SEXP tau_in, SEXP fixtau_in, SEXP tol_in)
+  //  SEXP fitglmm_ai(SEXP Y_in, SEXP X_in, SEXP q_in, SEXP Phi_in, SEXP ng_in, SEXP group_in, SEXP W_in, SEXP tau_in, SEXP fixtau_in, SEXP tol_in)
+  SEXP fitglmm_ai(SEXP Y_in, SEXP X_in, SEXP q_in, SEXP Phi_in, SEXP ng_in, SEXP group_in, SEXP W_in, SEXP tau_in, SEXP fixtau_in)
 {
 	try {
 		Rcpp::NumericMatrix X_r(X_in);
@@ -539,7 +540,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		vec tau = as<vec>(tau_in);
 		const uvec fixtau = as<uvec>(fixtau_in);
 		const size_t q2 = sum(fixtau == 0);
-		const double tol = Rcpp::as<double>(tol_in);
+		//const double tol = Rcpp::as<double>(tol_in);
 		//uvec ZERO = (tau < tol);
 		mat cov(p, p);
 		vec alpha(p), eta(n);
@@ -631,7 +632,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		const size_t infile_nrow_skip = Rcpp::as<size_t>(infile_nrow_skip_in);
 		string infile_sep = Rcpp::as<string>(infile_sep_in);
 		string infile_na = Rcpp::as<string>(infile_na_in);
-		const size_t infile_ncol_skip = Rcpp::as<size_t>(infile_ncol_skip_in);
+		const int infile_ncol_skip = Rcpp::as<int>(infile_ncol_skip_in);
 		Rcpp::IntegerVector infile_ncol_print(infile_ncol_print_in);
 		Rcpp::CharacterVector infile_header_print(infile_header_print_in);
 		const size_t npb = Rcpp::as<size_t>(nperbatch_in);
@@ -644,7 +645,9 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		mat G(n, npb);
 		string *tmpout = new string[npb];
 		double gmean, geno, gmax, gmin, num, denom, pval;
-		size_t nmiss, infile_ncol_print_idx, npbidx = 0;
+		//size_t nmiss, infile_ncol_print_idx, npbidx = 0;
+		size_t nmiss, npbidx = 0;
+		int infile_ncol_print_idx;
 		clock_t time0;
 		double compute_time = 0.0;
 		size_t tmppos = infile.rfind('.');
@@ -663,7 +666,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		      ofstream writefile (outfile.c_str(), ofstream::out);
 		      if (!writefile) {Rcout << "Error writing file: " << outfile << "\n"; return R_NilValue;}
 		      if (infile_ncol_print[0] != 0 && strcmp(infile_header_print[0], infile_na.c_str()) != 0) {
-			    for(size_t i=0; i<infile_header_print.size(); ++i) {
+			    for(int i=0; i<infile_header_print.size(); ++i) {
 			          writefile << infile_header_print[i] << "\t";
 			    }
 		      }
@@ -713,7 +716,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 					infile_ncol_print_idx++;
 				  }
 				  if (infile_ncol_skip > 1) {
-				        for(size_t k=1; k<infile_ncol_skip; ++k) {
+				        for(int k=1; k<infile_ncol_skip; ++k) {
 				              cp=strtok (NULL, infile_sep.c_str());
 					      if (infile_ncol_print_idx<infile_ncol_print.size()) {
 					            if(infile_ncol_print[infile_ncol_print_idx] == k+1) {
@@ -796,7 +799,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		      ofstream writefile (outfile.c_str(), ofstream::out);
 		      if (!writefile) {Rcout << "Error writing file: " << outfile << "\n"; return R_NilValue;}
 		      if (infile_ncol_print[0] != 0 && strcmp(infile_header_print[0], infile_na.c_str()) != 0) {
-			    for(size_t i=0; i<infile_header_print.size(); ++i) {
+			    for(int i=0; i<infile_header_print.size(); ++i) {
 			          writefile << infile_header_print[i] << "\t";
 			    }
 		      }
@@ -846,7 +849,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 					infile_ncol_print_idx++;
 				  }
 				  if (infile_ncol_skip > 1) {
-				        for(size_t k=1; k<infile_ncol_skip; ++k) {
+				        for(int k=1; k<infile_ncol_skip; ++k) {
 				              cp=strtok (NULL, infile_sep.c_str());
 					      if (infile_ncol_print_idx<infile_ncol_print.size()) {
 					            if(infile_ncol_print[infile_ncol_print_idx] == k+1) {
@@ -1001,7 +1004,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		      readbedfile.seekg(i*nblocks+3);
 		      ncount = 0;
 		      readbedfile.read((char *)buffer, nblocks);
-		      for(size_t j=0; j<nblocks; ++j) {
+		      for(int j=0; j<nblocks; ++j) {
 			    pos = 0;
 			    for(size_t k=0; k<4; ++k) {
 			          if(ncount == ns && j == nblocks - 1) {break;}
@@ -1101,11 +1104,11 @@ SEXP glmm_wald_text(SEXP n_in, SEXP snp_in, SEXP infile_in, SEXP tol_in, SEXP ce
 		const size_t infile_nrow_skip = Rcpp::as<size_t>(infile_nrow_skip_in);
 		string infile_sep = Rcpp::as<string>(infile_sep_in);
 		string infile_na = Rcpp::as<string>(infile_na_in);
-		const size_t infile_ncol_skip = Rcpp::as<size_t>(infile_ncol_skip_in);
+		const int infile_ncol_skip = Rcpp::as<int>(infile_ncol_skip_in);
 		Rcpp::IntegerVector infile_ncol_print(infile_ncol_print_in);
 		const size_t ncol_print = infile_ncol_print.size();
 		Rcpp::CharacterVector infile_header_print(ncol_print);
-		const size_t snp_col = Rcpp::as<size_t>(snp_col_in);
+		const int snp_col = Rcpp::as<int>(snp_col_in);
 		Rcpp::IntegerVector select(select_in);
 		string line;
 		char *cp;
@@ -1145,7 +1148,7 @@ SEXP glmm_wald_text(SEXP n_in, SEXP snp_in, SEXP infile_in, SEXP tol_in, SEXP ce
 				  infile_ncol_print_idx++;
 			    }
 			    if (infile_ncol_skip > 1) {
-			          for(size_t k=1; k<infile_ncol_skip; ++k) {
+			          for(int k=1; k<infile_ncol_skip; ++k) {
 				        cp=strtok (NULL, infile_sep.c_str());
 					if (snp_col == k+1 && strcmp(cp, snp.c_str()) == 0) {
 					      snpfound = true;
@@ -1217,7 +1220,7 @@ SEXP glmm_wald_text(SEXP n_in, SEXP snp_in, SEXP infile_in, SEXP tol_in, SEXP ce
 				  infile_ncol_print_idx++;
 			    }
 			    if (infile_ncol_skip > 1) {
-			          for(size_t k=1; k<infile_ncol_skip; ++k) {
+			          for(int k=1; k<infile_ncol_skip; ++k) {
 				        cp=strtok (NULL, infile_sep.c_str());
 					if (snp_col == k+1 && strcmp(cp, snp.c_str()) == 0) {
 					      snpfound = true;
@@ -1294,7 +1297,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 		uvec gmiss(n);
 		double gmean, geno, gmax, gmin;
 		const double tol = 1e-5;
-		size_t ncount, nmiss, p=0, skip = 0, ns = select.size();
+		size_t ncount, nmiss=0, p=0, skip = 0, ns = select.size();
 		bool snpfound = false;
 		ifstream readfile (bimfile.c_str(), ifstream::in);
 		if (!readfile) {Rcout << "Error reading bimfile: " << bimfile << "\n"; return R_NilValue;}
@@ -1327,7 +1330,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 		      readfile.seekg(p*nblocks+3);
 		      ncount = 0;
 		      readfile.read((char *)buffer, nblocks);
-		      for(size_t j=0; j<nblocks; ++j) {
+		      for(int j=0; j<nblocks; ++j) {
 			    pos = 0;
 			    for(size_t k=0; k<4; ++k) {
 			          if(ncount == ns && j == nblocks - 1) {break;}

@@ -6,7 +6,7 @@
 ###################################################
 ## ## try http:// if https:// URLs are not supported
 ## install.packages(c("devtools", "RcppArmadillo", "CompQuadForm", "doMC", 
-##         "foreach"), repos = "https://cran.r-project.org/")
+##         "foreach", "testthat", "BH"), repos = "https://cran.r-project.org/")
 ## source("https://bioconductor.org/biocLite.R")
 ## biocLite(c("SeqArray", "SeqVarTools"))
 ## devtools::install_github("hanchenphd/GMMAT")

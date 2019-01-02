@@ -1,6 +1,6 @@
 Package: GMMAT
 Version: 1.0.1
-Date: 2018-12-29
+Date: 2019-01-01
 Title: Generalized Linear Mixed Model Association Tests
 Author: Han Chen, Matthew P. Conomos
 Maintainer: Han Chen <Han.Chen.2@uth.tmc.edu>
@@ -8,6 +8,7 @@ Description: An R package for performing association tests using generalized lin
 License: GPL-3
 Copyright: See COPYRIGHTS for details.
 Imports: Rcpp, SeqArray, SeqVarTools, CompQuadForm, foreach, doMC, parallel
+Suggests: testthat
 LinkingTo: Rcpp, RcppArmadillo, BH
 Encoding: UTF-8
 NeedsCompilation: yes

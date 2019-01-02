@@ -180,9 +180,10 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 	} else { # text genotype files
 		if(ncores != 1) stop("Error: parallel computing currently not implemented for plain text format genotypes.")
 		if(is.null(infile.nrow)) {
-			if(grepl("\\.gz$", infile)) infile.nrow <- as.integer(system(paste("zcat", infile, "| wc -l | awk '{print $1}'"), intern = T))
-			else if(grepl("\\.bz2$", infile)) infile.nrow <- as.integer(system(paste("bzcat", infile, "| wc -l | awk '{print $1}'"), intern = T))
-			else infile.nrow <- as.integer(system(paste("wc -l", infile, "| awk '{print $1}'"), intern = T))
+			if(grepl("\\.gz$", infile)) infile.nrow <- try(as.integer(system(paste("zcat", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+			else if(grepl("\\.bz2$", infile)) infile.nrow <- try(as.integer(system(paste("bzcat", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+			else infile.nrow <- try(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+			if(is.na(infile.nrow) || class(infile.nrow) == "try-error") infile.nrow <- length(readLines(infile))
 		}
 		if(!is.numeric(infile.nrow) | infile.nrow < 0)
 			stop("Error: number of rows of the input file is incorrect!")
