@@ -1,6 +1,4 @@
 import(Rcpp)
-import(SeqArray)
-import(SeqVarTools)
 import(foreach)
 import(parallel)
 importFrom("stats", "as.formula", "binomial", "dbeta", "glm", "model.frame",
@@ -8,6 +6,8 @@ importFrom("stats", "as.formula", "binomial", "dbeta", "glm", "model.frame",
 "pnorm", "uniroot", "integrate", "weights", "vcov")
 importFrom("utils", "read.table", "write.table")
 importFrom("CompQuadForm", "davies", "liu")
+importFrom("SeqArray", "seqOpen", "seqGetData", "seqClose", "seqSetFilter")
+importFrom("SeqVarTools", "missingGenotypeRate", "alleleFrequency", "altDosage")
 
 useDynLib(GMMAT, .registration = TRUE, .fixes = "C_")
 

@@ -24,6 +24,11 @@ test_that("cross-sectional id le 400 binomial", {
 
 	skip_on_cran()
 
+	out1.tmp <- SMMAT(obj1, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies", ncores = 2)
+	expect_equal(out1, out1.tmp)
+	out2.tmp <- SMMAT(obj2, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies", ncores = 2)
+	expect_equal(out2, out2.tmp)
+
 	idx <- sample(nrow(pheno))
 	pheno <- pheno[idx, ]
 	obj1 <- glmmkin(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI")

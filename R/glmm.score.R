@@ -1,8 +1,4 @@
 glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", ncores = 1) {
-	if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
-	 	warning("The package doMC is not available on Windows... Switching to single thread...")
-		ncores <- 1
-	}
 	if(class(obj) != "glmmkin") stop("Error: obj must be a class glmmkin object!")
 	if(any(duplicated(obj$id_include))) {
 		J <- sapply(unique(obj$id_include), function(x) 1*(obj$id_include==x))
@@ -40,6 +36,10 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		#print(sprintf("Computational time: %.2f seconds", time))
 		return(invisible(time))
 	} else if(grepl("\\.gds$", infile)) { # GDS genotype file
+	        if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
+	 		warning("The package doMC is not available on Windows... Switching to single thread...")
+			ncores <- 1
+		}
 	        ncores <- min(c(ncores, parallel::detectCores(logical = TRUE)))
 	        gds <- SeqArray::seqOpen(infile)
 		sample.id <- SeqArray::seqGetData(gds, "sample.id")
@@ -184,10 +184,17 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 	} else { # text genotype files
 		if(ncores != 1) stop("Error: parallel computing currently not implemented for plain text format genotypes.")
 		if(is.null(infile.nrow)) {
-			if(grepl("\\.gz$", infile)) infile.nrow <- try(as.integer(system(paste("zcat", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-			else if(grepl("\\.bz2$", infile)) infile.nrow <- try(as.integer(system(paste("bzcat", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-			else infile.nrow <- try(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
-			if(is.na(infile.nrow) || class(infile.nrow) == "try-error") infile.nrow <- length(readLines(infile))
+			if(Sys.info()["sysname"] == "Windows") {
+				if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+				#else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+				else if(grepl("\\.bz2$", infile)) infile.nrow <- NA
+				else infile.nrow <- suppressWarnings(as.integer(shell(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+			} else {
+				if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+				else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+				else infile.nrow <- suppressWarnings(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+			}
+			if(any(is.na(infile.nrow))) infile.nrow <- length(readLines(infile))
 		}
 		if(!is.numeric(infile.nrow) | infile.nrow < 0)
 			stop("Error: number of rows of the input file is incorrect!")

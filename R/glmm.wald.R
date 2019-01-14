@@ -44,10 +44,17 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 		snpinfo <- matrix(NA, length(snps), 5)
 	} else { # text genotype files
 		if(is.null(infile.nrow)) {
-			if(grepl("\\.gz$", infile)) infile.nrow <- try(as.integer(system(paste("zcat", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-			else if(grepl("\\.bz2$", infile)) infile.nrow <- try(as.integer(system(paste("bzcat", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-			else infile.nrow <- try(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
-			if(is.na(infile.nrow) || class(infile.nrow) == "try-error") infile.nrow <- length(readLines(infile))
+                        if(Sys.info()["sysname"] == "Windows") {
+                                if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                #else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                else if(grepl("\\.bz2$", infile)) infile.nrow <- NA
+                                else infile.nrow <- suppressWarnings(as.integer(shell(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+                        } else {
+                                if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                else infile.nrow <- suppressWarnings(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+                        }
+                        if(any(is.na(infile.nrow))) infile.nrow <- length(readLines(infile))
 		}
 		if(!is.numeric(infile.nrow) | infile.nrow < 0)
 			stop("Error: number of rows of the input file is incorrect!")

@@ -22,6 +22,16 @@ test_that("cross-sectional id le 400 binomial", {
 
 	skip_on_cran()
 
+	outfile1.tmp <- tempfile()
+	out1.tmp <- SMMAT(obj1, gdsfile, group.file, meta.file.prefix = outfile1.tmp, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies", tests = c("O", "E"), ncores = 2)
+	n.files <- 2
+	if(Sys.info()["sysname"] == "Windows") n.files <- 1
+	out1.meta.tmp <- SMMAT.meta(outfile1.tmp, n.files = n.files, group.file = group.file, tests = c("O", "E"))
+	expect_equal(signif(out1.tmp[, -(1:8)]), signif(out1.meta.tmp[, -(1:2)]))
+	expect_equal(out1, out1.tmp)
+	expect_equal(out1.meta, out1.meta.tmp)
+	unlink(c(paste0(outfile1.tmp, ".score.*"), paste0(outfile1.tmp, ".var.*")))
+
 	obj2 <- glmmkin(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI")
 	outfile2 <- tempfile()
 	out2 <- SMMAT(obj2, gdsfile, group.file, meta.file.prefix = outfile2, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies", tests = c("O", "E"))

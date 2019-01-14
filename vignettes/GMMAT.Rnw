@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.0.2}
-\date{January 2, 2019}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.0.3}
+\date{January 14, 2019}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -94,7 +94,7 @@ Variant set tests for longitudinal data in the SMMAT framework are similarly def
 \textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package.
 
 \subsection{Installing \textit{GMMAT}}
-Before installing \textit{GMMAT}, please check your system to make sure C++ libraries \href{http://www.boost.org/}{boost} and \href{http://arma.sourceforge.net/}{Armadillo} have been installed appropriately. \textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo} and \href{https://cran.r-project.org/web/packages/BH/index.html}{BH}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
+Before installing \textit{GMMAT}, please check your system to make sure C++ libraries \href{http://www.boost.org/}{boost} and \href{http://arma.sourceforge.net/}{Armadillo} have been installed appropriately. \textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
 
 For optimal computational performance, it is recommended to use an R version configured with the Intel Math Kernel Library (or other fast BLAS/LAPACK libraries). See the instructions on building R use with Intel MKL (\url{https://software.intel.com/en-us/articles/using-intel-mkl-with-r}).
 
@@ -104,7 +104,7 @@ Here is an example for installing \textit{GMMAT} and all its dependencies in an 
 ## try http:// if https:// URLs are not supported
 ## remove "doMC" below if you are running Windows
 install.packages(c("devtools", "RcppArmadillo", "CompQuadForm", "doMC", 
-        "foreach", "testthat", "BH"), repos = "https://cran.r-project.org/")
+        "foreach", "testthat"), repos = "https://cran.r-project.org/")
 source("https://bioconductor.org/biocLite.R")
 biocLite(c("SeqArray", "SeqVarTools"))
 devtools::install_github("hanchenphd/GMMAT")
@@ -695,6 +695,12 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Added \textbf{Sys.info} checks in \textbf{glmm.score} and \textbf{SMMAT}. If "ncores" is greater than 1 on a Windows operating system, it will be switched back to 1 to use a single thread for genotype files in the GDS format.
 \end{enumerate}
 
+\subsection{Version 1.0.3 (January 14, 2019)}
+\begin{enumerate}
+\item Removed dependency on boost in reading .gz and .bz2 genotype files (for Windows portability).
+\item Added dependency on zlib and bzip2 libraries.
+\end{enumerate}
+
 \section{Contact}
 Please refer to the R help document of \textit{GMMAT} for specific questions about each function. For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
@@ -717,7 +723,7 @@ We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and sug
 
 \bibitem{Lee2012} Lee, S., Wu, M. C. and Lin, X. Optimal tests for rare variant effects in sequencing association studies. \textit{Biostatistics} \textbf{13,} 762--775 (2012).
 
-\bibitem{Chen2019} Chen, H., Huffman, J. E., Brody, J. A., Wang, C., Lee, S., Li, Z., Gogarten, S. M., Sofer, T., Bielak, L. F., Bis, J. C., \textit{et al.} Efficient variant set mixed model association tests for continuous and binary traits in large-scale whole-genome sequencing studies. \textit{The American Journal of Human Genetics} (in press 2019).
+\bibitem{Chen2019} Chen, H., Huffman, J. E., Brody, J. A., Wang, C., Lee, S., Li, Z., Gogarten, S. M., Sofer, T., Bielak, L. F., Bis, J. C., \textit{et al.} Efficient variant set mixed model association tests for continuous and binary traits in large-scale whole-genome sequencing studies. \textit{The American Journal of Human Genetics} (in press 2019, DOI: https://doi.org/10.1016/j.ajhg.2018.12.012).
 
 \bibitem{Chen2016} Chen, H., Wang, C., Conomos, M. P., Stilp, A. M., Li, Z., Sofer, T., Szpiro, A. A., Chen, W., Brehm, J. M., Celed\'{o}n, J. C., Redline, S., Papanicolaou, G. J., Thornton, T. A., Laurie, C. C., Rice, K. and Lin, X. Control for Population Structure and Relatedness for Binary Traits in Genetic Association Studies via Logistic Mixed Models. \textit{The American Journal of Human Genetics} \textbf{98,} 653--666 (2016).
 

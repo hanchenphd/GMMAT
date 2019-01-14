@@ -1,7 +1,6 @@
 context("single-variant score test meta-analysis")
 
 test_that("single-variant meta-analysis", {
-	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	infile1 <- system.file("extdata", "meta1.txt", package = "GMMAT")
 	infile2 <- system.file("extdata", "meta2.txt", package = "GMMAT")
 	infile3 <- system.file("extdata", "meta3.txt", package = "GMMAT")
