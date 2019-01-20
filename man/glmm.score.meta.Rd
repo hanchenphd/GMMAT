@@ -45,14 +45,12 @@ Han Chen
 \code{\link{glmm.score}}
 }
 \examples{
-\dontrun{
 infile1 <- system.file("extdata", "meta1.txt", package = "GMMAT")
 infile2 <- system.file("extdata", "meta2.txt", package = "GMMAT")
 infile3 <- system.file("extdata", "meta3.txt", package = "GMMAT")
 outfile <- "glmm.score.meta.testoutfile.txt"
 glmm.score.meta(files = c(infile1, infile2, infile3), outfile = outfile,
 	SNP = rep("SNP", 3), A1 = rep("A1", 3), A2 = rep("A2", 3))
-}
 }
 \keyword{ meta-analysis }
 \keyword{ score test }

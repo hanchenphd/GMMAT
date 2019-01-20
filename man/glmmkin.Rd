@@ -108,7 +108,6 @@ Zhou, X. and Stephens, M. (2012) Genome-wide efficient mixed-model analysis for 
 Han Chen, Matthew P. Conomos
 }
 \examples{
-\dontrun{
 data(example)
 attach(example)
 model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
@@ -116,6 +115,7 @@ model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 model0$theta
 model0$coefficients
 model0$cov
+\donttest{
 model1 <- glmmkin(y.repeated ~ sex, data = pheno2, kins = GRM, id = "id", 
        family = gaussian(link = "identity"))
 model1$theta

@@ -161,7 +161,7 @@ Han Chen, Matthew P. Conomos
 \code{\link{glmmkin}}, \code{\link{glmm.score}}
 }
 \examples{
-\dontrun{
+\donttest{
 data(example)
 attach(example)
 snps <- c("SNP10", "SNP25", "SNP1", "SNP0")

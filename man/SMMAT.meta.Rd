@@ -100,7 +100,7 @@ Han Chen
 \code{\link{glmmkin}}, \code{\link{SMMAT}}
 }
 \examples{
-\dontrun{
+\donttest{
 data(example)
 attach(example)
 model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
