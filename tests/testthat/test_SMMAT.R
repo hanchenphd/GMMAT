@@ -4,6 +4,7 @@ test_that("cross-sectional id le 400 binomial", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -19,8 +20,8 @@ test_that("cross-sectional id le 400 binomial", {
 	expect_equal(signif(range(out1$E.pval)), signif(c(0.01675254, 0.76516832)))
 	obj2 <- glmmkin(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI")
 	out2 <- SMMAT(obj2, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
-	expect_equal(signif(range(out2$B.pval)), signif(c(0.1401707, 0.9730224)))
-	expect_equal(signif(range(out2$E.pval)), signif(c(0.01782418, 0.73027324)))
+	expect_equal(signif(range(out2$B.pval), digits = 2), signif(c(0.1401707, 0.9730224), digits = 2))
+	expect_equal(signif(range(out2$E.pval), digits = 2), signif(c(0.01782418, 0.73027324), digits = 2))
 
 	skip_on_cran()
 
@@ -54,6 +55,7 @@ test_that("cross-sectional id gt 400 binomial", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -70,7 +72,7 @@ test_that("cross-sectional id gt 400 binomial", {
 	expect_equal(signif(range(out1$E.pval), digits = 5), signif(c(0.0585866, 0.9423505), digits = 5))
 	obj2 <- glmmkin(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI")
 	out2 <- SMMAT(obj2, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
-	expect_equal(signif(range(out2$B.pval)), signif(c(0.7086258, 0.9753463)))
+	expect_equal(signif(range(out2$B.pval), digits = 5), signif(c(0.7086258, 0.9753463), digits = 5))
 	expect_equal(signif(range(out2$E.pval), digits = 5), signif(c(0.05865188, 0.96100550), digits = 5))
 
 	idx <- sample(nrow(pheno))
@@ -98,6 +100,7 @@ test_that("cross-sectional id le 400 gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -141,6 +144,7 @@ test_that("cross-sectional id gt 400 gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -185,6 +189,7 @@ test_that("longitudinal repeated measures gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
         pheno <- example$pheno2
         kins <- example$GRM
@@ -222,6 +227,7 @@ test_that("longitudinal random time trend gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
         pheno <- example$pheno2
         kins <- example$GRM

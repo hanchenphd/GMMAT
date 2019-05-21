@@ -12,9 +12,14 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     SKATO <- "O" %in% tests
     SMMAT <- "E" %in% tests
     if(any(duplicated(null.obj$id_include))) {
-        J <- sapply(unique(null.obj$id_include), function(x) 1*(null.obj$id_include==x))
-        residuals <- crossprod(J, null.obj$scaled.residuals)
-        null.obj$P <- crossprod(J, crossprod(null.obj$P, J))
+        J <- Matrix(sapply(unique(null.obj$id_include), function(x) 1*(null.obj$id_include==x)), sparse = TRUE)
+        residuals <- as.numeric(as.matrix(crossprod(J, null.obj$scaled.residuals)))
+        if(!is.null(null.obj$P)) null.obj$P <- as.matrix(crossprod(J, crossprod(null.obj$P, J)))
+	else {
+	    null.obj$Sigma_iX <- crossprod(J, null.obj$Sigma_iX)
+	    null.obj$Sigma_i <- forceSymmetric(crossprod(J,crossprod(null.obj$Sigma_i,J)))
+	    null.obj$Sigma_i <- Matrix(null.obj$Sigma_i, sparse = TRUE)
+	}
         rm(J)
     } else residuals <- null.obj$scaled.residuals
     if(!grepl("\\.gds$", geno.file)) stop("Error: currently only .gds format is supported in geno.file!")
@@ -25,7 +30,11 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     if(length(sample.id) == 0) stop("Error: null.obj$id_include does not match sample.id in geno.file!")
     match.id <- match(sample.id, unique(null.obj$id_include))
     residuals <- residuals[match.id]
-    null.obj$P <- null.obj$P[match.id, match.id]
+    if(!is.null(null.obj$P)) null.obj$P <- null.obj$P[match.id, match.id]
+    else {
+    	null.obj$Sigma_iX <- null.obj$Sigma_iX[match.id, , drop = FALSE]
+	null.obj$Sigma_i <- null.obj$Sigma_i[match.id, match.id]
+    }
     variant.idx <- SeqArray::seqGetData(gds, "variant.id")
     #variant.id <- SeqArray::seqGetData(gds, "annotation/id")
     #variant.id <- paste(SeqArray::seqGetData(gds, "chromosome"), SeqArray::seqGetData(gds, "position"), SeqArray::seqGetData(gds, "allele"), sep=":")
@@ -38,12 +47,10 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     SeqArray::seqClose(gds)
     variant.id <- paste(chr, pos, ref, alt, sep = ":")
     rm(chr, pos, ref, alt); gc()
-    group.info <- try(read.table(group.file, header = FALSE, stringsAsFactors = FALSE, sep = group.file.sep), silent = TRUE)
+    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
     if (class(group.info) == "try-error") {
         stop("Error: cannot read group.file!")
     }
-    #colnames(group.info) <- c("group", "variant", "weight")
-    colnames(group.info) <- c("group", "chr", "pos", "ref", "alt", "weight")
     group.info <- group.info[!duplicated(paste(group.info$group, group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")), ]
     variant.id1 <- paste(group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")
     variant.idx1 <- variant.idx[match(variant.id1, variant.id)]
@@ -138,7 +145,12 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    	    geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    	}
 	    	U <- as.vector(crossprod(geno, residuals))
-	    	V <- crossprod(geno, crossprod(null.obj$P, geno))
+	    	if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
+		else {
+		    GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
+		    V <- crossprod(geno, crossprod(null.obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, null.obj$cov))
+		}
+	    	V <- as.matrix(V)
 		if(!is.null(meta.file.prefix)) {
 		    VAR <- diag(V)
 		    PVAL <- ifelse(VAR>0, pchisq(U^2/VAR, df=1, lower.tail=FALSE), NA)
@@ -275,7 +287,12 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    	geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    }
 	    U <- as.vector(crossprod(geno, residuals))
-	    V <- crossprod(geno, crossprod(null.obj$P, geno))
+    	    if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
+	    else {
+		GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
+		V <- crossprod(geno, crossprod(null.obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, null.obj$cov))
+	    }
+	    V <- as.matrix(V)
 	    if(!is.null(meta.file.prefix)) {
 		VAR <- diag(V)
 		PVAL <- ifelse(VAR>0, pchisq(U^2/VAR, df=1, lower.tail=FALSE), NA)
@@ -375,12 +392,10 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     SKAT <- "S" %in% tests
     SKATO <- "O" %in% tests
     SMMAT <- "E" %in% tests
-    group.info <- try(read.table(group.file, header = FALSE, stringsAsFactors = FALSE, sep = group.file.sep), silent = TRUE)
+    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
     if (class(group.info) == "try-error") {
         stop("Error: cannot read group.file!")
     }
-    #colnames(group.info) <- c("group", "variant", "weight")
-    colnames(group.info) <- c("group", "chr", "pos", "ref", "alt", "weight")
     group.info <- group.info[!duplicated(paste(group.info$group, group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")), ]
     groups <- unique(group.info$group)
     n.groups <- length(groups)

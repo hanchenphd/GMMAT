@@ -9,6 +9,7 @@ test_that("cross-sectional binomial", {
 	txtfile1 <- system.file("extdata", "geno.txt.gz", package = "GMMAT")
 	txtfile2 <- system.file("extdata", "geno.txt.bz2", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
@@ -668,6 +669,7 @@ test_that("cross-sectional gaussian", {
 	txtfile1 <- system.file("extdata", "geno.txt.gz", package = "GMMAT")
 	txtfile2 <- system.file("extdata", "geno.txt.bz2", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
@@ -1327,6 +1329,7 @@ test_that("longitudinal repeated measures gaussian", {
 	txtfile1 <- system.file("extdata", "geno.txt.gz", package = "GMMAT")
 	txtfile2 <- system.file("extdata", "geno.txt.bz2", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
         pheno <- example$pheno2
@@ -1454,6 +1457,7 @@ test_that("longitudinal random time trend gaussian", {
 	txtfile1 <- system.file("extdata", "geno.txt.gz", package = "GMMAT")
 	txtfile2 <- system.file("extdata", "geno.txt.bz2", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
         pheno <- example$pheno2

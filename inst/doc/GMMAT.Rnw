@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.0.3}
-\date{January 14, 2019}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.1.0}
+\date{May 21, 2019}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -152,7 +152,7 @@ This matrix can include more than $n$ individuals in practice, but the rownames 
 Mats <- list(Mat1, Mat2, Mat3)
 @
 
-All matrices must be positive semi-definite.
+All matrices must be positive semi-definite. Sparse matrices from the \textit{Matrix} package are also allowed.
 
 \subsection{Genotypes}
 \textit{GMMAT} can take genotype files either in plain text format (or the compressed version .gz or .bz2), \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED format}, or in the GDS format. Non-integer imputed genotypes (dosages) should be saved in plain text files (or the compressed version .gz or .bz2). The plain text file can be space-, tab-, comma-, or even special character-delimited, and there can be additional rows (e.g., comments) and/or columns before the genotype data matrix. Here is an example of part of a tab-delimited plain text genotype file geno.txt:
@@ -243,13 +243,7 @@ quasipoisson & log & count & $\phi\mu$\\
 \end{tabular}
 \end{center}
 
-The function \textbf{glmmkin} returns a list. Except for the heteroscedastic
-LMM, the first element in the vector theta is the estimate of the dispersion
-parameter $\phi$ (for binary and Poisson data we have a fixed $\phi=1$), and
-the remaining elements are variance component estimates for each matrix
-modeling the covariance structure of the random effects (in the same order as
-in the list of matrices passed to "kins"). In our binary disease example
-model0 above, we have only one such matrix (the GRM, therefore $K=1$), and the results show that the estimate of the variance component parameter $\tau_1$ is 0.3377331. The vector coefficients gives the fixed effect estimates, and the order matches the order of covariates in the formula passed to "fixed". In our binary disease example above, we have an intercept 0.472081189, and an age effect estimate $-$0.006818634, a sex effect estimate $-$0.086444746. The matrix cov is the covariance matrix of the fixed effect estimates.
+The function \textbf{glmmkin} returns a list. Except for the heteroscedastic LMM, the first element in the vector theta is the estimate of the dispersion parameter $\phi$ (for binary and Poisson data we have a fixed $\phi=1$), and the remaining elements are variance component estimates for each matrix modeling the covariance structure of the random effects (in the same order as in the list of matrices passed to "kins"). In our binary disease example model0 above, we have only one such matrix (the GRM, therefore $K=1$), and the results show that the estimate of the variance component parameter $\tau_1$ is 0.3377331. The vector coefficients gives the fixed effect estimates, and the order matches the order of covariates in the formula passed to "fixed". In our binary disease example above, we have an intercept 0.472081189, and an age effect estimate $-$0.006818634, a sex effect estimate $-$0.086444746. The matrix cov is the covariance matrix of the fixed effect estimates.
 
 When a heteroscedastic LMM is fitted using the function \textbf{glmmkin}, the first elements (with length equal to the number of groups) in the vector theta are the estimated residual variances for each group (in the same order as the levels of groups appearing in the data), followed by variance component estimates for each matrix modeling the covariance structure of the random effects (in the same order as in the list of matrices passed to "kins"). In our heteroscedastic LMM model2 above, 0.9082504 is the residual variance estimate for cases, 1.0589985 is the residual variance estimate for controls (since in the data pheno, disease 1 appears before disease 0), and 1.0853533 is the estimate of the variance component parameter for the GRM.
 
@@ -701,11 +695,23 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Added dependency on zlib and bzip2 libraries.
 \end{enumerate}
 
+\subsection{Version 1.0.4 (March 6, 2019)}
+\begin{enumerate}
+\item Minor code change in the tests directory as the default method for generating from a discrete uniform distribution used in sample() has been changed in R-devel (3.6.0).
+\end{enumerate}
+
+\subsection{Version 1.1.0 (May 21, 2019)}
+\begin{enumerate}
+\item Implemented support for sparse matrices in the argument "kins" of \textbf{glmmkin}.
+\item Fixed a bug in \textbf{glmm.wald} when the argument "missing.method" is "omit".
+\item Fixed a bug in \textbf{SMMAT} and \textbf{SMMAT.meta} when reading group definition files with T as all reference or alternate alleles (force T to be character instead of logical).
+\end{enumerate}
+
 \section{Contact}
 Please refer to the R help document of \textit{GMMAT} for specific questions about each function. For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 \section{Acknowledgments}
-We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, and Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
+We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, Dr. Ken Rice for help with sparse matrices, and Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
 
 \begin{thebibliography}{}
 
@@ -723,7 +729,7 @@ We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and sug
 
 \bibitem{Lee2012} Lee, S., Wu, M. C. and Lin, X. Optimal tests for rare variant effects in sequencing association studies. \textit{Biostatistics} \textbf{13,} 762--775 (2012).
 
-\bibitem{Chen2019} Chen, H., Huffman, J. E., Brody, J. A., Wang, C., Lee, S., Li, Z., Gogarten, S. M., Sofer, T., Bielak, L. F., Bis, J. C., \textit{et al.} Efficient variant set mixed model association tests for continuous and binary traits in large-scale whole-genome sequencing studies. \textit{The American Journal of Human Genetics} (in press 2019, DOI: https://doi.org/10.1016/j.ajhg.2018.12.012).
+\bibitem{Chen2019} Chen, H., Huffman, J. E., Brody, J. A., Wang, C., Lee, S., Li, Z., Gogarten, S. M., Sofer, T., Bielak, L. F., Bis, J. C., \textit{et al.} Efficient variant set mixed model association tests for continuous and binary traits in large-scale whole-genome sequencing studies. \textit{The American Journal of Human Genetics} \textbf{104,} 260--274 (2019).
 
 \bibitem{Chen2016} Chen, H., Wang, C., Conomos, M. P., Stilp, A. M., Li, Z., Sofer, T., Szpiro, A. A., Chen, W., Brehm, J. M., Celed\'{o}n, J. C., Redline, S., Papanicolaou, G. J., Thornton, T. A., Laurie, C. C., Rice, K. and Lin, X. Control for Population Structure and Relatedness for Binary Traits in Genetic Association Studies via Logistic Mixed Models. \textit{The American Journal of Human Genetics} \textbf{98,} 653--666 (2016).
 

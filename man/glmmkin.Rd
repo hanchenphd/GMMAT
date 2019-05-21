@@ -81,10 +81,12 @@ For longitudinal data (with duplicated \code{id}) in a random intercept and rand
   \item{fitted.values}{a vector of length equal to the sample size for the fitted mean values on the original scale.}
   \item{Y}{a vector of length equal to the sample size for the final working vector.}
   \item{X}{model matrix for the fixed effects.}
-  \item{P}{the projection matrix with dimensions equal to the sample size. Used in score tests.}
+  \item{P}{the projection matrix with dimensions equal to the sample size. Used in \code{\link{glmm.score}} and \code{\link{SMMAT}} for dense matrices.}
   \item{residuals}{a vector of length equal to the sample size for the residuals on the original scale. NOT rescaled by the dispersion parameter.}
   \item{scaled.residuals}{a vector of length equal to the sample size for the scaled residuals, calculated as the original residuals divided by the dispersion parameter (in heteroscedastic linear mixed models, corresponding residual variance estimates by each group).}
   \item{cov}{covariance matrix for the fixed effects (including the intercept).}
+  \item{Sigma_i}{the inverse of the estimated covariance matrix for samples, with dimensions equal to the sample size. Used in \code{\link{glmm.score}} and \code{\link{SMMAT}} for sparse matrices.}
+  \item{Sigma_iX}{Sigma_i multiplied by X. Used in \code{\link{glmm.score}} and \code{\link{SMMAT}} for sparse matrices.}
   \item{converged}{a logical indicator for convergence.}
   \item{call}{the matched call.}
   \item{id_include}{a vector indicating the \code{id} of rows in \code{data} with nonmissing outcome and covariates, thus are included in the model fit.}

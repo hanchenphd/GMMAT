@@ -4,6 +4,7 @@ test_that("cross-sectional id le 400 binomial", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -46,6 +47,7 @@ test_that("cross-sectional id gt 400 binomial", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -65,7 +67,7 @@ test_that("cross-sectional id gt 400 binomial", {
 	outfile2 <- tempfile()
 	out2 <- SMMAT(obj2, gdsfile, group.file, meta.file.prefix = outfile2, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies", tests = c("O", "E"))
 	out2.meta <- SMMAT.meta(outfile2, group.file = group.file, tests = c("O", "E"))
-	expect_equal(signif(out2[, -(1:8)]), signif(out2.meta[, -(1:2)]))
+	expect_equal(signif(out2[, -(1:8)], digits = 5), signif(out2.meta[, -(1:2)], digits = 5))
 	unlink(c(paste0(outfile1, ".score.*"), paste0(outfile1, ".var.*"), paste0(outfile2, ".score.*"), paste0(outfile2, ".var.*")))
 })
 
@@ -75,6 +77,7 @@ test_that("cross-sectional id le 400 gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -103,6 +106,7 @@ test_that("cross-sectional id gt 400 gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
 	pheno <- rbind(example$pheno, example$pheno[1:100, ])
 	pheno$id <- 1:500
@@ -132,6 +136,7 @@ test_that("longitudinal repeated measures gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
         pheno <- example$pheno2
         kins <- example$GRM
@@ -154,6 +159,7 @@ test_that("longitudinal random time trend gaussian", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
 	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
 	set.seed(123)
         pheno <- example$pheno2
         kins <- example$GRM

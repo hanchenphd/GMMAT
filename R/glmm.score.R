@@ -1,9 +1,14 @@
 glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", ncores = 1) {
 	if(class(obj) != "glmmkin") stop("Error: obj must be a class glmmkin object!")
 	if(any(duplicated(obj$id_include))) {
-		J <- sapply(unique(obj$id_include), function(x) 1*(obj$id_include==x))
-		res <- crossprod(J, obj$scaled.residuals)
-		obj$P <- crossprod(J, crossprod(obj$P, J))
+		J <- Matrix(sapply(unique(obj$id_include), function(x) 1*(obj$id_include==x)), sparse = TRUE)
+		res <- as.vector(as.matrix(crossprod(J, obj$scaled.residuals)))
+		if(!is.null(obj$P)) obj$P <- as.matrix(crossprod(J, crossprod(obj$P, J)))
+		else {
+			obj$Sigma_iX <- crossprod(J, obj$Sigma_iX)
+			obj$Sigma_i <- forceSymmetric(crossprod(J,crossprod(obj$Sigma_i,J)))
+			obj$Sigma_i <- Matrix(obj$Sigma_i, sparse = TRUE)
+		}
 		rm(J)
 	} else res <- obj$scaled.residuals
 	miss.method <- try(match.arg(missing.method, c("impute2mean", "omit")))
@@ -25,13 +30,20 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		select2 <- select[select > 0]
 		if(any(duplicated(select2)) || max(select2) > length(unique(obj$id_include))) stop("Error: select is a vector of orders, individuals not in obj should be coded 0!")
 		res <- res[select2]
-		obj$P <- obj$P[select2, select2]
+		if(!is.null(obj$P)) obj$P <- obj$P[select2, select2]
+		else {
+			obj$Sigma_iX <- Matrix(obj$Sigma_iX[select2, , drop = FALSE], sparse = TRUE)
+			obj$Sigma_i <- Matrix(obj$Sigma_i[select2, select2], sparse = TRUE)
+			obj$cov <- Matrix(obj$cov, sparse = TRUE)
+		}
 		select[select > 0] <- 1:sum(select > 0)
 		rm(select2)
 		if(center) {
-			time <- .Call(C_glmm_score_bed, res, obj$P, bimfile, bedfile, outfile, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
+			if(!is.null(obj$P)) time <- .Call(C_glmm_score_bed, res, obj$P, bimfile, bedfile, outfile, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
+			else time <- .Call(C_glmm_score_bed_sp, res, obj$Sigma_i, obj$Sigma_iX, obj$cov, bimfile, bedfile, outfile, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
 		} else {
-			time <- .Call(C_glmm_score_bed, res, obj$P, bimfile, bedfile, outfile, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
+			if(!is.null(obj$P)) time <- .Call(C_glmm_score_bed, res, obj$P, bimfile, bedfile, outfile, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
+			else time <- .Call(C_glmm_score_bed_sp, res, obj$Sigma_i, obj$Sigma_iX, obj$cov, bimfile, bedfile, outfile, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, nperbatch, select)
 		}
 		#print(sprintf("Computational time: %.2f seconds", time))
 		return(invisible(time))
@@ -53,7 +65,11 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		select2 <- select[select > 0]
 		if(any(duplicated(select2)) || max(select2) > length(unique(obj$id_include))) stop("Error: select is a vector of orders, individuals not in obj should be coded 0!")
 		res <- res[select2]
-		obj$P <- obj$P[select2, select2]
+		if(!is.null(obj$P)) obj$P <- obj$P[select2, select2]
+		else {
+			obj$Sigma_iX <- obj$Sigma_iX[select2, , drop = FALSE]
+			obj$Sigma_i <- obj$Sigma_i[select2, select2]
+		}
 		rm(select2)
     		variant.idx.all <- SeqArray::seqGetData(gds, "variant.id")
 	        SeqArray::seqClose(gds)
@@ -103,7 +119,11 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 							geno[miss.idx] <- if(!center & missing.method == "impute2mean") colMeans(geno, na.rm = TRUE)[ceiling(miss.idx/nrow(geno))] else 0
 						}
 						SCORE <- as.vector(crossprod(geno, res))
-						VAR <- diag(crossprod(geno, crossprod(obj$P, geno)))
+						if(!is.null(obj$P)) VAR <- diag(crossprod(geno, crossprod(obj$P, geno)))
+						else {
+							GSigma_iX <- crossprod(geno, obj$Sigma_iX)
+							VAR <- diag(crossprod(geno, crossprod(obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, obj$cov)))
+						}
 						PVAL <- ifelse(VAR>0, pchisq(SCORE^2/VAR, df=1, lower.tail=FALSE), NA)
 						return(rbind(N, SCORE, VAR, PVAL))
 					})
@@ -167,7 +187,11 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 						geno[miss.idx] <- if(!center & missing.method == "impute2mean") colMeans(geno, na.rm = TRUE)[ceiling(miss.idx/nrow(geno))] else 0
 					}
 					SCORE <- as.vector(crossprod(geno, res))
-					VAR <- diag(crossprod(geno, crossprod(obj$P, geno)))
+					if(!is.null(obj$P)) VAR <- diag(crossprod(geno, crossprod(obj$P, geno)))
+					else {
+						GSigma_iX <- crossprod(geno, obj$Sigma_iX)
+						VAR <- diag(crossprod(geno, crossprod(obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, obj$cov)))
+					}
 					PVAL <- ifelse(VAR>0, pchisq(SCORE^2/VAR, df=1, lower.tail=FALSE), NA)
 					return(rbind(N, SCORE, VAR, PVAL))
 				})
@@ -184,17 +208,17 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 	} else { # text genotype files
 		if(ncores != 1) stop("Error: parallel computing currently not implemented for plain text format genotypes.")
 		if(is.null(infile.nrow)) {
-			if(Sys.info()["sysname"] == "Windows") {
-				if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-				#else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-				else if(grepl("\\.bz2$", infile)) infile.nrow <- NA
-				else infile.nrow <- suppressWarnings(as.integer(shell(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
-			} else {
-				if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-				else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-				else infile.nrow <- suppressWarnings(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
-			}
-			if(any(is.na(infile.nrow))) infile.nrow <- length(readLines(infile))
+                        if(Sys.info()["sysname"] == "Windows") {
+                                if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                #else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                else if(grepl("\\.bz2$", infile)) infile.nrow <- NA
+                                else infile.nrow <- suppressWarnings(as.integer(shell(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+                        } else {
+                                if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
+                                else infile.nrow <- suppressWarnings(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+                        }
+                        if(any(is.na(infile.nrow))) infile.nrow <- length(readLines(infile))
 		}
 		if(!is.numeric(infile.nrow) | infile.nrow < 0)
 			stop("Error: number of rows of the input file is incorrect!")
@@ -212,17 +236,27 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 			stop("Error: cols selected to print have incorrect indices!")
 		if(any(infile.ncol.print != sort(infile.ncol.print)))
 			stop("Error: col indices must be sorted increasingly in infile.ncol.print!")
-		if(is.null(select)) select <- 1:length(unique(obj$id_include))
+		if(is.null(select)) {
+			warning("Argument select is unspecified... Assuming the order of individuals in infile matches unique id_include in obj...")
+			select <- 1:length(unique(obj$id_include))
+		}
 		select2 <- select[select > 0]
 		if(any(duplicated(select2)) || max(select2) > length(unique(obj$id_include))) stop("Error: select is a vector of orders, individuals not in obj should be coded 0!")
 		res <- res[select2]
-		obj$P <- obj$P[select2, select2]
+		if(!is.null(obj$P)) obj$P <- obj$P[select2, select2]
+		else {
+			obj$Sigma_iX <- Matrix(obj$Sigma_iX[select2, , drop = FALSE], sparse = TRUE)
+			obj$Sigma_i <- Matrix(obj$Sigma_i[select2, select2], sparse = TRUE)
+			obj$cov <- Matrix(obj$cov, sparse = TRUE)
+		}
 		select[select > 0] <- 1:sum(select > 0)
 		rm(select2)
 		if(center) {
-			time <- .Call(C_glmm_score_text, res, obj$P, infile, outfile, tol, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
+			if(!is.null(obj$P)) time <- .Call(C_glmm_score_text, res, obj$P, infile, outfile, tol, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
+			else time <- .Call(C_glmm_score_text_sp, res, obj$Sigma_i, obj$Sigma_iX, obj$cov, infile, outfile, tol, 'c', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
 		} else {
-			time <- .Call(C_glmm_score_text, res, obj$P, infile, outfile, tol, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
+			if(!is.null(obj$P)) time <- .Call(C_glmm_score_text, res, obj$P, infile, outfile, tol, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
+			else time <- .Call(C_glmm_score_text_sp, res, obj$Sigma_i, obj$Sigma_iX, obj$cov, infile, outfile, tol, 'n', MAF.range[1], MAF.range[2], miss.cutoff, miss.method, infile.nrow, infile.nrow.skip, infile.sep, infile.na, infile.ncol.skip, infile.ncol.print, infile.header.print, nperbatch, select)
 		}
 		#print(sprintf("Computational time: %.2f seconds", time))
 		return(invisible(time))

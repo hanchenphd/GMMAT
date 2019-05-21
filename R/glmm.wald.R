@@ -1,6 +1,8 @@
 glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), infile, snps, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, center = T, select = NULL, missing.method = "impute2mean", infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", verbose = FALSE, ...) {
-	if(!is.null(kins) && !class(kins) %in% c("matrix", "list"))
-		stop("Error: \"kins\" must be a matrix or a list.")
+        if(!is.null(kins) && !class(kins) %in% c("matrix", "list")) {
+                if(is.null(attr(class(kins), "package"))) stop("Error: \"kins\" must be a matrix or a list.")
+                else if(attr(class(kins), "package") != "Matrix") stop("Error: if \"kins\" is a sparse matrix, it must be created using the Matrix package.")
+        }
 	if(!method %in% c("REML", "ML"))
 		stop("Error: \"method\" must be \"REML\" or \"ML\".")
 	method.optim <- try(match.arg(method.optim, c("AI", "Brent", "Nelder-Mead")))
@@ -10,6 +12,8 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 		stop("Error: method \"ML\" not available for method.optim \"AI\", use method \"REML\" instead.")
 	if(method.optim == "Brent" && class(kins) == "list")
 		stop("Error: method.optim \"Brent\" can only be applied in one-dimensional optimization, use a matrix for \"kins\".")
+        if(method.optim != "AI" && ((!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix") || (class(kins) == "list" && any(sapply(kins, function(xx) !is.null(attr(class(xx), "package")) && attr(class(xx), "package") == "Matrix")))))
+                stop("Error: sparse matrices can only be handled by method.optim \"AI\".")
 	if(class(family) != "family")
 		stop("Error: \"family\" must be an object of class \"family\".")
 	if(!family$family %in% c("binomial", "gaussian", "Gamma", "inverse.gaussian", "poisson", "quasi", "quasibinomial", "quasipoisson"))
@@ -24,6 +28,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
                 if(method.optim != "AI") stop("Error: random slope for longitudinal data is currently only implemented for method.optim \"AI\".")
                 if(!random.slope %in% names(data)) stop("Error: \"random.slope\" must be one of the variables in the names of \"data\".")
         }
+	if(!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix")  kins <- list(kins1 = kins)
         if(method.optim != "Brent" && class(kins) == "matrix") kins <- list(kins1 = kins)
 	miss.method <- try(match.arg(missing.method, c("impute2mean", "omit")))
 	if(class(miss.method) == "try-error") stop("Error: missing.method should be one of the following: impute2mean, omit!")
@@ -55,7 +60,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
                                 else infile.nrow <- suppressWarnings(as.integer(system(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
                         }
                         if(any(is.na(infile.nrow))) infile.nrow <- length(readLines(infile))
-		}
+}
 		if(!is.numeric(infile.nrow) | infile.nrow < 0)
 			stop("Error: number of rows of the input file is incorrect!")
 		if(!is.numeric(infile.nrow.skip) | infile.nrow.skip < 0)
@@ -71,7 +76,10 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 		if(any(infile.ncol.print != sort(infile.ncol.print)))
 			stop("Error: col indices must be sorted increasingly in infile.ncol.print!")
 		snpinfo <- matrix(NA, length(snps), length(infile.header.print))
-		if(is.null(select)) select <- 1:length(unique(data[, id]))
+		if(is.null(select)) {
+			warning("Argument select is unspecified... Assuming the order of individuals in infile matches unique id in data...")
+			select <- 1:length(unique(data[, id]))
+		}
 	}
 	if(is.null(select)) {
 		if(any(is.na(match(unique(data[, id]), sample.id)))) warning("Check your data... Some individuals in data are missing in sample.id of infile!")
@@ -101,7 +109,9 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
                                 rownames(kins) <- colnames(kins) <- unique(data[, id])
                         } else stop("Error: method.optim \"Brent\" can only be applied to unrelated individuals in longitudinal data analysis.")
                 } else {
-                        kins[[length(kins) + 1]] <- diag(length(unique(data[, id])))
+                        if(method.optim != "AI") kins[[length(kins) + 1]] <- diag(length(unique(data[,id])))
+                        else if(length(kins) > 0) kins[[length(kins) + 1]] <- Diagonal(n = length(unique(data[, id])))
+                        else kins <- list(kins1 = Diagonal(n = length(unique(data[, id]))))
                         rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[, id])
                 }
         } else if(!is.null(random.slope)) stop("Error: \"random.slope\" must be used for longitudinal data with duplicated \"id\".")
@@ -182,6 +192,8 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 				else {
 				        for(i in 1:length(tmpkins)) tmpkins[[i]] <- tmpkins[[i]][idx, idx]
 				}
+				if(!is.null(time.var)) time.var <- time.var[idx]
+				group.id <- group.id[idx]
 				fit <- try(glmmkin.fit(fit0, tmpkins, time.var, group.id, method = method, method.optim = method.optim, maxiter = maxiter, tol = tol, taumin = taumin, taumax = taumax, tauregion = tauregion, verbose = verbose))
 				if(class(fit) != "try-error") {
 					BETA[ii] <- fit$coefficients[length(fit$coefficients)]

@@ -1,6 +1,7 @@
 import(Rcpp)
 import(foreach)
 import(parallel)
+import(Matrix)
 importFrom("stats", "as.formula", "binomial", "dbeta", "glm", "model.frame",
 "model.matrix", "na.omit", "na.pass", "pchisq", "dchisq", "qchisq", "var",
 "pnorm", "uniroot", "integrate", "weights", "vcov")

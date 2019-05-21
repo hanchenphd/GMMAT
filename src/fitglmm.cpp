@@ -1107,6 +1107,503 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 	return R_NilValue;
 }
 
+  SEXP glmm_score_text_sp(SEXP res_in, SEXP Sigma_i_in, SEXP Sigma_iX_in, SEXP cov_in, SEXP infile_in, SEXP outfile_in, SEXP tol_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP p_in, SEXP infile_nrow_skip_in, SEXP infile_sep_in, SEXP infile_na_in, SEXP infile_ncol_skip_in, SEXP infile_ncol_print_in, SEXP infile_header_print_in, SEXP nperbatch_in, SEXP select_in) {
+	try {
+		Rcpp::NumericVector res_r(res_in);
+		arma::vec res(res_r.begin(), res_r.size(), false);
+		arma::sp_mat Sigma_i = Rcpp::as<arma::sp_mat>(Sigma_i_in);
+		arma::sp_mat Sigma_iX = Rcpp::as<arma::sp_mat>(Sigma_iX_in);
+		arma::sp_mat cov = Rcpp::as<arma::sp_mat>(cov_in);
+		const double tol = Rcpp::as<double>(tol_in);
+		const char center = Rcpp::as<char>(center_in);
+		const double minmaf = Rcpp::as<double>(minmaf_in);
+		const double maxmaf = Rcpp::as<double>(maxmaf_in);
+		const double missrate = Rcpp::as<double>(missrate_in);
+		const char miss_method = Rcpp::as<char>(miss_method_in);
+		string infile = Rcpp::as<string>(infile_in);
+		string outfile = Rcpp::as<string>(outfile_in);
+		const size_t p = Rcpp::as<size_t>(p_in);
+		const size_t infile_nrow_skip = Rcpp::as<size_t>(infile_nrow_skip_in);
+		string infile_sep = Rcpp::as<string>(infile_sep_in);
+		string infile_na = Rcpp::as<string>(infile_na_in);
+		const int infile_ncol_skip = Rcpp::as<int>(infile_ncol_skip_in);
+		Rcpp::IntegerVector infile_ncol_print(infile_ncol_print_in);
+		Rcpp::CharacterVector infile_header_print(infile_header_print_in);
+		const size_t npb = Rcpp::as<size_t>(nperbatch_in);
+		Rcpp::IntegerVector select(select_in);
+		string snp;
+		char *cp;
+		size_t n = res.n_elem, ns = select.size();
+		vec g(n);
+		uvec gmiss(n), snp_skip = zeros<uvec>(npb);
+		mat G(n, npb);
+		string *tmpout = new string[npb];
+		double gmean, geno, gmax, gmin, num, denom, pval;
+		//size_t nmiss, infile_ncol_print_idx, npbidx = 0;
+		size_t nmiss, npbidx = 0;
+		int infile_ncol_print_idx;
+		clock_t time0;
+		double compute_time = 0.0;
+		ofstream writefile (outfile.c_str(), ofstream::out);
+		if (!writefile) {Rcout << "Error writing file: " << outfile << "\n"; return R_NilValue;}
+		if (infile_ncol_print[0] != 0 && strcmp(infile_header_print[0], infile_na.c_str()) != 0) {
+		      for(int i=0; i<infile_header_print.size(); ++i) {
+			    writefile << infile_header_print[i] << "\t";
+		      }
+		}
+		writefile << "N" << "\t" << "AF" << "\t" << "SCORE" << "\t" << "VAR" << "\t" << "PVAL" << "\n";
+		size_t tmppos = infile.rfind('.');
+		string ext = infile.substr(tmppos);
+		if (strcmp(ext.c_str(), ".bz2")==0) { // bzip2 infile
+		      FILE* fp = fopen(infile.c_str(), "rb");
+		      int bzerror;
+		      BZFILE* bfp = BZ2_bzReadOpen(&bzerror, fp, 0, 0, NULL, 0);;
+		      int buffer_length = 100 * (int(ns) + infile_ncol_skip);
+		      if(bzerror != BZ_OK) {
+			    BZ2_bzReadClose(&bzerror, bfp);
+			    fclose(fp);
+			    Rcout << "File " << infile << " appears not to be compressed by bzip2\n";
+			    return R_NilValue;
+		      }
+		      for(size_t i=0; i<p; ++i) {
+			    int nread = 0;
+			    char *buffer = new char[buffer_length];
+			    while (bzerror == BZ_OK) {
+			          int nn = BZ2_bzRead(&bzerror, bfp, buffer + nread, 1);
+				  if (bzerror == BZ_STREAM_END) {
+				        char *unused, *next_unused = NULL;
+					int nUnused;
+					BZ2_bzReadGetUnused(&bzerror, bfp, (void**) &unused, &nUnused);
+					if (bzerror == BZ_OK) {
+					      if (nUnused > 0) {
+						    next_unused = (char*) malloc(nUnused);
+						    if (!next_unused) {
+						          BZ2_bzReadClose(&bzerror, bfp);
+							  fclose(fp);
+						          Rcout << "Allocation of overflow buffer for bzfile failed\n";
+							  return R_NilValue;
+						    }
+						    memcpy(next_unused, unused, nUnused);
+					      }
+					      if (nUnused > 0 || !feof(fp)) {
+						    BZ2_bzReadClose(&bzerror, bfp);
+						    bfp = BZ2_bzReadOpen(&bzerror, fp, 0, 0, next_unused, nUnused);
+						    if(bzerror != BZ_OK) {
+						          BZ2_bzReadClose(&bzerror, bfp);
+							  fclose(fp);
+						          Rcout << "File " << infile << " has trailing content that appears not to be compressed by bzip2\n";
+							  return R_NilValue;
+						    }
+					      }
+					      if (next_unused) free(next_unused);
+					}
+				  } else if (bzerror != BZ_OK) {
+				        nread += nn;
+					break;
+				  }
+				  nread += nn;
+				  if(nread > 0 && buffer[nread-1] == '\n') {
+				        buffer[nread-1] = '\0';
+					break;
+				  }
+			    }
+			    if(i<infile_nrow_skip) {
+			          delete [] buffer;
+				  continue;
+			    }
+			    gmean=0.0;
+			    gmax=-100.0;
+			    gmin=100.0;
+			    nmiss=0;
+			    gmiss.zeros();
+			    stringstream writeout;
+			    cp=strtok (buffer, infile_sep.c_str());
+			    if(infile_ncol_skip == 0) {
+			          if(select[0] > 0) {
+				        if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[0]-1] = 1;
+					      nmiss++;
+					} else {
+					      geno = atof(cp); 				
+					      g[select[0]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }
+				  for (size_t j=1; j<ns; ++j) {
+				        cp=strtok (NULL, infile_sep.c_str());
+					if(select[j] <= 0) {continue;}
+					if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[j]-1] = 1;
+					      nmiss++;
+					} else {
+				 	      geno = atof(cp); 				
+					      g[select[j]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }	
+			    } else {
+			          infile_ncol_print_idx = 0;
+				  if (infile_ncol_print[0] == 1) {
+				        snp=cp;
+					writeout << snp << "\t";
+					infile_ncol_print_idx++;
+				  }
+				  if (infile_ncol_skip > 1) {
+				        for(int k=1; k<infile_ncol_skip; ++k) {
+				              cp=strtok (NULL, infile_sep.c_str());
+					      if (infile_ncol_print_idx<infile_ncol_print.size()) {
+					            if(infile_ncol_print[infile_ncol_print_idx] == k+1) {
+						          snp=cp;
+							  writeout << snp << "\t";
+							  infile_ncol_print_idx++;
+						    }
+					      }
+					}
+				  }
+				  for (size_t j=0; j<ns; ++j) {
+				        cp=strtok (NULL, infile_sep.c_str());
+					if(select[j] <= 0) {continue;}
+					if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[j]-1] = 1;
+					      nmiss++;
+					} else {
+					      geno = atof(cp); 				
+					      g[select[j]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }	
+			    }
+			    gmean/=(double)(n-nmiss);
+			    for (size_t j=0; j<n; ++j) {
+			          if (gmiss[j]==1) {
+					g[j] = gmean;
+					if (center=='n' && miss_method=='o') {g[j] = 0.0;} // remove missing genotypes
+				  }
+				  if (center=='c') {
+					g[j] -= gmean;
+				  }
+			    }
+			    gmean/=2.0; // convert mean to allele freq
+			    writeout << n-nmiss << "\t" << gmean << "\t";
+			    tmpout[npbidx] = writeout.str();
+			    writeout.clear();
+			    if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
+			          snp_skip[npbidx] = 1;
+			    } else {
+			          G.col(npbidx) = g;
+			    }
+			    npbidx++;
+			    if((i+1 == p) || (npbidx == npb)) {
+			          uvec snp_idx = find(snp_skip == 0);
+				  time0 = clock();
+				  vec allnum = G.cols(snp_idx).t() * res;
+				  sp_mat Gsp(G.cols(snp_idx));
+				  sp_mat XSigma_iG = Sigma_iX.t() * Gsp;
+				  sp_mat alldenom = Gsp.t() * Sigma_i * Gsp - XSigma_iG.t() * cov * XSigma_iG;
+				  compute_time += (clock()-time0)/double(CLOCKS_PER_SEC);
+				  for(size_t j=0; j<npbidx; ++j) {
+				        if(snp_skip[j] == 1) { // monomorphic, missrate, MAF
+					      writefile << tmpout[j] << "NA\tNA\tNA\n";
+					} else {
+					      uvec snp_idx2 = find(snp_idx == j);
+					      num = allnum[snp_idx2[0]];
+					      denom = alldenom(snp_idx2[0], snp_idx2[0]);
+					      if(denom < tol) { // G collinearity with X
+						    writefile << tmpout[j] << "0\t0\tNA\n";
+					      } else {
+						    pval = Rf_pchisq(num*num/denom, 1.0, 0, 0);
+						    writefile << tmpout[j] << num << "\t" << denom << "\t" << pval << "\n";
+					      }
+					}
+				  }
+				  if(npbidx == npb) {npbidx = 0; snp_skip.zeros();}
+			    }
+			    if((i+1) % 100000 == 0) {writefile << flush;}
+			    delete [] buffer;
+		      }
+		      if(p % 100000 != 0) {writefile << flush;}
+		      writefile.close();
+		      writefile.clear();
+		      BZ2_bzReadClose(&bzerror, bfp);
+		      fclose(fp);
+		} else if (strcmp(ext.c_str(), ".gz")==0) { // gzip infile
+		      gzFile fp = gzopen(infile.c_str(), "rb");
+		      int buffer_length = 100 * (int(ns) + infile_ncol_skip);
+		      if(!fp) {
+			    Rcout << "Error: cannot open gzipped file " << infile << "\n";
+			    return R_NilValue;
+		      }
+		      for(size_t i=0; i<p; ++i) {
+			    char *buffer = new char[buffer_length];
+			    gzgets(fp, buffer, buffer_length);
+			    if(i<infile_nrow_skip) {
+			          delete [] buffer;
+				  continue;
+			    }
+			    gmean=0.0;
+			    gmax=-100.0;
+			    gmin=100.0;
+			    nmiss=0;
+			    gmiss.zeros();
+			    stringstream writeout;
+			    cp=strtok (buffer, infile_sep.c_str());
+			    if(infile_ncol_skip == 0) {
+			          if(select[0] > 0) {
+				        if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[0]-1] = 1;
+					      nmiss++;
+					} else {
+					      geno = atof(cp); 				
+					      g[select[0]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }
+				  for (size_t j=1; j<ns; ++j) {
+				        cp=strtok (NULL, infile_sep.c_str());
+					if(select[j] <= 0) {continue;}
+					if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[j]-1] = 1;
+					      nmiss++;
+					} else {
+				 	      geno = atof(cp); 				
+					      g[select[j]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }	
+			    } else {
+			          infile_ncol_print_idx = 0;
+				  if (infile_ncol_print[0] == 1) {
+				        snp=cp;
+					writeout << snp << "\t";
+					infile_ncol_print_idx++;
+				  }
+				  if (infile_ncol_skip > 1) {
+				        for(int k=1; k<infile_ncol_skip; ++k) {
+				              cp=strtok (NULL, infile_sep.c_str());
+					      if (infile_ncol_print_idx<infile_ncol_print.size()) {
+					            if(infile_ncol_print[infile_ncol_print_idx] == k+1) {
+						          snp=cp;
+							  writeout << snp << "\t";
+							  infile_ncol_print_idx++;
+						    }
+					      }
+					}
+				  }
+				  for (size_t j=0; j<ns; ++j) {
+				        cp=strtok (NULL, infile_sep.c_str());
+					if(select[j] <= 0) {continue;}
+					if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[j]-1] = 1;
+					      nmiss++;
+					} else {
+					      geno = atof(cp); 				
+					      g[select[j]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }	
+			    }
+			    gmean/=(double)(n-nmiss);
+			    for (size_t j=0; j<n; ++j) {
+			          if (gmiss[j]==1) {
+					g[j] = gmean;
+					if (center=='n' && miss_method=='o') {g[j] = 0.0;} // remove missing genotypes
+				  }
+				  if (center=='c') {
+					g[j] -= gmean;
+				  }
+			    }
+			    gmean/=2.0; // convert mean to allele freq
+			    writeout << n-nmiss << "\t" << gmean << "\t";
+			    tmpout[npbidx] = writeout.str();
+			    writeout.clear();
+			    if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
+			          snp_skip[npbidx] = 1;
+			    } else {
+			          G.col(npbidx) = g;
+			    }
+			    npbidx++;
+			    if((i+1 == p) || (npbidx == npb)) {
+			          uvec snp_idx = find(snp_skip == 0);
+				  time0 = clock();
+				  vec allnum = G.cols(snp_idx).t() * res;
+				  sp_mat Gsp(G.cols(snp_idx));
+				  sp_mat XSigma_iG = Sigma_iX.t() * Gsp;
+				  sp_mat alldenom = Gsp.t() * Sigma_i * Gsp - XSigma_iG.t() * cov * XSigma_iG;
+				  compute_time += (clock()-time0)/double(CLOCKS_PER_SEC);
+				  for(size_t j=0; j<npbidx; ++j) {
+				        if(snp_skip[j] == 1) { // monomorphic, missrate, MAF
+					      writefile << tmpout[j] << "NA\tNA\tNA\n";
+					} else {
+					      uvec snp_idx2 = find(snp_idx == j);
+					      num = allnum[snp_idx2[0]];
+					      denom = alldenom(snp_idx2[0], snp_idx2[0]);
+					      if(denom < tol) { // G collinearity with X
+						    writefile << tmpout[j] << "0\t0\tNA\n";
+					      } else {
+						    pval = Rf_pchisq(num*num/denom, 1.0, 0, 0);
+						    writefile << tmpout[j] << num << "\t" << denom << "\t" << pval << "\n";
+					      }
+					}
+				  }
+				  if(npbidx == npb) {npbidx = 0; snp_skip.zeros();}
+			    }
+			    if((i+1) % 100000 == 0) {writefile << flush;}
+			    delete [] buffer;
+		      }
+		      if(p % 100000 != 0) {writefile << flush;}
+		      writefile.close();
+		      writefile.clear();
+		      gzclose(fp);
+		} else { // plain text infile
+		      ifstream readfile (infile.c_str(), ifstream::in);
+		      if (!readfile) {Rcout << "Error reading genotype file: " << infile << "\n"; return R_NilValue;}
+		      string line;
+		      for(size_t i=0; i<p; ++i) {
+			    getline(readfile, line);
+			    if(i<infile_nrow_skip) {continue;}
+			    gmean=0.0;
+			    gmax=-100.0;
+			    gmin=100.0;
+			    nmiss=0;
+			    gmiss.zeros();
+			    stringstream writeout;
+			    cp=strtok ((char *)line.c_str(), infile_sep.c_str());
+			    if(infile_ncol_skip == 0) {
+			          if(select[0] > 0) {
+				        if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[0]-1] = 1;
+					      nmiss++;
+					} else {
+					      geno = atof(cp); 				
+					      g[select[0]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }
+				  for (size_t j=1; j<ns; ++j) {
+				        cp=strtok (NULL, infile_sep.c_str());
+					if(select[j] <= 0) {continue;}
+					if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[j]-1] = 1;
+					      nmiss++;
+					} else {
+				 	      geno = atof(cp); 				
+					      g[select[j]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }	
+			    } else {
+			          infile_ncol_print_idx = 0;
+				  if (infile_ncol_print[0] == 1) {
+				        snp=cp;
+					writeout << snp << "\t";
+					infile_ncol_print_idx++;
+				  }
+				  if (infile_ncol_skip > 1) {
+				        for(int k=1; k<infile_ncol_skip; ++k) {
+				              cp=strtok (NULL, infile_sep.c_str());
+					      if (infile_ncol_print_idx<infile_ncol_print.size()) {
+					            if(infile_ncol_print[infile_ncol_print_idx] == k+1) {
+						          snp=cp;
+							  writeout << snp << "\t";
+							  infile_ncol_print_idx++;
+						    }
+					      }
+					}
+				  }
+				  for (size_t j=0; j<ns; ++j) {
+				        cp=strtok (NULL, infile_sep.c_str());
+					if(select[j] <= 0) {continue;}
+					if (strcmp(cp, infile_na.c_str())==0) {
+					      gmiss[select[j]-1] = 1;
+					      nmiss++;
+					} else {
+					      geno = atof(cp); 				
+					      g[select[j]-1] = geno;
+					      gmean += geno;
+					      if(geno>gmax) {gmax=geno;}
+					      if(geno<gmin) {gmin=geno;}
+					}
+				  }	
+			    }
+			    gmean/=(double)(n-nmiss);
+			    for (size_t j=0; j<n; ++j) {
+			          if (gmiss[j]==1) {
+					g[j] = gmean;
+					if (center=='n' && miss_method=='o') {g[j] = 0.0;} // remove missing genotypes
+				  }
+				  if (center=='c') {
+					g[j] -= gmean;
+				  }
+			    }
+			    gmean/=2.0; // convert mean to allele freq
+			    writeout << n-nmiss << "\t" << gmean << "\t";
+			    tmpout[npbidx] = writeout.str();
+			    writeout.clear();
+			    if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
+			          snp_skip[npbidx] = 1;
+			    } else {
+			          G.col(npbidx) = g;
+			    }
+			    npbidx++;
+			    if((i+1 == p) || (npbidx == npb)) {
+			          uvec snp_idx = find(snp_skip == 0);
+				  time0 = clock();
+				  vec allnum = G.cols(snp_idx).t() * res;
+				  sp_mat Gsp(G.cols(snp_idx));
+				  sp_mat XSigma_iG = Sigma_iX.t() * Gsp;
+				  sp_mat alldenom = Gsp.t() * Sigma_i * Gsp - XSigma_iG.t() * cov * XSigma_iG;
+				  compute_time += (clock()-time0)/double(CLOCKS_PER_SEC);
+				  for(size_t j=0; j<npbidx; ++j) {
+				        if(snp_skip[j] == 1) { // monomorphic, missrate, MAF
+					      writefile << tmpout[j] << "NA\tNA\tNA\n";
+					} else {
+					      uvec snp_idx2 = find(snp_idx == j);
+					      num = allnum[snp_idx2[0]];
+					      denom = alldenom(snp_idx2[0], snp_idx2[0]);
+					      if(denom < tol) { // G collinearity with X
+						    writefile << tmpout[j] << "0\t0\tNA\n";
+					      } else {
+						    pval = Rf_pchisq(num*num/denom, 1.0, 0, 0);
+						    writefile << tmpout[j] << num << "\t" << denom << "\t" << pval << "\n";
+					      }
+					}
+				  }
+				  if(npbidx == npb) {npbidx = 0; snp_skip.zeros();}
+			    }
+			    if((i+1) % 100000 == 0) {writefile << flush;}
+		      }
+		      if(p % 100000 != 0) {writefile << flush;}
+		      writefile.close();
+		      writefile.clear();
+		      readfile.close();
+		      readfile.clear();
+		}
+		delete [] tmpout;
+		return wrap(compute_time);
+	} catch( std::exception &ex ) {
+		forward_exception_to_r( ex );
+	} catch(...) {
+		::Rf_error( "C++ exception (unknown reason)..." );
+	}
+	return R_NilValue;
+}
+
   SEXP glmm_score_bed(SEXP res_in, SEXP P_in, SEXP bimfile_in, SEXP bedfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in) {
 	try {
 		Rcpp::NumericMatrix P_r(P_in);
@@ -1229,6 +1726,166 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 			    time0 = clock();
 			    vec allnum = G.cols(snp_idx).t() * res;
 			    mat alldenom = G.cols(snp_idx).t() * P * G.cols(snp_idx);
+			    compute_time += (clock()-time0)/double(CLOCKS_PER_SEC);
+			    for(size_t j=0; j<npbidx; ++j) {
+			          if(snp_skip[j] == 1) { // monomorphic, missrate, MAF
+				        writefile << tmpout[j] << "NA\tNA\tNA\n";
+				  } else {
+				        uvec snp_idx2 = find(snp_idx == j);
+					num = allnum[snp_idx2[0]];
+					denom = alldenom(snp_idx2[0], snp_idx2[0]);
+					if(denom < tol) { // G collinearity with X
+					      writefile << tmpout[j] << "0\t0\tNA\n";
+					} else {
+					      pval = Rf_pchisq(num*num/denom, 1.0, 0, 0);
+					      writefile << tmpout[j] << num << "\t" << denom << "\t" << pval << "\n";
+					}
+				  }
+			    }
+			    if(npbidx == npb) {npbidx = 0; snp_skip.zeros();}
+		      }
+		      if((i+1) % 100000 == 0) {writefile << flush;}
+		}
+		if(p % 100000 != 0) {writefile << flush;}
+		delete [] buffer;
+		delete [] tmpout;
+		writefile.close();
+		writefile.clear();
+		readbedfile.close();
+		readbedfile.clear();
+		return wrap(compute_time);
+	} catch( std::exception &ex ) {
+		forward_exception_to_r( ex );
+	} catch(...) {
+		::Rf_error( "C++ exception (unknown reason)..." );
+	}
+	return R_NilValue;
+}
+
+  SEXP glmm_score_bed_sp(SEXP res_in, SEXP Sigma_i_in, SEXP Sigma_iX_in, SEXP cov_in, SEXP bimfile_in, SEXP bedfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in) {
+	try {
+		Rcpp::NumericVector res_r(res_in);
+		arma::vec res(res_r.begin(), res_r.size(), false);
+		arma::sp_mat Sigma_i = Rcpp::as<arma::sp_mat>(Sigma_i_in);
+		arma::sp_mat Sigma_iX = Rcpp::as<arma::sp_mat>(Sigma_iX_in);
+		arma::sp_mat cov = Rcpp::as<arma::sp_mat>(cov_in);
+	        const char center = Rcpp::as<char>(center_in);
+		const double minmaf = Rcpp::as<double>(minmaf_in);
+		const double maxmaf = Rcpp::as<double>(maxmaf_in);
+		const double missrate = Rcpp::as<double>(missrate_in);
+		const char miss_method = Rcpp::as<char>(miss_method_in);
+		string bimfile = Rcpp::as<string>(bimfile_in);
+		string bedfile = Rcpp::as<string>(bedfile_in);
+		string outfile = Rcpp::as<string>(outfile_in);
+		const size_t npb = Rcpp::as<size_t>(nperbatch_in);
+		Rcpp::IntegerVector select(select_in);
+		string line, snp;
+		char *cp;
+		size_t n = res.n_elem, ns = select.size();
+		vec g(n);
+		uvec gmiss(n), snp_skip = zeros<uvec>(npb);
+		mat G(n, npb);
+		string *tmpout = new string[npb];
+		vector <string> biminfo;
+		double gmean, geno, gmax, gmin, num, denom, pval;
+		const double tol = 1e-5;
+		size_t ncount, nmiss, npbidx = 0, p = 0;
+		clock_t time0;
+		double compute_time = 0.0;
+		ifstream readfile (bimfile.c_str(), ifstream::in);
+		if (!readfile) {Rcout << "Error reading bimfile: " << bimfile << "\n"; return R_NilValue;}
+		ofstream writefile (outfile.c_str(), ofstream::out);
+		if (!writefile) {Rcout << "Error writing outfile: " << outfile << "\n"; return R_NilValue;}
+		while(getline(readfile, line)) {
+		      cp=strtok ((char *)line.c_str(), " \t");
+		      stringstream writeout;
+		      snp=cp;
+		      writeout << snp << "\t";
+		      for(size_t i=0; i<5; ++i) {
+			    cp=strtok(NULL, " \t");
+			    snp=cp;
+			    writeout << snp << "\t";
+		      }
+		      biminfo.push_back(writeout.str());
+		      writeout.clear();
+		      p++;
+		}
+		readfile.close();
+		readfile.clear();
+		ifstream readbedfile (bedfile.c_str(), ios::binary);
+		if (!readbedfile) {Rcout << "Error reading bedfile: " << bedfile << "\n"; return R_NilValue;}
+		int nblocks = (ns + 3) / 4, pos;
+		unsigned char magic[3], temp[2];
+		unsigned char *buffer = new unsigned char[nblocks];
+		readbedfile.read((char *)magic, 3);
+		if(magic[0] != 0x6C || magic[1] != 0x1B) {Rcout << "Error: " << bedfile << " is not a plink binary file!\n"; return R_NilValue;}
+		if(magic[2] != 0x1) {Rcout << "Error: SNP major mode expected in " << bedfile << "\n"; return R_NilValue;}
+		writefile << "CHR\tSNP\tcM\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
+		for(size_t i=0; i<p; ++i) {
+		      stringstream writeout;
+		      gmean=0.0;
+		      gmax=-100.0;
+		      gmin=100.0;
+		      nmiss=0;
+		      gmiss.zeros();
+		      readbedfile.seekg(i*nblocks+3);
+		      ncount = 0;
+		      readbedfile.read((char *)buffer, nblocks);
+		      for(int j=0; j<nblocks; ++j) {
+			    pos = 0;
+			    for(size_t k=0; k<4; ++k) {
+			          if(ncount == ns && j == nblocks - 1) {break;}
+				  for(size_t l=0; l<2; ++l) {
+				        temp[l] = (buffer[j] >> pos) & 1;
+					pos++;
+				  }
+				  if(select[ncount] <= 0) {ncount++; continue;}
+				  if(temp[0] ==0 && temp[1] ==0){
+				        geno = 0.0;
+				  } else if(temp[0] ==1 && temp[1] ==1){
+				        geno = 2.0;
+				  } else if(temp[0] ==0 && temp[1] ==1){
+				        geno = 1.0;
+				  } else {
+				        gmiss[select[ncount]-1] = 1;
+					nmiss++;
+					ncount++;
+					continue;
+				  }
+				  g[select[ncount]-1] = geno;
+				  gmean += geno;
+				  if(geno>gmax) {gmax=geno;}
+				  if(geno<gmin) {gmin=geno;}
+				  ncount++;
+			    }
+		      }
+		      gmean/=(double)(n-nmiss);
+		      for (size_t j=0; j<n; ++j) {
+			    if (gmiss[j]==1) {
+			          g[j] = gmean;
+				  if (center=='n' && miss_method=='o') {g[j] = 0.0;} // remove missing genotypes
+			    }
+			    if (center=='c') {
+			          g[j] -= gmean;
+			    }
+		      }
+		      gmean/=2.0; // convert mean to allele freq
+		      writeout << biminfo[i] << n-nmiss << "\t" << gmean << "\t";
+		      tmpout[npbidx] = writeout.str();
+		      writeout.clear();
+		      if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
+			    snp_skip[npbidx] = 1;
+		      } else {
+			    G.col(npbidx) = g;
+		      }
+		      npbidx++;
+		      if((i+1 == p) || (npbidx == npb)) {
+			    uvec snp_idx = find(snp_skip == 0);
+			    time0 = clock();
+			    vec allnum = G.cols(snp_idx).t() * res;
+			    sp_mat Gsp(G.cols(snp_idx));
+			    sp_mat XSigma_iG = Sigma_iX.t() * Gsp;
+			    sp_mat alldenom = Gsp.t() * Sigma_i * Gsp - XSigma_iG.t() * cov * XSigma_iG;
 			    compute_time += (clock()-time0)/double(CLOCKS_PER_SEC);
 			    for(size_t j=0; j<npbidx; ++j) {
 			          if(snp_skip[j] == 1) { // monomorphic, missrate, MAF

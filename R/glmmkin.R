@@ -1,7 +1,9 @@
 glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE, ...) {
 	call <- match.call()
-	if(!is.null(kins) && !class(kins) %in% c("matrix", "list"))
-		stop("Error: \"kins\" must be a matrix or a list.")
+	if(!is.null(kins) && !class(kins) %in% c("matrix", "list")) {
+		if(is.null(attr(class(kins), "package"))) stop("Error: \"kins\" must be a matrix or a list.")
+		else if(attr(class(kins), "package") != "Matrix") stop("Error: if \"kins\" is a sparse matrix, it must be created using the Matrix package.")
+	}
 	if(!method %in% c("REML", "ML"))
 		stop("Error: \"method\" must be \"REML\" or \"ML\".")
 	method.optim <- try(match.arg(method.optim, c("AI", "Brent", "Nelder-Mead")))
@@ -11,6 +13,8 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
 		stop("Error: method \"ML\" not available for method.optim \"AI\", use method \"REML\" instead.")
 	if(method.optim == "Brent" && class(kins) == "list")
 		stop("Error: method.optim \"Brent\" can only be applied in one-dimensional optimization, use a matrix for \"kins\".")
+	if(method.optim != "AI" && ((!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix") || (class(kins) == "list" && any(sapply(kins, function(xx) !is.null(attr(class(xx), "package")) && attr(class(xx), "package") == "Matrix")))))
+		stop("Error: sparse matrices can only be handled by method.optim \"AI\".")
 	if(class(family) != "family")
 		stop("Error: \"family\" must be an object of class \"family\".")
 	if(!family$family %in% c("binomial", "gaussian", "Gamma", "inverse.gaussian", "poisson", "quasi", "quasibinomial", "quasipoisson"))
@@ -25,6 +29,7 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
 		if(method.optim != "AI") stop("Error: random slope for longitudinal data is currently only implemented for method.optim \"AI\".")
 		if(!random.slope %in% names(data)) stop("Error: \"random.slope\" must be one of the variables in the names of \"data\".")
 	}
+        if(!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix")  kins <- list(kins1 = kins)
 	if(method.optim != "Brent" && class(kins) == "matrix") kins <- list(kins1 = kins)
 	fit0 <- glm(formula = fixed, data = data, family = family, ...)
 	idx <- match(rownames(model.frame(formula = fixed, data = data, na.action = na.omit)), rownames(model.frame(formula = fixed, data = data, na.action = na.pass)))
@@ -36,7 +41,9 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
 				rownames(kins) <- colnames(kins) <- unique(data[idx, id])
 			} else stop("Error: method.optim \"Brent\" can only be applied to unrelated individuals in longitudinal data analysis.")
 	     	} else {
-			kins[[length(kins) + 1]] <- diag(length(unique(data[idx, id])))
+			if(method.optim != "AI") kins[[length(kins) + 1]] <- diag(length(unique(data[idx,id]))) 
+			else if(length(kins) > 0) kins[[length(kins) + 1]] <- Diagonal(n = length(unique(data[idx, id])))
+			else kins <- list(kins1 = Diagonal(n = length(unique(data[idx, id]))))
 			rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[idx, id])
 		}
 	} else if(!is.null(random.slope)) stop("Error: no duplicated \"id\" found, \"random.slope\" must be used for longitudinal data with duplicated \"id\".")
@@ -65,11 +72,12 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
 		Y <- eta - offset + (y - mu)/mu.eta
 		sqrtW <- mu.eta/sqrt(1/as.vector(weights(fit0))*family$variance(mu))
 		X <- model.matrix(fit0)
-		X2 <- X * sqrtW
 		alpha <- fit0$coef
 		res <- y - mu
 		tau <- summary(fit0)$dispersion
-		fit <- list(theta=tau, n.groups=1, coefficients=alpha, linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=t((diag(n) - crossprod(t(X2), tcrossprod(solve(crossprod(X2)), X2))) * sqrtW) * sqrtW/tau, residuals=res, scaled.residuals=res*as.vector(weights(fit0))/tau, cov=vcov(fit0), converged=TRUE, call = call, id_include = data[idx, id])
+		Sigma_i <- Diagonal(x = sqrtW^2/tau)
+		rownames(Sigma_i) <- colnames(Sigma_i) <- rownames(X)
+		fit <- list(theta=tau, n.groups=1, coefficients=alpha, linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=NULL, residuals=res, scaled.residuals=res*as.vector(weights(fit0))/tau, cov=vcov(fit0), Sigma_i=Sigma_i,Sigma_iX=X*sqrtW^2/tau,converged=TRUE, call = call, id_include = data[idx, id])
 		class(fit) <- "glmmkin"
 		return(fit)
 	}
@@ -99,9 +107,9 @@ glmmkin.fit <- function(fit0, kins, time.var, group.id, method = "REML", method.
 			if(!is.null(time.var)) {
 				q <- length(kins)
 				covariance.idx <- matrix(0, q, 3)
-				for(i in 1:q) kins[[q + i]] <- kins[[i]] * time.var + t(kins[[i]] * time.var)
+				for(i in 1:q) kins[[q + i]] <- if(!is.null(attr(class(kins[[i]]), "package")) && attr(class(kins[[i]]), "package") == "Matrix") forceSymmetric(kins[[i]] * time.var + t(kins[[i]] * time.var)) else kins[[i]] * time.var + t(kins[[i]] * time.var)
 				for(i in 1:q) {
-				        kins[[2*q + i]] <- t(kins[[i]] * time.var) * time.var
+				        kins[[2*q + i]] <- if(!is.null(attr(class(kins[[i]]), "package")) && attr(class(kins[[i]]), "package") == "Matrix") forceSymmetric(t(kins[[i]] * time.var) * time.var) else t(kins[[i]] * time.var) * time.var
 					covariance.idx[i, ] <- c(q + i, i, 2*q + i) + length(group.idx)
 				}
 				names(kins) <- paste("kins", 1:length(kins), sep="")
@@ -172,6 +180,7 @@ glmmkin.fit <- function(fit0, kins, time.var, group.id, method = "REML", method.
 }
 
 glmmkin.ai <- function(fit0, kins, covariance.idx = NULL, group.idx, tau = rep(0, length(kins)+length(group.idx)), fixtau = rep(0, length(kins)+length(group.idx)), fixrho = NULL, maxiter = 500, tol = 1e-5, verbose = FALSE) {
+	is.Matrix <- any(sapply(kins, function(xx) !is.null(attr(class(xx), "package")) && attr(class(xx), "package") == "Matrix"))
 	y <- fit0$y
 	n <- length(y)
 	offset <- fit0$offset
@@ -202,37 +211,49 @@ glmmkin.ai <- function(fit0, kins, covariance.idx = NULL, group.idx, tau = rep(0
 		if(!is.null(covariance.idx)) tau[idxtau2] <- 0
 		diagSigma <- rep(0, n)
 		for(i in 1:ng) diagSigma[group.idx[[i]]] <- tau[i]/sqrtW[group.idx[[i]]]^2
-		Sigma <- diag(diagSigma)
+		Sigma <- if(is.Matrix) Diagonal(x = diagSigma) else diag(diagSigma)
 		for(i in 1:q) {
 		      	tau[i+ng] <- tau[i+ng]/mean(diag(kins[[i]]))
 			Sigma <- Sigma + tau[i+ng]*kins[[i]]
 		}
+#		if(is.Matrix) Sigma <- forceSymmetric(Sigma)
 		Sigma_i <- chol2inv(chol(Sigma))
 		rm(Sigma, diagSigma)
 		gc()
 		Sigma_iX <- crossprod(Sigma_i, X)
-		P <- Sigma_i - tcrossprod(tcrossprod(Sigma_iX, chol2inv(chol(crossprod(X, Sigma_iX)))), Sigma_iX)
-		rm(Sigma_i)
-		gc()
-		PY <- crossprod(P, Y)
+		#P <- Sigma_i - tcrossprod(tcrossprod(Sigma_iX, chol2inv(chol(crossprod(X, Sigma_iX)))), Sigma_iX)
+		#rm(Sigma_i)
+		#gc()
+		#PY <- crossprod(P, Y)
+		XSigma_iX <- crossprod(X, Sigma_iX)
+		if(is.Matrix) XSigma_iX <- forceSymmetric(XSigma_iX)
+		cov <- chol2inv(chol(XSigma_iX))
+		Sigma_iXcov <- tcrossprod(Sigma_iX, cov)
+		PY <- crossprod(Sigma_i, Y) - tcrossprod(Sigma_iX, t(crossprod(Sigma_iXcov, Y)))
 		tau0 <- tau
 		for(i in 1:q2) {
-		        if(idxtau[i] <= ng) tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (sum((PY/sqrtW)[group.idx[[idxtau[i]]]]^2) - sum((diag(P)/sqrtW^2)[group.idx[[idxtau[i]]]]))/n)
+		        #if(idxtau[i] <= ng) tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (sum((PY/sqrtW)[group.idx[[idxtau[i]]]]^2) - sum((diag(P)/sqrtW^2)[group.idx[[idxtau[i]]]]))/n)
+		        if(idxtau[i] <= ng) tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (sum((PY/sqrtW)[group.idx[[idxtau[i]]]]^2) - sum(((diag(Sigma_i)-rowSums(Sigma_iX*Sigma_iXcov))/sqrtW^2)[group.idx[[idxtau[i]]]]))/n)
 			else {
-	        	        PAPY <- crossprod(P, crossprod(kins[[idxtau[i]-ng]], PY))
-				if(!is.null(covariance.idx)) tau[idxtau[i]] <- if(idxtau[i] %in% idxtau2) 0 else max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (crossprod(Y, PAPY) - sum(P*kins[[idxtau[i]-ng]]))/n)
-				else tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (crossprod(Y, PAPY) - sum(P*kins[[idxtau[i]-ng]]))/n)
+	        	        #PAPY <- crossprod(P, crossprod(kins[[idxtau[i]-ng]], PY))
+				#if(!is.null(covariance.idx)) tau[idxtau[i]] <- if(idxtau[i] %in% idxtau2) 0 else max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (crossprod(Y, PAPY) - sum(P*kins[[idxtau[i]-ng]]))/n)
+				#else tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (crossprod(Y, PAPY) - sum(P*kins[[idxtau[i]-ng]]))/n)
+				APY <- crossprod(kins[[idxtau[i]-ng]], PY)
+	        	        PAPY <- crossprod(Sigma_i, APY) - tcrossprod(Sigma_iX, t(crossprod(Sigma_iXcov, APY)))
+				if(!is.null(covariance.idx)) tau[idxtau[i]] <- if(idxtau[i] %in% idxtau2) 0 else max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (sum(Y* PAPY) - (sum(Sigma_i*kins[[idxtau[i]-ng]])-sum(Sigma_iX*crossprod(kins[[idxtau[i]-ng]],Sigma_iXcov))))/n)
+				else tau[idxtau[i]] <- max(0, tau0[idxtau[i]] + tau0[idxtau[i]]^2 * (sum(Y* PAPY) - (sum(Sigma_i*kins[[idxtau[i]-ng]])-sum(Sigma_iX*crossprod(kins[[idxtau[i]-ng]],Sigma_iXcov))))/n)
 			}
 		}
-		rm(P)
-		gc()
+		#rm(P)
+		#gc()
 	}
 	for (i in seq_len(maxiter)) {
 		if(verbose) cat("\nIteration ", i, ":\n")
 		alpha0 <- alpha
 		tau0 <- tau
 		#fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau, tol)
-		fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
+		if(is.Matrix) fit <- R_fitglmm_ai(Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
+		else fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
 		if(q2 > 0) {
 		        Dtau <- as.numeric(fit$Dtau)
 		      	tau[idxtau] <- tau0[idxtau] + Dtau
@@ -292,9 +313,8 @@ glmmkin.ai <- function(fit0, kins, covariance.idx = NULL, group.idx, tau = rep(0
 	res <- y - mu
 	res.var <- rep(1, n)
 	for(i in 1:ng) res.var[group.idx[[i]]] <- tau[i]
-	return(list(theta=tau, n.groups=ng, coefficients=alpha,
-	linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=fit$P, residuals=res,
-	scaled.residuals=res*as.vector(weights(fit0))/res.var, cov=cov, converged=converged))
+	if(!is.Matrix) fit$Sigma_i <- fit$Sigma_iX <- NULL
+	return(list(theta=tau, n.groups=ng, coefficients=alpha, linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=fit$P, residuals=res, scaled.residuals=res*as.vector(weights(fit0))/res.var, cov=cov, Sigma_i=fit$Sigma_i, Sigma_iX=fit$Sigma_iX, converged=converged))
 }
 
 glmmkin.brent <- function(fit0, kins, method = "REML", tau = 1, fixtau = 0, maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE) {
@@ -352,9 +372,7 @@ glmmkin.brent <- function(fit0, kins, method = "REML", tau = 1, fixtau = 0, maxi
 		P <- P/phi
 		cov <- phi*cov
 	}
-	return(list(theta=theta, n.groups=1, coefficients=alpha,
-	linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=P, residuals=res,
-	scaled.residuals=res*as.vector(weights(fit0))/theta[1], cov=cov, converged=converged))
+	return(list(theta=theta, n.groups=1, coefficients=alpha, linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=P, residuals=res, scaled.residuals=res*as.vector(weights(fit0))/theta[1], cov=cov, Sigma_i=NULL, Sigma_iX=NULL, converged=converged))
 }
 
 glmmkin.nm <- function(fit0, kins, method = "REML", tau = rep(1, length(kins)), fixtau = rep(0, length(kins)), maxiter = 500, tol = 1e-5, verbose = FALSE) {
@@ -412,7 +430,56 @@ glmmkin.nm <- function(fit0, kins, method = "REML", tau = rep(1, length(kins)), 
 		P <- P/phi
 		cov <- phi*cov
 	}
-	return(list(theta=theta, n.groups=1, coefficients=alpha,
-	linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=P, residuals=res,
-	scaled.residuals=res*as.vector(weights(fit0))/theta[1], cov=cov, converged=converged))
+	return(list(theta=theta, n.groups=1, coefficients=alpha, linear.predictors=eta, fitted.values=mu, Y=Y, X=X, P=P, residuals=res, scaled.residuals=res*as.vector(weights(fit0))/theta[1], cov=cov, Sigma_i=NULL, Sigma_iX=NULL, converged=converged))
 }
+
+R_fitglmm_ai <- function(Y, X, q, kins, ng, group.idx, W, tau, fixtau) {
+	n <- nrow(X)
+	p <- ncol(X)
+	q2 <- sum(fixtau == 0)
+	diagSigma <- rep(0, n)
+	for(i in 1:ng) diagSigma[group.idx[[i]]] <- tau[i]/W[group.idx[[i]]]
+	Sigma <- Diagonal(x = diagSigma)
+	for(i in 1:q) Sigma <- Sigma + tau[i+ng]*kins[[i]]
+#	Sigma <- forceSymmetric(Sigma)
+	Sigma_i <- chol2inv(chol(Sigma))
+	rm(Sigma)
+	gc()
+	Sigma_iX <- crossprod(Sigma_i, X)
+	XSigma_iX <- crossprod(X, Sigma_iX)
+	XSigma_iX <- forceSymmetric(XSigma_iX)
+	cov <- chol2inv(chol(XSigma_iX))
+	Sigma_iXcov <- tcrossprod(Sigma_iX, cov)
+	alpha <- crossprod(cov, crossprod(Sigma_iX, Y))
+	eta <- Y - diagSigma*(crossprod(Sigma_i,Y)-tcrossprod(Sigma_iX,t(alpha)))
+	if(q2 > 0) {
+	      	idxtau <- which(fixtau == 0)
+		PY <- crossprod(Sigma_i, Y) - tcrossprod(Sigma_iX, t(crossprod(Sigma_iXcov, Y)))
+		wPY <- PY/W
+		diagP <- (diag(Sigma_i) - rowSums(Sigma_iX * Sigma_iXcov))/W
+		AI <- matrix(NA, q2, q2)
+		score <- rep(NA, q2)
+		for(i in 1:q2) {
+		        if(idxtau[i] <= ng) {
+				score[i] <- sum(wPY[group.idx[[idxtau[i]]]] * PY[group.idx[[idxtau[i]]]] - diagP[group.idx[[idxtau[i]]]])
+				for(j in 1:i) {
+				      	AI[i,j] <- sum(wPY[group.idx[[idxtau[i]]]] * crossprod(Sigma_i[group.idx[[idxtau[j]]], group.idx[[idxtau[i]]]], wPY[group.idx[[idxtau[j]]]])) - sum(crossprod(Sigma_iXcov[group.idx[[idxtau[i]]], ], wPY[group.idx[[idxtau[i]]]]) * crossprod(Sigma_iX[group.idx[[idxtau[j]]], ], wPY[group.idx[[idxtau[j]]]]))
+					if(j != i) AI[j,i] <- AI[i,j]
+				}
+			} else {
+				APY <- crossprod(kins[[idxtau[i]-ng]], PY)
+	        	        PAPY <- crossprod(Sigma_i, APY) - tcrossprod(Sigma_iX, t(crossprod(Sigma_iXcov, APY)))
+				score[i] <- sum(Y * PAPY) - (sum(Sigma_i*kins[[idxtau[i]-ng]])-sum(Sigma_iX*crossprod(kins[[idxtau[i]-ng]],Sigma_iXcov)))
+				for(j in 1:i) {
+				      	if(idxtau[j] <= ng) AI[i,j] <- sum(wPY[group.idx[[idxtau[j]]]] * PAPY[group.idx[[idxtau[j]]]])
+					else AI[i,j] <- sum(PY * crossprod(kins[[idxtau[j]-ng]], PAPY))
+					if(j != i) AI[j,i] <- AI[i,j]
+				}
+			}
+		}
+		Dtau <- solve(AI, score)
+		return(list(Dtau = Dtau, P = NULL, cov = cov, alpha = alpha, eta = eta, Sigma_i = Sigma_i, Sigma_iX = Sigma_iX))
+	}
+	return(list(Dtau = NULL, P = NULL, cov = cov, alpha = alpha, eta = eta, Sigma_i = Sigma_i, Sigma_iX = Sigma_iX))
+}
+

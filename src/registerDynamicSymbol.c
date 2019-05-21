@@ -10,7 +10,11 @@ SEXP fitglmm_ai(SEXP Y_in, SEXP X_in, SEXP q_in, SEXP Phi_in, SEXP ng_in, SEXP g
 
 SEXP glmm_score_text(SEXP res_in, SEXP P_in, SEXP infile_in, SEXP outfile_in, SEXP tol_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP p_in, SEXP infile_nrow_skip_in, SEXP infile_sep_in, SEXP infile_na_in, SEXP infile_ncol_skip_in, SEXP infile_ncol_print_in, SEXP infile_header_print_in, SEXP nperbatch_in, SEXP select_in);
 
+SEXP glmm_score_text_sp(SEXP res_in, SEXP Sigma_i_in, SEXP Sigma_iX_in, SEXP cov_in, SEXP infile_in, SEXP outfile_in, SEXP tol_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP p_in, SEXP infile_nrow_skip_in, SEXP infile_sep_in, SEXP infile_na_in, SEXP infile_ncol_skip_in, SEXP infile_ncol_print_in, SEXP infile_header_print_in, SEXP nperbatch_in, SEXP select_in);
+
 SEXP glmm_score_bed(SEXP res_in, SEXP P_in, SEXP bimfile_in, SEXP bedfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in);
+
+SEXP glmm_score_bed_sp(SEXP res_in, SEXP Sigma_i_in, SEXP Sigma_iX_in, SEXP cov_in, SEXP bimfile_in, SEXP bedfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in);
 
 SEXP glmm_wald_text(SEXP n_in, SEXP snp_in, SEXP infile_in, SEXP tol_in, SEXP center_in, SEXP miss_method_in, SEXP p_in, SEXP infile_nrow_skip_in, SEXP infile_sep_in, SEXP infile_na_in, SEXP infile_ncol_skip_in, SEXP infile_ncol_print_in, SEXP snp_col_in, SEXP select_in);
 
@@ -21,7 +25,9 @@ static const R_CallMethodDef R_CallDef[]  = {
   {"fitglmm_nm", (DL_FUNC) &fitglmm_nm, 11},
   {"fitglmm_ai", (DL_FUNC) &fitglmm_ai, 9},
   {"glmm_score_text", (DL_FUNC) &glmm_score_text, 19},
+  {"glmm_score_text_sp", (DL_FUNC) &glmm_score_text_sp, 21},
   {"glmm_score_bed", (DL_FUNC) &glmm_score_bed, 12},
+  {"glmm_score_bed_sp", (DL_FUNC) &glmm_score_bed_sp, 14},
   {"glmm_wald_text", (DL_FUNC) &glmm_wald_text, 14},
   {"glmm_wald_bed", (DL_FUNC) &glmm_wald_bed, 7},
   {NULL, NULL, 0}
