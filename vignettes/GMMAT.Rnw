@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.1.0}
-\date{May 21, 2019}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.1.1}
+\date{August 26, 2019}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -94,7 +94,7 @@ Variant set tests for longitudinal data in the SMMAT framework are similarly def
 \textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package.
 
 \subsection{Installing \textit{GMMAT}}
-\textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
+\textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, \href{https://cran.r-project.org/web/packages/Matrix/index.html}{Matrix}, methods, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
 
 For optimal computational performance, it is recommended to use an R version configured with the Intel Math Kernel Library (or other fast BLAS/LAPACK libraries). See the instructions on building R with Intel MKL (\url{https://software.intel.com/en-us/articles/using-intel-mkl-with-r}).
 
@@ -104,9 +104,9 @@ Here is an example for installing \textit{GMMAT} and all its dependencies in an 
 ## try http:// if https:// URLs are not supported
 ## remove "doMC" below if you are running Windows
 install.packages(c("devtools", "RcppArmadillo", "CompQuadForm", "doMC", 
-        "foreach", "testthat"), repos = "https://cran.r-project.org/")
-source("https://bioconductor.org/biocLite.R")
-biocLite(c("SeqArray", "SeqVarTools"))
+        "foreach", "Matrix", "BiocManager", "testthat"), 
+	repos = "https://cran.r-project.org/")
+BiocManager::install(c("SeqArray", "SeqVarTools"))
 devtools::install_github("hanchenphd/GMMAT")
 @
 
@@ -705,6 +705,12 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Implemented support for sparse matrices in the argument "kins" of \textbf{glmmkin}.
 \item Fixed a bug in \textbf{glmm.wald} when the argument "missing.method" is "omit".
 \item Fixed a bug in \textbf{SMMAT} and \textbf{SMMAT.meta} when reading group definition files with T as all reference or alternate alleles (force T to be character instead of logical).
+\end{enumerate}
+
+\subsection{Version 1.1.1 (August 26, 2019)}
+\begin{enumerate}
+\item Fixed a bug in \textbf{glmm.wald} when the argument "fixed" is a long formula.
+\item Fixed a bug in \textbf{glmmkin} and \textbf{glmm.wald} when the indices are already ordered in subsetting ddiMatrix for longitudinal data analysis.
 \end{enumerate}
 
 \section{Contact}

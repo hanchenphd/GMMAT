@@ -9,6 +9,7 @@ importFrom("utils", "read.table", "write.table")
 importFrom("CompQuadForm", "davies", "liu")
 importFrom("SeqArray", "seqOpen", "seqGetData", "seqClose", "seqSetFilter")
 importFrom("SeqVarTools", "missingGenotypeRate", "alleleFrequency", "altDosage")
+importFrom("methods", "as")
 
 useDynLib(GMMAT, .registration = TRUE, .fixes = "C_")
 

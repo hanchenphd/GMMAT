@@ -110,8 +110,8 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
                         } else stop("Error: method.optim \"Brent\" can only be applied to unrelated individuals in longitudinal data analysis.")
                 } else {
                         if(method.optim != "AI") kins[[length(kins) + 1]] <- diag(length(unique(data[,id])))
-                        else if(length(kins) > 0) kins[[length(kins) + 1]] <- Diagonal(n = length(unique(data[, id])))
-                        else kins <- list(kins1 = Diagonal(n = length(unique(data[, id]))))
+                        else if(length(kins) > 0) kins[[length(kins) + 1]] <- as(diag(length(unique(data[, id]))), "sparseMatrix")
+                        else kins <- list(kins1 = as(diag(length(unique(data[, id]))), "sparseMatrix"))
                         rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[, id])
                 }
         } else if(!is.null(random.slope)) stop("Error: \"random.slope\" must be used for longitudinal data with duplicated \"id\".")
@@ -177,7 +177,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 			if(readfile$skip != 1) { # snp
 				data$SNP__ <- as.numeric(readfile$G)[data.idx]
 				data$SNP__[data$SNP__ < (-999)] <- NA
-				fit0 <- glm(formula = as.formula(paste(deparse(fixed), "SNP__", sep=" + ")), data = data, family = family, ...)
+				fit0 <- glm(formula = as.formula(paste(paste(deparse(fixed), collapse = ""), "SNP__", sep=" + ")), data = data, family = family, ...)
 				if(is.null(kins)) {
 					coef <- summary(fit0)$coef
                                         BETA[ii] <- coef[nrow(coef), 1]
@@ -186,7 +186,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 					converged[ii] <- TRUE
 					next
 				}
-				idx <- match(rownames(model.frame(formula = as.formula(paste(deparse(fixed), "SNP__", sep=" + ")), data = data, na.action = na.omit)), rownames(model.frame(formula = as.formula(paste(deparse(fixed), "SNP__", sep=" + ")), data = data, na.action = na.pass)))
+				idx <- match(rownames(model.frame(formula = as.formula(paste(paste(deparse(fixed), collapse = ""), "SNP__", sep=" + ")), data = data, na.action = na.omit)), rownames(model.frame(formula = as.formula(paste(paste(deparse(fixed), collapse = ""), "SNP__", sep=" + ")), data = data, na.action = na.pass)))
 				tmpkins <- kins
 				if(class(tmpkins) == "matrix") tmpkins <- tmpkins[idx, idx]
 				else {
