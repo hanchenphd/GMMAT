@@ -6,7 +6,7 @@ GMMAT links to R packages <a href="https://cran.r-project.org/web/packages/Rcpp/
 
 For optimal computational performance, it is recommended to use an R version configured with the Intel Math Kernel Library (or other fast BLAS/LAPACK libraries). See the <a href="https://software.intel.com/en-us/articles/using-intel-mkl-with-r">instructions</a> on building R with Intel MKL.
 ## Version
-The current version is 1.1.1 (August 26, 2019).
+The current version is 1.1.2 (October 11, 2019).
 ## License
 This software is licensed under GPL-3.
 ## Contact
