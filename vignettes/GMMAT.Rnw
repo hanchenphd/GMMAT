@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.1.1}
-\date{August 26, 2019}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.1.2}
+\date{October 11, 2019}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -711,6 +711,12 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \begin{enumerate}
 \item Fixed a bug in \textbf{glmm.wald} when the argument "fixed" is a long formula.
 \item Fixed a bug in \textbf{glmmkin} and \textbf{glmm.wald} when the indices are already ordered in subsetting ddiMatrix for longitudinal data analysis.
+\end{enumerate}
+
+\subsection{Version 1.1.2 (October 11, 2019)}
+\begin{enumerate}
+\item Fixed a bug in \textbf{glmmkin} when fitting a model with large dense matrices in "kins".
+\item Fixed a bug in \textbf{glmm.score} and \textbf{glmm.wald} for analyzing plain text genotype files on Mac OS.
 \end{enumerate}
 
 \section{Contact}

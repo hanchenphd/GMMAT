@@ -49,11 +49,8 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 		snpinfo <- matrix(NA, length(snps), 5)
 	} else { # text genotype files
 		if(is.null(infile.nrow)) {
-                        if(Sys.info()["sysname"] == "Windows") {
-                                if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-                                #else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(shell(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
-                                else if(grepl("\\.bz2$", infile)) infile.nrow <- NA
-                                else infile.nrow <- suppressWarnings(as.integer(shell(paste("wc -l", infile, "| gawk '{print $1}'"), intern = T)))
+                        if(Sys.info()["sysname"] != "Linux") {
+				infile.nrow <- length(readLines(infile))
                         } else {
                                 if(grepl("\\.gz$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("gzip -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))
                                 else if(grepl("\\.bz2$", infile)) infile.nrow <- suppressWarnings(as.integer(system(paste("bzip2 -dc", infile, "| wc -l | gawk '{print $1}'"), intern = T)))

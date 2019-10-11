@@ -253,7 +253,8 @@ glmmkin.ai <- function(fit0, kins, covariance.idx = NULL, group.idx, tau = rep(0
 		tau0 <- tau
 		#fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau, tol)
 		if(is.Matrix) fit <- R_fitglmm_ai(Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
-		else fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
+		else if(n < 2^15.5) fit <- .Call(C_fitglmm_ai, Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
+		else fit <- R_fitglmm_ai_dense(Y, X, q, kins, ng, group.idx, sqrtW^2, tau, fixtau)
 		if(q2 > 0) {
 		        Dtau <- as.numeric(fit$Dtau)
 		      	tau[idxtau] <- tau0[idxtau] + Dtau
@@ -481,5 +482,64 @@ R_fitglmm_ai <- function(Y, X, q, kins, ng, group.idx, W, tau, fixtau) {
 		return(list(Dtau = Dtau, P = NULL, cov = cov, alpha = alpha, eta = eta, Sigma_i = Sigma_i, Sigma_iX = Sigma_iX))
 	}
 	return(list(Dtau = NULL, P = NULL, cov = cov, alpha = alpha, eta = eta, Sigma_i = Sigma_i, Sigma_iX = Sigma_iX))
+}
+
+R_fitglmm_ai_dense <- function(Y, X, q, kins, ng, group.idx, W, tau, fixtau) {
+	n <- nrow(X)
+	p <- ncol(X)
+	q2 <- sum(fixtau == 0)
+	diagSigma <- rep(0, n)
+	for(i in 1:ng) diagSigma[group.idx[[i]]] <- tau[i]/W[group.idx[[i]]]
+#	Sigma <- Diagonal(x = diagSigma)
+	Sigma <- diag(diagSigma)
+	for(i in 1:q) Sigma <- Sigma + tau[i+ng]*kins[[i]]
+##	Sigma <- forceSymmetric(Sigma)
+	Sigma_i <- chol2inv(chol(Sigma))
+	rm(Sigma)
+	gc()
+	Sigma_iX <- crossprod(Sigma_i, X)
+	XSigma_iX <- crossprod(X, Sigma_iX)
+#	XSigma_iX <- forceSymmetric(XSigma_iX)
+	cov <- chol2inv(chol(XSigma_iX))
+	Sigma_iXcov <- tcrossprod(Sigma_iX, cov)
+	P <- Sigma_i - tcrossprod(Sigma_iXcov, Sigma_iX)
+	alpha <- crossprod(cov, crossprod(Sigma_iX, Y))
+	eta <- Y - diagSigma*(crossprod(Sigma_i,Y)-tcrossprod(Sigma_iX,t(alpha)))
+	rm(Sigma_i)
+	gc()
+	if(q2 > 0) {
+	      	idxtau <- which(fixtau == 0)
+#		PY <- crossprod(Sigma_i, Y) - tcrossprod(Sigma_iX, t(crossprod(Sigma_iXcov, Y)))
+		PY <- crossprod(P, Y)
+		wPY <- PY/W
+#		diagP <- (diag(Sigma_i) - rowSums(Sigma_iX * Sigma_iXcov))/W
+		diagP <- diag(P)/W
+		AI <- matrix(NA, q2, q2)
+		score <- rep(NA, q2)
+		for(i in 1:q2) {
+		        if(idxtau[i] <= ng) {
+				score[i] <- sum(wPY[group.idx[[idxtau[i]]]] * PY[group.idx[[idxtau[i]]]] - diagP[group.idx[[idxtau[i]]]])
+				for(j in 1:i) {
+#				      	AI[i,j] <- sum(wPY[group.idx[[idxtau[i]]]] * crossprod(Sigma_i[group.idx[[idxtau[j]]], group.idx[[idxtau[i]]]], wPY[group.idx[[idxtau[j]]]])) - sum(crossprod(Sigma_iXcov[group.idx[[idxtau[i]]], ], wPY[group.idx[[idxtau[i]]]]) * crossprod(Sigma_iX[group.idx[[idxtau[j]]], ], wPY[group.idx[[idxtau[j]]]]))
+					AI[i,j] <- crossprod(wPY[group.idx[[idxtau[i]]]], crossprod(P[group.idx[[idxtau[j]]], group.idx[[idxtau[i]]]], wPY[group.idx[[idxtau[j]]]]))
+					if(j != i) AI[j,i] <- AI[i,j]
+				}
+			} else {
+#				APY <- crossprod(kins[[idxtau[i]-ng]], PY)
+#	        	        PAPY <- crossprod(Sigma_i, APY) - tcrossprod(Sigma_iX, t(crossprod(Sigma_iXcov, APY)))
+				PAPY <- crossprod(P, crossprod(kins[[idxtau[i]-ng]], PY))
+#				score[i] <- sum(Y * PAPY) - (sum(Sigma_i*kins[[idxtau[i]-ng]])-sum(Sigma_iX*crossprod(kins[[idxtau[i]-ng]],Sigma_iXcov)))
+				score[i] <- sum(Y * PAPY) - sum(P * kins[[idxtau[i]-ng]])
+				for(j in 1:i) {
+				      	if(idxtau[j] <= ng) AI[i,j] <- sum(wPY[group.idx[[idxtau[j]]]] * PAPY[group.idx[[idxtau[j]]]])
+					else AI[i,j] <- sum(PY * crossprod(kins[[idxtau[j]-ng]], PAPY))
+					if(j != i) AI[j,i] <- AI[i,j]
+				}
+			}
+		}
+		Dtau <- solve(AI, score)
+		return(list(Dtau = Dtau, P = P, cov = cov, alpha = alpha, eta = eta))
+	}
+	return(list(Dtau = NULL, P = P, cov = cov, alpha = alpha, eta = eta))
 }
 
