@@ -400,7 +400,7 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     groups <- unique(group.info$group)
     n.groups <- length(groups)
     group.info$group.idx <- as.numeric(factor(group.info$group))
-    group.info <- group.info[order(group.info$group.idx), ]
+    group.info <- group.info[order(group.info$group.idx, group.info$chr, group.info$pos), ]
     group.idx.end <- findInterval(1:n.groups, group.info$group.idx)
     group.idx.start <- c(1, group.idx.end[-n.groups] + 1)
     variant.id <- paste(group.info$group, group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")
