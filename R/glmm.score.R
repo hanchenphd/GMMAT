@@ -1,5 +1,6 @@
-glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", ncores = 1) {
-	if(class(obj) != "glmmkin") stop("Error: obj must be a class glmmkin object!")
+glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", is.dosage = FALSE, ncores = 1) {
+	if(!class(obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: obj must be a class glmmkin or glmmkin.multi object!")
+	n.pheno <- obj$n.pheno
 	if(any(duplicated(obj$id_include))) {
 		J <- Matrix(sapply(unique(obj$id_include), function(x) 1*(obj$id_include==x)), sparse = TRUE)
 		res <- as.vector(as.matrix(crossprod(J, obj$scaled.residuals)))
@@ -11,11 +12,13 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		}
 		rm(J)
 	} else res <- obj$scaled.residuals
+	n <- length(unique(obj$id_include))
 	miss.method <- try(match.arg(missing.method, c("impute2mean", "omit")))
 	if(class(miss.method) == "try-error") stop("Error: missing.method should be one of the following: impute2mean, omit!")
 	miss.method <- substr(miss.method, 1, 1)
 	if(all(file.exists(paste(infile, c("bim", "bed", "fam"), sep=".")))) {
 		if(ncores != 1) stop("Error: parallel computing currently not implemented for PLINK binary format genotypes.")
+		if(class(obj) == "glmmkin.multi") stop("Error: multiple	phenotypes currently not implemented for PLINK binary format genotypes.")
 		bimfile <- paste(infile, "bim", sep=".")
 		bedfile <- paste(infile, "bed", sep=".")
 		famfile <- paste(infile, "fam", sep=".")
@@ -64,7 +67,12 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		if(length(select) != length(sample.id)) stop("Error: number of individuals in select does not match infile!")
 		select2 <- select[select > 0]
 		if(any(duplicated(select2)) || max(select2) > length(unique(obj$id_include))) stop("Error: select is a vector of orders, individuals not in obj should be coded 0!")
-		res <- res[select2]
+		if(class(obj) == "glmmkin.multi") {
+			res <- res[select2, , drop = FALSE]
+			select2 <- rep(select2, n.pheno) + rep((0:(n.pheno-1))*n, each = length(select2))
+		} else {
+			res <- res[select2]
+		}
 		if(!is.null(obj$P)) obj$P <- obj$P[select2, select2]
 		else {
 			obj$Sigma_iX <- obj$Sigma_iX[select2, , drop = FALSE]
@@ -111,30 +119,51 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 					tmp.out <- lapply(1:((tmp.p-1) %/% nperbatch + 1), function(j) {
 						tmp2.variant.idx <- if(j == (tmp.p-1) %/% nperbatch + 1) tmp.variant.idx[((j-1)*nperbatch+1):tmp.p] else tmp.variant.idx[((j-1)*nperbatch+1):(j*nperbatch)]
 						SeqArray::seqSetFilter(gds, variant.id = tmp2.variant.idx, verbose = FALSE)
-						geno <- SeqVarTools::altDosage(gds, use.names = FALSE)
+						geno <- if(is.dosage) SeqVarTools::imputedDosage(gds, use.names = FALSE) else SeqVarTools::altDosage(gds, use.names = FALSE)
         					N <- nrow(geno) - colSums(is.na(geno))
 						if(center) geno <- scale(geno, scale = FALSE)
 						miss.idx <- which(is.na(geno))
 						if(length(miss.idx)>0) {
 							geno[miss.idx] <- if(!center & missing.method == "impute2mean") colMeans(geno, na.rm = TRUE)[ceiling(miss.idx/nrow(geno))] else 0
 						}
-						SCORE <- as.vector(crossprod(geno, res))
-						if(!is.null(obj$P)) VAR <- diag(crossprod(geno, crossprod(obj$P, geno)))
+						if(class(obj) == "glmmkin.multi") {
+							SCORE <- crossprod(res, geno)
+							geno <- Diagonal(n = n.pheno) %x% geno
+						} else {
+							SCORE <- as.vector(crossprod(geno, res))
+						}
+						if(!is.null(obj$P)) VAR <- crossprod(geno, crossprod(obj$P, geno))
 						else {
 							GSigma_iX <- crossprod(geno, obj$Sigma_iX)
-							VAR <- diag(crossprod(geno, crossprod(obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, obj$cov)))
+							VAR <- crossprod(geno, crossprod(obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, obj$cov))
 						}
-						PVAL <- ifelse(VAR>0, pchisq(SCORE^2/VAR, df=1, lower.tail=FALSE), NA)
-						return(rbind(N, SCORE, VAR, PVAL))
+						if(class(obj) == "glmmkin.multi") {
+							VAR_PVAL <- sapply(1:length(N), function(xx) {
+								VAR2 <- as.matrix(VAR[(0:(n.pheno-1))*length(N)+xx,(0:(n.pheno-1))*length(N)+xx])
+								PVAL <- try(pchisq(crossprod(SCORE[,xx], solve(VAR2, SCORE[,xx])), df = n.pheno, lower.tail = FALSE))
+								if(class(PVAL)[1] == "try-error") PVAL <- NA
+								c(VAR2[lower.tri(VAR2, diag = TRUE)], PVAL)
+							})
+							return(rbind(N, SCORE, VAR_PVAL))
+						} else {
+							VAR <- diag(VAR)
+							PVAL <- ifelse(VAR>0, pchisq(SCORE^2/VAR, df=1, lower.tail=FALSE), NA)
+							return(rbind(N, SCORE, VAR, PVAL))
+						}
 					})
-					tmp.out <- matrix(unlist(tmp.out), ncol = 4, byrow = TRUE, dimnames = list(NULL, c("N", "SCORE", "VAR", "PVAL")))
-					out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c("SCORE","VAR","PVAL")])
+					if(class(obj) == "glmmkin.multi") {
+						tmp.out <- matrix(unlist(tmp.out), ncol = 2+n.pheno+n.pheno*(n.pheno+1)/2, byrow = TRUE, dimnames = list(NULL, c("N", paste0("SCORE",1:n.pheno), paste0("VAR",rep(1:n.pheno,n.pheno:1),unlist(lapply(1:n.pheno,function(xx) xx:n.pheno))), "PVAL")))
+						out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c(paste0("SCORE",1:n.pheno), paste0("VAR",rep(1:n.pheno,n.pheno:1),unlist(lapply(1:n.pheno,function(xx) xx:n.pheno))), "PVAL")])
+					} else {
+						tmp.out <- matrix(unlist(tmp.out), ncol = 4, byrow = TRUE, dimnames = list(NULL, c("N", "SCORE", "VAR", "PVAL")))
+						out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c("SCORE","VAR","PVAL")])
+					}
 					names(out)[6] <- "N"
 					rm(tmp.out)
 					if(b == 1) {
-				     	        write.table(out, outfile, quote=FALSE, row.names=FALSE, col.names=(ii == 1), sep="\t", append=(ii > 1), na=".")
+				     	        write.table(out, outfile, quote=FALSE, row.names=FALSE, col.names=(ii == 1), sep="\t", append=(ii > 1), na="NA")
 					} else {
-			     	                write.table(out, paste0(outfile, "_tmp.", b), quote=FALSE, row.names=FALSE, col.names=FALSE, sep="\t", append=(ii > 1), na=".")
+			     	                write.table(out, paste0(outfile, "_tmp.", b), quote=FALSE, row.names=FALSE, col.names=FALSE, sep="\t", append=(ii > 1), na="NA")
 					}
 					rm(out)
 				}
@@ -179,27 +208,48 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 				tmp.out <- lapply(1:((tmp.p-1) %/% nperbatch + 1), function(j) {
 					tmp2.variant.idx <- if(j == (tmp.p-1) %/% nperbatch + 1) tmp.variant.idx[((j-1)*nperbatch+1):tmp.p] else tmp.variant.idx[((j-1)*nperbatch+1):(j*nperbatch)]
 					SeqArray::seqSetFilter(gds, variant.id = tmp2.variant.idx, verbose = FALSE)
-					geno <- SeqVarTools::altDosage(gds, use.names = FALSE)
+					geno <- if(is.dosage) SeqVarTools::imputedDosage(gds, use.names = FALSE) else SeqVarTools::altDosage(gds, use.names = FALSE)
        					N <- nrow(geno) - colSums(is.na(geno))
 					if(center) geno <- scale(geno, scale = FALSE)
 					miss.idx <- which(is.na(geno))
 					if(length(miss.idx)>0) {
 						geno[miss.idx] <- if(!center & missing.method == "impute2mean") colMeans(geno, na.rm = TRUE)[ceiling(miss.idx/nrow(geno))] else 0
 					}
-					SCORE <- as.vector(crossprod(geno, res))
-					if(!is.null(obj$P)) VAR <- diag(crossprod(geno, crossprod(obj$P, geno)))
+					if(class(obj) == "glmmkin.multi") {
+						SCORE <- crossprod(res, geno)
+						geno <- Diagonal(n = n.pheno) %x% geno
+					} else {
+						SCORE <- as.vector(crossprod(geno, res))
+					}
+					if(!is.null(obj$P)) VAR <- crossprod(geno, crossprod(obj$P, geno))
 					else {
 						GSigma_iX <- crossprod(geno, obj$Sigma_iX)
-						VAR <- diag(crossprod(geno, crossprod(obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, obj$cov)))
+						VAR <- crossprod(geno, crossprod(obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, obj$cov))
 					}
-					PVAL <- ifelse(VAR>0, pchisq(SCORE^2/VAR, df=1, lower.tail=FALSE), NA)
-					return(rbind(N, SCORE, VAR, PVAL))
+					if(class(obj) == "glmmkin.multi") {
+						VAR_PVAL <- sapply(1:length(N), function(xx) {
+							VAR2 <- as.matrix(VAR[(0:(n.pheno-1))*length(N)+xx,(0:(n.pheno-1))*length(N)+xx])
+							PVAL <- try(pchisq(crossprod(SCORE[,xx], solve(VAR2, SCORE[,xx])), df = n.pheno, lower.tail = FALSE))
+							if(class(PVAL)[1] == "try-error") PVAL <- NA
+							c(VAR2[lower.tri(VAR2, diag = TRUE)], PVAL)
+						})
+						return(rbind(N, SCORE, VAR_PVAL))
+					} else {
+						VAR <- diag(VAR)
+						PVAL <- ifelse(VAR>0, pchisq(SCORE^2/VAR, df=1, lower.tail=FALSE), NA)
+						return(rbind(N, SCORE, VAR, PVAL))
+					}
 				})
-				tmp.out <- matrix(unlist(tmp.out), ncol = 4, byrow = TRUE, dimnames = list(NULL, c("N", "SCORE", "VAR", "PVAL")))
-				out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c("SCORE","VAR","PVAL")])
+				if(class(obj) == "glmmkin.multi") {
+					tmp.out <- matrix(unlist(tmp.out), ncol = 2+n.pheno+n.pheno*(n.pheno+1)/2, byrow = TRUE, dimnames = list(NULL, c("N", paste0("SCORE",1:n.pheno), paste0("VAR",rep(1:n.pheno,n.pheno:1),unlist(lapply(1:n.pheno,function(xx) xx:n.pheno))), "PVAL")))
+					out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c(paste0("SCORE",1:n.pheno), paste0("VAR",rep(1:n.pheno,n.pheno:1),unlist(lapply(1:n.pheno,function(xx) xx:n.pheno))), "PVAL")])
+				} else {
+					tmp.out <- matrix(unlist(tmp.out), ncol = 4, byrow = TRUE, dimnames = list(NULL, c("N", "SCORE", "VAR", "PVAL")))
+					out <- cbind(out[,c("SNP","CHR","POS","REF","ALT")], tmp.out[,"N"], out[,c("MISSRATE","AF")], tmp.out[,c("SCORE","VAR","PVAL")])
+				}
 				names(out)[6] <- "N"
 				rm(tmp.out)
-			     	write.table(out, outfile, quote=FALSE, row.names=FALSE, col.names=(ii == 1), sep="\t", append=(ii > 1), na=".")
+			     	write.table(out, outfile, quote=FALSE, row.names=FALSE, col.names=(ii == 1), sep="\t", append=(ii > 1), na="NA")
 				rm(out)
 			}
 	        	SeqArray::seqClose(gds)
@@ -207,6 +257,7 @@ glmm.score <- function(obj, infile, outfile, center = T, select = NULL, MAF.rang
 		return(invisible(NULL))
 	} else { # text genotype files
 		if(ncores != 1) stop("Error: parallel computing currently not implemented for plain text format genotypes.")
+		if(class(obj) == "glmmkin.multi") stop("Error: multiple	phenotypes currently not implemented for plain text format genotypes.")
 		if(is.null(infile.nrow)) {
                         if(Sys.info()["sysname"] != "Linux") {
 				infile.nrow <- length(readLines(infile))

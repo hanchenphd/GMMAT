@@ -6,13 +6,13 @@ GMMAT links to R packages <a href="https://cran.r-project.org/web/packages/Rcpp/
 
 For optimal computational performance, it is recommended to use an R version configured with the Intel Math Kernel Library (or other fast BLAS/LAPACK libraries). See the <a href="https://software.intel.com/en-us/articles/using-intel-mkl-with-r">instructions</a> on building R with Intel MKL.
 ## Version
-The current version is 1.1.2 (October 11, 2019).
+The current version is 1.2.0 (May 14, 2020).
 ## License
 This software is licensed under GPL-3.
 ## Contact
 Please refer to the R help document of GMMAT for specific questions about each function. For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2 AT uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 ## Acknowledgments
-We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on GMMAT and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, and Jennifer Brody for help with parallel computing and App development in <a href="http://analysiscommons.com/">Analysis Commons</a>, a cloud computing platform. The GMMAT implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in <a href="http://analysiscommons.com/">Analysis Commons</a> is supported by NIH grant U01 HL120393.
+We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on GMMAT and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, Jennifer Brody for help with parallel computing and App development in <a href="http://analysiscommons.com/">Analysis Commons</a>, a cloud computing platform, Arthur Gilly for supporting reordered group definition files in SMMAT.meta, and Dr. Rounak Dey for supporting imputed dosage GDS files. The GMMAT implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in <a href="http://analysiscommons.com/">Analysis Commons</a> is supported by NIH grant U01 HL120393.
 ## References
 <p>If you use the single-variant test in GMMAT, please cite
 <li>Chen H, Wang C, Conomos MP, Stilp AM, Li Z, Sofer T, Szpiro AA, Chen W, Brehm JM, Celed&oacute;n JC, Redline S, Papanicolaou GJ, Thornton TA, Laurie CC, Rice K, Lin X. (2016) Control for Population Structure and Relatedness for Binary Traits in Genetic Association Studies via Logistic Mixed Models. <em>The American Journal of Human Genetics</em> <b>98(4):</b> 653-666. PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed/27018471">27018471</a>. PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4833218/">PMC4833218</a>. DOI: <a href="https://doi.org/10.1016/j.ajhg.2016.02.012">10.1016/j.ajhg.2016.02.012</a>.</li></p>

@@ -259,3 +259,47 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(out2, tmpout)
 })
 
+test_that("multiple phenotypes gaussian", {
+	skip_on_cran()
+
+	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
+	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")
+	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
+	set.seed(103)
+	kins <- example$GRM
+	tau1 <- matrix(c(3,0.5,0,0.5,2.5,-0.1,0,-0.1,3),3,3)
+	tau2 <- matrix(c(2.5,0.8,0.2,0.8,4.8,-0.1,0.2,-0.1,2.8),3,3)
+	kins.chol <- chol(tau1 %x% kins + tau2 %x% diag(400))
+	tmp <- as.vector(crossprod(kins.chol, rnorm(1200)))
+	x1 <- rnorm(400)
+	x2 <- rbinom(400,1,0.5)
+	pheno <- data.frame(id = 1:400, x1 = x1, x2 = x2, y1 = 0.5*x1+0.8*x2+tmp[1:400], y2 = x1-0.3*x2+tmp[401:800], y3 = x2+tmp[801:1200])
+	obj1 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"))
+	out1 <- SMMAT(obj1, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
+	expect_equal(signif(range(out1$B.pval)), signif(c(0.1446184, 0.9251768)))
+	expect_equal(signif(range(out1$E.pval)), signif(c(0.1290289, 0.8907589)))
+	obj2 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"))
+	out2 <- SMMAT(obj2, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
+	expect_equal(signif(range(out2$B.pval)), signif(c(0.0360646, 0.5596724)))
+	expect_equal(signif(range(out2$E.pval)), signif(c(0.0004170892, 0.6362776242)))
+
+	idx <- sample(nrow(pheno))
+	pheno <- pheno[idx, ]
+	obj1 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"))
+	tmpout <- SMMAT(obj1, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
+	expect_equal(out1, tmpout)
+	obj2 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"))
+	tmpout <- SMMAT(obj2, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
+	expect_equal(out2, tmpout)
+
+	idx <- sample(nrow(kins))
+	kins <- kins[idx, idx]
+	obj1 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"))
+	tmpout <- SMMAT(obj1, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
+	expect_equal(out1, tmpout)
+	obj2 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"))
+	tmpout <- SMMAT(obj2, gdsfile, group.file, MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
+	expect_equal(out2, tmpout)
+})
+

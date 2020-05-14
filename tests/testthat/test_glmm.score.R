@@ -1339,3 +1339,102 @@ test_that("longitudinal random time trend gaussian", {
 	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
 })
 
+test_that("multiple phenotypes gaussian", {
+	skip_on_cran()
+
+	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
+	data(example)
+	suppressWarnings(RNGversion("3.5.0"))
+	set.seed(103)
+	kins <- example$GRM
+	tau1 <- matrix(c(3,0.5,0,0.5,2.5,-0.1,0,-0.1,3),3,3)
+	tau2 <- matrix(c(2.5,0.8,0.2,0.8,4.8,-0.1,0.2,-0.1,2.8),3,3)
+	kins.chol <- chol(tau1 %x% kins + tau2 %x% diag(400))
+	tmp <- as.vector(crossprod(kins.chol, rnorm(1200)))
+	x1 <- rnorm(400)
+	x2 <- rbinom(400,1,0.5)
+	pheno <- data.frame(id = 1:400, x1 = x1, x2 = x2, y1 = 0.5*x1+0.8*x2+tmp[1:400], y2 = x1-0.3*x2+tmp[401:800], y3 = x2+tmp[801:1200])
+	obj1 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"))
+	select <- match(1:400, unique(obj1$id_include))
+	select[is.na(select)] <- 0
+	obj1.outfile.gds.noselect.1 <- tempfile()
+	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.1)
+	obj1.gds.noselect.1 <- read.table(obj1.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
+	obj1.outfile.gds.select.1 <- tempfile()
+	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.1)
+	obj1.gds.select.1 <- read.table(obj1.outfile.gds.select.1, header = TRUE, as.is = TRUE)
+	expect_equal(obj1.gds.noselect.1, obj1.gds.select.1)
+	expect_equal(signif(range(obj1.gds.select.1$PVAL), digits = 5), signif(c(0.009074957, 0.999072499), digits = 5))
+
+	obj2 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"))
+	select <- match(1:400, unique(obj2$id_include))
+	select[is.na(select)] <- 0
+	obj2.outfile.gds.noselect.1 <- tempfile()
+	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.1)
+	obj2.gds.noselect.1 <- read.table(obj2.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
+	obj2.outfile.gds.select.1 <- tempfile()
+	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.1)
+	obj2.gds.select.1 <- read.table(obj2.outfile.gds.select.1, header = TRUE, as.is = TRUE)
+	expect_equal(obj2.gds.noselect.1, obj2.gds.select.1)
+	expect_equal(signif(range(obj2.gds.select.1$PVAL)), signif(c(2.591209e-05, 9.961137e-01)))
+
+	idx <- sample(nrow(pheno))
+	pheno <- pheno[idx, ]
+	obj1 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"))
+	select <- match(1:400, unique(obj1$id_include))
+	select[is.na(select)] <- 0
+	obj1.outfile.gds.noselect.2 <- tempfile()
+	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.2)
+	obj1.gds.noselect.2 <- read.table(obj1.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
+	expect_equal(obj1.gds.noselect.1, obj1.gds.noselect.2)
+	obj1.outfile.gds.select.2 <- tempfile()
+	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.2)
+	obj1.gds.select.2 <- read.table(obj1.outfile.gds.select.2, header = TRUE, as.is = TRUE)
+	expect_equal(obj1.gds.select.1, obj1.gds.select.2)
+
+	obj2 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"))
+	select <- match(1:400, unique(obj2$id_include))
+	select[is.na(select)] <- 0
+	obj2.outfile.gds.noselect.2 <- tempfile()
+	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.2)
+	obj2.gds.noselect.2 <- read.table(obj2.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
+	expect_equal(obj2.gds.noselect.1, obj2.gds.noselect.2)
+	obj2.outfile.gds.select.2 <- tempfile()
+	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.2)
+	obj2.gds.select.2 <- read.table(obj2.outfile.gds.select.2, header = TRUE, as.is = TRUE)
+	expect_equal(obj2.gds.select.1, obj2.gds.select.2)
+
+	idx <- sample(nrow(kins))
+	kins <- kins[idx, idx]
+	obj1 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"))
+	select <- match(1:400, unique(obj1$id_include))
+	select[is.na(select)] <- 0
+	obj1.outfile.gds.noselect.3 <- tempfile()
+	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.3)
+	obj1.gds.noselect.3 <- read.table(obj1.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
+	expect_equal(obj1.gds.noselect.1, obj1.gds.noselect.3)
+	obj1.outfile.gds.select.3 <- tempfile()
+	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.3)
+	obj1.gds.select.3 <- read.table(obj1.outfile.gds.select.3, header = TRUE, as.is = TRUE)
+	expect_equal(obj1.gds.select.1, obj1.gds.select.3)
+
+	obj2 <- glmmkin(cbind(y1,y2,y3)~x1+x2, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"))
+	select <- match(1:400, unique(obj2$id_include))
+	select[is.na(select)] <- 0
+	obj2.outfile.gds.noselect.3 <- tempfile()
+	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.3)
+	obj2.gds.noselect.3 <- read.table(obj2.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
+	expect_equal(obj2.gds.noselect.1, obj2.gds.noselect.3)
+	obj2.outfile.gds.select.3 <- tempfile()
+	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.3)
+	obj2.gds.select.3 <- read.table(obj2.outfile.gds.select.3, header = TRUE, as.is = TRUE)
+	expect_equal(obj2.gds.select.1, obj2.gds.select.3)
+
+	unlink(c(obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1))
+	unlink(c(obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1))
+	unlink(c(obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2))
+	unlink(c(obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2))
+	unlink(c(obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3))
+	unlink(c(obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3))
+})
+

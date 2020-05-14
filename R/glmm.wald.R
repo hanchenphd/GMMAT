@@ -1,5 +1,5 @@
-glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), infile, snps, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, center = T, select = NULL, missing.method = "impute2mean", infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", verbose = FALSE, ...) {
-        if(!is.null(kins) && !class(kins) %in% c("matrix", "list")) {
+glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), infile, snps, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, center = T, select = NULL, missing.method = "impute2mean", infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", is.dosage = FALSE, verbose = FALSE, ...) {
+        if(!is.null(kins) && !class(kins)[1] %in% c("matrix", "list")) {
                 if(is.null(attr(class(kins), "package"))) stop("Error: \"kins\" must be a matrix or a list.")
                 else if(attr(class(kins), "package") != "Matrix") stop("Error: if \"kins\" is a sparse matrix, it must be created using the Matrix package.")
         }
@@ -10,9 +10,9 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 		stop("Error: \"method.optim\" must be \"AI\", \"Brent\" or \"Nelder-Mead\".")
 	if(method.optim == "AI" && method == "ML")
 		stop("Error: method \"ML\" not available for method.optim \"AI\", use method \"REML\" instead.")
-	if(method.optim == "Brent" && class(kins) == "list")
+	if(method.optim == "Brent" && class(kins)[1] == "list")
 		stop("Error: method.optim \"Brent\" can only be applied in one-dimensional optimization, use a matrix for \"kins\".")
-        if(method.optim != "AI" && ((!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix") || (class(kins) == "list" && any(sapply(kins, function(xx) !is.null(attr(class(xx), "package")) && attr(class(xx), "package") == "Matrix")))))
+        if(method.optim != "AI" && ((!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix") || (class(kins)[1] == "list" && any(sapply(kins, function(xx) !is.null(attr(class(xx), "package")) && attr(class(xx), "package") == "Matrix")))))
                 stop("Error: sparse matrices can only be handled by method.optim \"AI\".")
 	if(class(family) != "family")
 		stop("Error: \"family\" must be an object of class \"family\".")
@@ -29,7 +29,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
                 if(!random.slope %in% names(data)) stop("Error: \"random.slope\" must be one of the variables in the names of \"data\".")
         }
 	if(!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix")  kins <- list(kins1 = kins)
-        if(method.optim != "Brent" && class(kins) == "matrix") kins <- list(kins1 = kins)
+        if(method.optim != "Brent" && class(kins)[1] == "matrix") kins <- list(kins1 = kins)
 	miss.method <- try(match.arg(missing.method, c("impute2mean", "omit")))
 	if(class(miss.method) == "try-error") stop("Error: missing.method should be one of the following: impute2mean, omit!")
 	miss.method <- substr(miss.method, 1, 1)
@@ -112,12 +112,12 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
                         rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[, id])
                 }
         } else if(!is.null(random.slope)) stop("Error: \"random.slope\" must be used for longitudinal data with duplicated \"id\".")
-	if(class(kins) == "matrix") {
+	if(class(kins)[1] == "matrix") {
 		match.idx1 <- match(data[, id], rownames(kins))
 		match.idx2 <- match(data[, id], colnames(kins))
 		if(any(is.na(c(match.idx1, match.idx2)))) stop("Error: kins matrix does not include all individuals in the data.")
 		kins <- kins[match.idx1, match.idx2]
-	} else if(class(kins) == "list") {
+	} else if(class(kins)[1] == "list") {
 	        for(i in 1:length(kins)) {
 		      	match.idx1 <- match(data[, id], rownames(kins[[i]]))
 			match.idx2 <- match(data[, id], colnames(kins[[i]]))
@@ -143,7 +143,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 				SeqArray::seqSetFilter(gds, variant.id = variant.idx[variant.id == snp], verbose = FALSE)
 				alleles <- strsplit(SeqArray::seqGetData(gds, "allele"), ",")
 				readfile <- list(snpinfo = c(snp, SeqArray::seqGetData(gds, "chromosome"), SeqArray::seqGetData(gds, "position"), alleles[[1]][1], paste(alleles[[1]][-1], collapse=",")))
-				geno <- SeqVarTools::altDosage(gds, use.names = FALSE)
+				geno <- if(is.dosage) SeqVarTools::imputedDosage(gds, use.names = FALSE) else SeqVarTools::altDosage(gds, use.names = FALSE)
 				geno <- as.numeric(geno)[select>0][order(select[select>0])]
 				readfile$N <- sum(!is.na(geno))
 				readfile$AF <- mean(geno, na.rm = TRUE)/2
@@ -174,7 +174,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 			if(readfile$skip != 1) { # snp
 				data$SNP__ <- as.numeric(readfile$G)[data.idx]
 				data$SNP__[data$SNP__ < (-999)] <- NA
-				fit0 <- glm(formula = as.formula(paste(paste(deparse(fixed), collapse = ""), "SNP__", sep=" + ")), data = data, family = family, ...)
+				fit0 <- do.call("glm", list(formula = as.formula(paste(paste(deparse(fixed), collapse = ""), "SNP__", sep=" + ")), data = data, family = family, ...))
 				if(is.null(kins)) {
 					coef <- summary(fit0)$coef
                                         BETA[ii] <- coef[nrow(coef), 1]
@@ -185,7 +185,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 				}
 				idx <- match(rownames(model.frame(formula = as.formula(paste(paste(deparse(fixed), collapse = ""), "SNP__", sep=" + ")), data = data, na.action = na.omit)), rownames(model.frame(formula = as.formula(paste(paste(deparse(fixed), collapse = ""), "SNP__", sep=" + ")), data = data, na.action = na.pass)))
 				tmpkins <- kins
-				if(class(tmpkins) == "matrix") tmpkins <- tmpkins[idx, idx]
+				if(class(tmpkins)[1] == "matrix") tmpkins <- tmpkins[idx, idx]
 				else {
 				        for(i in 1:length(tmpkins)) tmpkins[[i]] <- tmpkins[[i]][idx, idx]
 				}

@@ -52,6 +52,7 @@ infile3 <- system.file("extdata", "meta3.txt", package = "GMMAT")
 outfile <- "glmm.score.meta.testoutfile.txt"
 glmm.score.meta(files = c(infile1, infile2, infile3), outfile = outfile,
 	SNP = rep("SNP", 3), A1 = rep("A1", 3), A2 = rep("A2", 3))
+unlink(outfile)
 }
 }
 \keyword{ meta-analysis }

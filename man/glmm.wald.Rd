@@ -14,7 +14,7 @@ glmm.wald(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL,
 	select = NULL, missing.method = "impute2mean", infile.nrow = NULL, 
 	infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", 
 	snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, 
-	infile.header.print = "SNP", verbose = FALSE, ...)
+	infile.header.print = "SNP", is.dosage = FALSE, verbose = FALSE, ...)
 }
 \arguments{
   \item{fixed}{
@@ -97,6 +97,9 @@ a vector indicating which column(s) in \code{infile} should be shown in the resu
 }
   \item{infile.header.print}{
 a character vector indicating column name(s) of column(s) selected to print by \code{infile.ncol.print} (default = "SNP"). Only used when \code{infile} is a plain text file (or compressed .gz or .bz2 file).
+}
+  \item{is.dosage}{
+a logical switch for whether imputed dosage should be used from a GDS \code{infile} (default = FALSE).
 }
   \item{verbose}{
 a logical switch for printing detailed information (parameter estimates in each iteration) for testing and debugging purpose (default = FALSE).

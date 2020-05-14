@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.1.2}
-\date{October 11, 2019}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.2.0}
+\date{May 14, 2020}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -89,9 +89,15 @@ Typically, the time-dependent variable of interest $T_{ij}$ should be included i
 
 Variant set tests for longitudinal data in the SMMAT framework are similarly defined, for both random intercept only models (repeated, exchangeable measures), and random intercept and random slope models (time trends).
 
+For multiple phenotype analysis, $m$ continuous traits can be jointly modeled in LMMs. Let $\mb{Y}$ be an $n\times m$ matrix of phenotypes, $\mb{X}$ be an $n\times p$ matrix of covariates, $\bs\alpha$ be a $p\times m$ matrix of fixed covariate effects including the intercept, $\mb{G}$ be an $n\times q$ matrix of genotypes (note that for single variant analysis, $q=1$), $\bs\beta$ be a $q\times m$ matrix of genotype effects, $\mb{b}$ be an $n\times m$ matrix of random effects, $\bs\varepsilon$ be an $n\times m$ matrix of random errors, we have
+\begin{equation}
+\mb{Y}=\mb{X}\bs\alpha+\mb{G}\bs\beta+\mb{b}+\bs\varepsilon.\nonumber
+\end{equation}
+In this joint model, $\bs\varepsilon$ follow a matrix normal distribution $\mathcal{MN}_{n\times m}(\mb{0}, \mb{I}_n, \bs\Psi_0)$, such that the vectorized form $vec(\bs\varepsilon)\sim \mathcal{N}_{nm}(\mb{0}, \bs\Psi_0\otimes\mb{I}_n)$, where $\bs\Psi_0$ is an $m\times m$ variance-covariance matrix for residuals of $m$ continuous traits. The vectorized form of the random effects $vec(\mb{b})\sim \mathcal{N}_{nm}(\mb{0}, \sum_{k=1}^K\bs\Psi_k\otimes\mb{V}_k)$, where $m\times m$ matrices $\bs\Psi_k$ are the variance-covariance component parameters for $m$ continous traits, corresponding to known $n\times n$ between-subject relatedness matrices $\mb{V}_k$. Once a null model without any genetic effects is fitted, the multiple phenotype single variant test $H_0: \bs\beta=\mb{0}$ versus $H_1: \bs\beta\ne \mb{0}$ can proceed using a chi-square distribution with $m$ degrees of freedom. Variant set tests for multiple phenotypes are currently defined as the burden test, SKAT, SKAT-O, and SMMAT efficient hybrid test on all $qm$ parameters in $\bs\beta$. Therefore, it is recommended that multiple phenotypes are rescaled to the same variance before conducting variant set tests.
+
 \section{Getting started}
 \subsection{Downloading \textit{GMMAT}}
-\textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package.
+\textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package. It is also available on CRAN (\url{https://CRAN.R-project.org/package=GMMAT}).
 
 \subsection{Installing \textit{GMMAT}}
 \textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, \href{https://cran.r-project.org/web/packages/Matrix/index.html}{Matrix}, methods, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
@@ -111,7 +117,7 @@ devtools::install_github("hanchenphd/GMMAT")
 @
 
 \subsection{Using \textit{GMMAT} in Analysis Commons}
-The current version of the \textit{GMMAT} package (version 1.0.0) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v1.0.0" App in Project "Commons\_Tools".
+The \textit{GMMAT} package (version 1.1.2) is also available in Analysis Commons \cite{Brody2017} on DNAnexus cloud computing platform (\url{https://platform.dnanexus.com/}), as the "gmmat\_v1.1.2" App in Project "Commons\_Tools".
 
 \section{Input}
 \textit{GMMAT} requires the phenotype and covariates in an R data frame, known positive semi-definite matrices $\mb{V}_k$ as an R matrix (in the case of a single matrix) or an R list (in the case of multiple matrices), and genotypes saved in a plain text file (or in a compressed plain text file .gz or .bz2), a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file}, or in a GDS format file. We describe how to prepare these data below.
@@ -719,11 +725,22 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Fixed a bug in \textbf{glmm.score} and \textbf{glmm.wald} for analyzing plain text genotype files on Mac OS.
 \end{enumerate}
 
+\subsection{Version 1.2.0 (May 14, 2020)}
+\begin{enumerate}
+\item Implemented multiple phenotype analysis in \textbf{glmmkin}, \textbf{glmm.score} and \textbf{SMMAT}.
+\item Added names to theta, coefficients, cov in \textbf{glmmkin} results.
+\item Changed the logical expression in \textbf{glmmkin} and \textbf{glmm.wald} for testing if "kins" is a matrix (matrix objects now also inherit from class "array").
+\item Fixed a bug in \textbf{glmmkin} and \textbf{glmm.wald} when passing \dots arguments.
+\item Changed missing values to NA in \textbf{glmm.score} output for the GDS genotype format.
+\item Supported reordered group definition files in \textbf{SMMAT.meta}, as long as chr:pos is a unique variant identifier (thanks to Arthur Gilly).
+\item Supported imputed dosage GDS files (in the node annotation/format/DS/data) (thanks to Rounak Dey).
+\end{enumerate}
+
 \section{Contact}
 Please refer to the R help document of \textit{GMMAT} for specific questions about each function. For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 \section{Acknowledgments}
-We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, Dr. Ken Rice for help with sparse matrices, and Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
+We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, Dr. Ken Rice for help with sparse matrices, Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform, Arthur Gilly for supporting reordered group definition files in \textbf{SMMAT.meta}, and Dr. Rounak Dey for supporting imputed dosage GDS files. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
 
 \begin{thebibliography}{}
 

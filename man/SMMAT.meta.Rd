@@ -113,6 +113,7 @@ out <- SMMAT(model0, geno.file, group.file, meta.file.prefix = "SMMAT.meta",
 print(out)
 out1 <- SMMAT.meta("SMMAT.meta", group.file = group.file)
 print(out1)
+unlink(paste0("SMMAT.meta.", c("score", "var"), ".1"))
 }
 }
 \keyword{ variant set-based test }

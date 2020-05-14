@@ -1,9 +1,11 @@
-SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, auto.flip = FALSE, Garbage.Collection = FALSE, ncores = 1)
+SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, auto.flip = FALSE, Garbage.Collection = FALSE, is.dosage = FALSE, ncores = 1)
 {
     if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
         warning("The package doMC is not available on Windows... Switching to single thread...")
         ncores <- 1
     }
+    if(!class(null.obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
+    n.pheno <- null.obj$n.pheno
     missing.method <- try(match.arg(missing.method, c("impute2mean", "impute2zero")))
     if(class(missing.method) == "try-error") stop("Error: \"missing.method\" must be \"impute2mean\" or \"impute2zero\".")
     if(any(!tests %in% c("B", "S", "O", "E"))) stop("Error: \"tests\" should only include \"B\" for the burden test, \"S\" for SKAT, \"O\" for SKAT-O or \"E\" for the efficient hybrid test of the burden test and SKAT.")
@@ -22,6 +24,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	}
         rm(J)
     } else residuals <- null.obj$scaled.residuals
+    n <- length(unique(null.obj$id_include))
     if(!grepl("\\.gds$", geno.file)) stop("Error: currently only .gds format is supported in geno.file!")
     gds <- SeqArray::seqOpen(geno.file)
     sample.id <- SeqArray::seqGetData(gds, "sample.id")
@@ -29,7 +32,12 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     sample.id <- sample.id[sample.id %in% null.obj$id_include]
     if(length(sample.id) == 0) stop("Error: null.obj$id_include does not match sample.id in geno.file!")
     match.id <- match(sample.id, unique(null.obj$id_include))
-    residuals <- residuals[match.id]
+    if(class(null.obj) == "glmmkin.multi") {
+        residuals <- residuals[match.id, , drop = FALSE]
+    	match.id <- rep(match.id, n.pheno) + rep((0:(n.pheno-1))*n, each = length(match.id))
+    } else {
+        residuals <- residuals[match.id]
+    }
     if(!is.null(null.obj$P)) null.obj$P <- null.obj$P[match.id, match.id]
     else {
     	null.obj$Sigma_iX <- null.obj$Sigma_iX[match.id, , drop = FALSE]
@@ -115,6 +123,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    }
     	    if(SMMAT) SMMAT.pval <- rep(NA, n.groups)
 	    if(!is.null(meta.file.prefix)) {
+	    	if(class(null.obj) == "glmmkin.multi") stop("Error: meta-analysis not supported yet for multiple phenotypes.")
 	        if(.Platform$endian!="little") stop("Error: platform must be little endian.")
 		meta.file.score <- paste0(meta.file.prefix, ".score.", b)
 		meta.file.var <- paste0(meta.file.prefix, ".var.", b)
@@ -125,7 +134,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     	    	tmp.idx <- group.idx.start[idx[i]]:group.idx.end[idx[i]]
 		tmp.group.info <- group.info[tmp.idx, , drop = FALSE]
 	    	SeqArray::seqSetFilter(gds, variant.id = tmp.group.info$variant.idx, verbose = FALSE)
-                geno <- SeqVarTools::altDosage(gds, use.names = FALSE)
+                geno <- if(is.dosage) SeqVarTools::imputedDosage(gds, use.names = FALSE) else SeqVarTools::altDosage(gds, use.names = FALSE)
                 miss <- colMeans(is.na(geno))
                 freq <- colMeans(geno, na.rm = TRUE)/2
 	    	include <- (miss <= miss.cutoff & ((freq >= MAF.range[1] & freq <= MAF.range[2]) | (freq >= 1-MAF.range[2] & freq <= 1-MAF.range[1])))
@@ -145,7 +154,8 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    	    geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    	}
 	    	U <- as.vector(crossprod(geno, residuals))
-	    	if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
+		if(class(null.obj) == "glmmkin.multi") geno <- Diagonal(n = n.pheno) %x% geno
+		if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
 		else {
 		    GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
 		    V <- crossprod(geno, crossprod(null.obj$Sigma_i, geno)) - tcrossprod(GSigma_iX, tcrossprod(GSigma_iX, null.obj$cov))
@@ -161,7 +171,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 		    tmp.group.info$weight[freq > 0.5] <- -tmp.group.info$weight[freq > 0.5]
 		    freq[freq > 0.5] <- 1 - freq[freq > 0.5]
 		}
-		tmp.group.info$weight <- tmp.group.info$weight * MAF.weights.beta.fun(freq, MAF.weights.beta[1], MAF.weights.beta[2])
+		weights <- rep(tmp.group.info$weight * MAF.weights.beta.fun(freq, MAF.weights.beta[1], MAF.weights.beta[2]), n.pheno)
 	    	n.variants[i] <- n.p
 	    	miss.min[i] <- min(miss)
 	    	miss.mean[i] <- mean(miss)
@@ -169,8 +179,8 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    	freq.min[i] <- min(freq)
 	    	freq.mean[i] <- mean(freq)
 	    	freq.max[i] <- max(freq)
-		U <- U*tmp.group.info$weight
-		V <- t(V*tmp.group.info$weight)*tmp.group.info$weight
+		U <- U*weights
+		V <- t(V*weights)*weights
 		if(max(V)-min(V) < sqrt(.Machine$double.eps)) {
 	    	    burden.score <- sum(U)
     	    	    burden.var <- sum(V)
@@ -257,6 +267,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	}
     	if(SMMAT) SMMAT.pval <- rep(NA, n.groups)
     	if(!is.null(meta.file.prefix)) {
+	    if(class(null.obj) == "glmmkin.multi") stop("Error: meta-analysis not supported yet for multiple phenotypes.")
             if(.Platform$endian!="little") stop("Error: platform must be little endian.")
 	    meta.file.score <- paste0(meta.file.prefix, ".score.1")
 	    meta.file.var <- paste0(meta.file.prefix, ".var.1")
@@ -267,7 +278,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     	    tmp.idx <- group.idx.start[i]:group.idx.end[i]
 	    tmp.group.info <- group.info[tmp.idx, , drop = FALSE]
     	    SeqArray::seqSetFilter(gds, variant.id = tmp.group.info$variant.idx, verbose = FALSE)
-            geno <- SeqVarTools::altDosage(gds, use.names = FALSE)
+            geno <- if(is.dosage) SeqVarTools::imputedDosage(gds, use.names = FALSE) else SeqVarTools::altDosage(gds, use.names = FALSE)
             miss <- colMeans(is.na(geno))
             freq <- colMeans(geno, na.rm = TRUE)/2
 	    include <- (miss <= miss.cutoff & ((freq >= MAF.range[1] & freq <= MAF.range[2]) | (freq >= 1-MAF.range[2] & freq <= 1-MAF.range[1])))
@@ -287,6 +298,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    	geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    }
 	    U <- as.vector(crossprod(geno, residuals))
+	    if(class(null.obj) == "glmmkin.multi") geno <- Diagonal(n = n.pheno) %x% geno
     	    if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
 	    else {
 		GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
@@ -303,7 +315,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 		tmp.group.info$weight[freq > 0.5] <- -tmp.group.info$weight[freq > 0.5]
 		freq[freq > 0.5] <- 1 - freq[freq > 0.5]
 	    }
-	    tmp.group.info$weight <- tmp.group.info$weight * MAF.weights.beta.fun(freq, MAF.weights.beta[1], MAF.weights.beta[2])
+	    weights <- rep(tmp.group.info$weight * MAF.weights.beta.fun(freq, MAF.weights.beta[1], MAF.weights.beta[2]), n.pheno)
 	    n.variants[i] <- n.p
 	    miss.min[i] <- min(miss)
 	    miss.mean[i] <- mean(miss)
@@ -311,8 +323,8 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    freq.min[i] <- min(freq)
 	    freq.mean[i] <- mean(freq)
 	    freq.max[i] <- max(freq)
-	    U <- U*tmp.group.info$weight
-	    V <- t(V*tmp.group.info$weight)*tmp.group.info$weight
+	    U <- U*weights
+	    V <- t(V*weights)*weights
 	    if(max(V)-min(V) < sqrt(.Machine$double.eps)) {
 	        burden.score <- sum(U)
     	        burden.var <- sum(V)

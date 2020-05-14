@@ -13,11 +13,12 @@ SMMAT(null.obj, geno.file, group.file, group.file.sep = "\t",
 	missing.method = "impute2mean", method = "davies", 
 	tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 
 	0.5^2, 0.5, 1), use.minor.allele = FALSE, 
-	auto.flip = FALSE, Garbage.Collection = FALSE, ncores = 1)
+	auto.flip = FALSE, Garbage.Collection = FALSE,
+	is.dosage = FALSE, ncores = 1)
 }
 \arguments{
   \item{null.obj}{
-a class glmmkin object, returned by fitting the null GLMM using \code{glmmkin( )}.
+a class glmmkin or a class glmmkin.multi object, returned by fitting the null GLMM using \code{glmmkin( )}.
 }
   \item{geno.file}{
 a .gds file for the full genotypes. The \code{sample.id} in \code{geno.file} should overlap \code{id_include} in \code{null.obj}. It is recommended that \code{sample.id} in \code{geno.file} include the full samples (at least all samples as specified in \code{id_include} of \code{null.obj}). It is not necessary for the user to take a subset of \code{geno.file} before running the analysis.
@@ -60,6 +61,9 @@ a logical switch for whether to enable automatic allele flipping if a variant wi
 }
   \item{Garbage.Collection}{
 a logical switch for whether to enable garbage collection in each test (default = FALSE). Pay for memory efficiency with slower computation speed.
+}
+  \item{is.dosage}{
+a logical switch for whether imputed dosage should be used from \code{geno.file} (default = FALSE).
 }
   \item{ncores}{
 a positive integer indicating the number of cores to be used in parallel computing (default = 1).
