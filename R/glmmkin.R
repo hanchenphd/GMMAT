@@ -25,6 +25,7 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
 		if(!groups %in% names(data)) stop("Error: \"groups\" must be one of the variables in the names of \"data\".")
 	}
 	if(!id %in% names(data)) stop("Error: \"id\" must be one of the variables in the names of \"data\".")
+	if("data.frame" %in% class(data) && length(class(data)) > 1) data <- as.data.frame(data)
 	if(!is.null(random.slope)) {
 		if(method.optim != "AI") stop("Error: random slope for longitudinal data is currently only implemented for method.optim \"AI\".")
 		if(!random.slope %in% names(data)) stop("Error: \"random.slope\" must be one of the variables in the names of \"data\".")
