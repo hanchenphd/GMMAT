@@ -1,0 +1,31 @@
+PLINK v2.00a2.3 64-bit (24 Jan 2020)
+Options in effect:
+  --bgen gmmat_bgen.bgen
+  --geno 0
+  --make-bed
+  --out plink1
+
+Hostname: LAPTOP-MRQ21C7G
+Working directory: C:\Users\duytp\Desktop
+Start time: Thu Jul 09 14:34:39 2020
+
+Warning: No --bgen REF/ALT mode specified ('ref-first', 'ref-last', or
+'ref-unknown').  This will be required as of alpha 3.
+Random number seed: 1594323279
+16233 MiB RAM detected; reserving 8116 MiB for main workspace.
+Using up to 12 threads (change this with --threads).
+--bgen: 99 variants detected, format v1.2.
+--bgen: 400 sample IDs written to plink1-temporary.psam .
+--bgen: plink1-temporary.pgen + plink1-temporary.pvar written.
+400 samples (0 females, 0 males, 400 ambiguous; 400 founders) loaded from
+plink1-temporary.psam.
+99 variants loaded from plink1-temporary.pvar.
+Note: No phenotype data present.
+Calculating allele frequencies... done.
+--geno: 0 variants removed due to missing genotype data.
+99 variants remaining after main filters.
+Writing plink1.fam ... done.
+Writing plink1.bim ... done.
+Writing plink1.bed ... done.
+
+End time: Thu Jul 09 14:34:39 2020

@@ -7,7 +7,7 @@ Performing GLMM based score tests
 Use a glmmkin class object from the null GLMM to perform score tests for association with genotypes in a plink .bed file (binary genotypes), a GDS file .gds, or a plain text file (or compressed .gz or .bz2 file).
 }
 \usage{
-glmm.score(obj, infile, outfile, center = T, select = NULL, 
+glmm.score(obj, infile, outfile, BGEN.samplefile = NULL, center = T, select = NULL, 
 	MAF.range = c(1e-7, 0.5), miss.cutoff = 1, 
 	missing.method = "impute2mean", nperbatch = 100, tol = 1e-5,
 	infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t",
@@ -23,6 +23,9 @@ the input file name. Note that for plink binary genotype files only the prefix w
 }
   \item{outfile}{
 the output file name.
+}
+  \item{BGEN.samplefile}{
+Path to the BGEN sample file. Required when the BGEN file does not contain sample identifiers or the 'select' parameter is NULL (default = NULL).
 }
   \item{center}{
 a logical switch for centering genotypes before tests. If TRUE, genotypes will be centered to have mean 0 before tests, otherwise raw values will be directly used in tests (default = TRUE).
