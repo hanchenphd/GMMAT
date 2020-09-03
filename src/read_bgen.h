@@ -80,8 +80,8 @@ extern "C"
     uint maxLA = 65536;
     vector<string> samVec;
     if (SampleID == 1){
-      uint LS;  if(!fread(&LS,  4, 1, bStream)) { Rcout << "Error reading BGEN file: Cannot read length of sample block value.\n"; return R_NilValue; }
-      uint Nid; if(!fread(&Nid, 4, 1, bStream)) { Rcout << "Error reading BGEN file: Cannot read the number of sample identifiers.\n"; return R_NilValue;}
+      uint LS;  if(!fread(&LS,  4, 1, bStream)) {  Rcout << "Error reading BGEN file: Cannot read length of sample block value.\n"; return R_NilValue; }
+      uint Nid; if(!fread(&Nid, 4, 1, bStream)) {  Rcout << "Error reading BGEN file: Cannot read the number of sample identifiers.\n"; return R_NilValue;}
       
       if (Nid != Nbgen) {
         Rcout << "Error reading BGEN file: Number of sample identifiers (" << Nid<< ") does not match number of samples specified in BGEN header block (" << Nbgen << ").\n"; return R_NilValue;
@@ -89,14 +89,13 @@ extern "C"
       
       samVec.resize(Nid);
       char* samID = new char[maxLA + 1];
-      int ret;
+ 
       for (uint n = 0; n < Nid; n++) {
-        ushort LSID; ret = fread(&LSID, 2, 1, bStream);
-        ret = fread(samID, 1, LSID, bStream); samID[LSID] = '\0';
-        samVec[n] = string(samID);
-      }
-      if (ret == 0){
-	 Rcout << "Error reading BGEN file: Cannot read in sample identifiers.\n"; return R_NilValue;
+          ushort LSID;
+          if (!fread(&LSID, 2, 1, bStream)) { Rcout << "Error reading BGEN file: Cannot read in sample identifiers.\n"; return R_NilValue; }
+          if (!fread(samID, 1, LSID, bStream)) { Rcout << "Error reading BGEN file: Cannot read in sample identifiers.\n"; return R_NilValue; }
+          samID[LSID] = '\0';
+          samVec[n] = string(samID);
       }
     }
     
@@ -151,8 +150,10 @@ extern "C"
     fseek(fin, offset + 4, SEEK_SET);
       
     uint index = 0;
-    int ret;
+ 
+
     for (uint snploop = 0; snploop < mbgen; snploop++) {
+      int ret;
       if (snploop == begin[index]) {
         bgenVariantPos[index] = ftell(fin);
         index++;
@@ -217,6 +218,8 @@ extern "C"
         }
         
       }
+
+      if (ret == 0) { Rcout << "Error reading BGEN file : Cannot parse variant block.\n"; return R_NilValue; }
     }
     
     fclose(fin);
