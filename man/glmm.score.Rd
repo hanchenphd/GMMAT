@@ -106,7 +106,11 @@ outfile <- "glmm.score.text.testoutfile.txt"
 glmm.score(model0, infile = infile, outfile = outfile, infile.nrow.skip = 5, 
 	infile.ncol.skip = 3, infile.ncol.print = 1:3, 
 	infile.header.print = c("SNP", "Allele1", "Allele2"))
-unlink(paste0("glmm.score.", c("bed", "gds", "text"), ".testoutfile.txt"))
+infile <- system.file("extdata", "geno.bgen", package = "GMMAT")
+samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
+outfile <- "glmm.score.bgen.testoutfile.txt"
+glmm.score(model0, infile = infile, BGEN.samplefile = samplefile, outfile = outfile)
+unlink(paste0("glmm.score.", c("bed", "gds", "text","bgen"), ".testoutfile.txt"))
 }
 }
 \keyword{ generalized linear mixed model }

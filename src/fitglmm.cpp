@@ -2411,7 +2411,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
       bool isMultiThread = Rcpp::as<bool>(isMultiThread_in);
       if (!isMultiThread){
-        writefile << "SNPID\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
+        writefile << "SNP\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
       }
       
       int ret;
@@ -2665,7 +2665,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
       bool isMultiThread = Rcpp::as<bool>(isMultiThread_in);
       if (!isMultiThread){
-        writefile << "SNPID\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
+        writefile << "SNP\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
       }
       
       int ret;
@@ -2923,7 +2923,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       bool isMultiThread = Rcpp::as<bool>(isMultiThread_in);
     
       if (!isMultiThread){
-        writefile << "SNPID\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
+        writefile << "SNP\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
       }
       
       int ret;
@@ -3135,7 +3135,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       bool isMultiThread = Rcpp::as<bool>(isMultiThread_in);
       
       if (!isMultiThread){
-        writefile << "SNPID\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
+        writefile << "SNP\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL\n";
       }
      
       int ret; 

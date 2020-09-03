@@ -326,7 +326,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
         }
       }
       outTmp <- file(outfile, "w")
-      writeLines("SNPID\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL", outTmp)
+      writeLines("SNP\tRSID\tCHR\tPOS\tA1\tA2\tN\tAF\tSCORE\tVAR\tPVAL", outTmp)
       for(i in 1:ncores){
         inTmp <- readLines(paste0(outfile, "_tmp.", i))
         writeLines(inTmp, outTmp)
