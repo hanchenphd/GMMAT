@@ -18,7 +18,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
   miss.method <- substr(miss.method, 1, 1)
   if(all(file.exists(paste(infile, c("bim", "bed", "fam"), sep=".")))) {
     if(ncores != 1) stop("Error: parallel computing currently not implemented for PLINK binary format genotypes.")
-    if(class(obj) == "glmmkin.multi") stop("Error: multiple	phenotypes currently not implemented for PLINK binary format genotypes.")
+    if(class(obj) == "glmmkin.multi") stop("Error: multiple phenotypes currently not implemented for PLINK binary format genotypes.")
     bimfile <- paste(infile, "bim", sep=".")
     bedfile <- paste(infile, "bed", sep=".")
     famfile <- paste(infile, "fam", sep=".")
@@ -256,14 +256,13 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
     }
     return(invisible(NULL))
   } else if (grepl("\\.bgen$", infile)){
-    
+    if(class(obj) == "glmmkin.multi") stop("Error: multiple phenotypes currently not implemented for BGEN format genotypes.")
     if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
       warning("The package doMC is not available on Windows... Switching to single thread...")
       ncores <- 1
     }
-    
+    ncores <- min(c(ncores, parallel::detectCores(logical = TRUE)))
     bgenInfo <- .Call(C_bgenHeader, infile)
-   
     if(!is.null(select)){
       if(length(select) != bgenInfo$N) stop("Error: number of individuals in select does not match infile!")
     } else if (!is.null(BGEN.samplefile)) {
@@ -349,12 +348,11 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
       }
     }
     
-    #print(sprintf("Computational time: %.2f seconds", time))
-    return(invisible(time))
+    return(invisible(NULL))
     
   } else { # text genotype files
     if(ncores != 1) stop("Error: parallel computing currently not implemented for plain text format genotypes.")
-    if(class(obj) == "glmmkin.multi") stop("Error: multiple	phenotypes currently not implemented for plain text format genotypes.")
+    if(class(obj) == "glmmkin.multi") stop("Error: multiple phenotypes currently not implemented for plain text format genotypes.")
     if(is.null(infile.nrow)) {
       if(Sys.info()["sysname"] != "Linux") {
         infile.nrow <- length(readLines(infile))

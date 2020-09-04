@@ -12,13 +12,13 @@ An R package for performing association tests using generalized linear mixed mod
 \tabular{ll}{
 Package: \tab GMMAT\cr
 Type: \tab Package\cr
-Version: \tab 1.2.0\cr
-Date: \tab 2020-05-14\cr
+Version: \tab 1.3.0\cr
+Date: \tab 2020-09-04\cr
 License: \tab GPL-3\cr
 }
 }
 \author{
-Han Chen, Matthew P. Conomos
+Han Chen, Matthew P. Conomos, Duy T. Pham
 
 Maintainer: Han Chen <Han.Chen.2@uth.tmc.edu>
 }
