@@ -20,6 +20,18 @@ SEXP glmm_wald_text(SEXP n_in, SEXP snp_in, SEXP infile_in, SEXP tol_in, SEXP ce
 
 SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEXP center_in, SEXP miss_method_in, SEXP select_in);
 
+SEXP glmm_score_bgen13(SEXP res_in, SEXP P_in, SEXP bgenfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in, SEXP begin_in, SEXP end_in, SEXP pos_in, SEXP nbgen_in, SEXP compression_in, SEXP isMultiThread_in);
+
+SEXP glmm_score_bgen11(SEXP res_in, SEXP P_in, SEXP bgenfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in, SEXP begin_in, SEXP end_in, SEXP pos_in, SEXP nbgen_in, SEXP compression_in, SEXP isMultiThread_in);
+
+SEXP glmm_score_bgen13_sp(SEXP res_in, SEXP Sigma_i_in, SEXP Sigma_iX_in, SEXP cov_in, SEXP bgenfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in, SEXP begin_in, SEXP end_in, SEXP pos_in, SEXP nbgen_in, SEXP compression_in, SEXP isMultiThread_in);
+
+SEXP glmm_score_bgen11_sp(SEXP res_in, SEXP Sigma_i_in, SEXP Sigma_iX_in, SEXP cov_in, SEXP bgenfile_in, SEXP outfile_in, SEXP center_in, SEXP minmaf_in, SEXP maxmaf_in, SEXP missrate_in, SEXP miss_method_in, SEXP nperbatch_in, SEXP select_in, SEXP begin_in, SEXP end_in, SEXP pos_in, SEXP nbgen_in, SEXP compression_in, SEXP isMultiThread_in);
+
+SEXP bgenHeader(SEXP bgenfile_in);
+
+SEXP getVariantPos(SEXP bgenfile_in, SEXP offset_in, SEXP mbgen_in, SEXP nbgen_in, SEXP compression_in, SEXP layout_in, SEXP cores_in);
+  
 static const R_CallMethodDef R_CallDef[]  = {
   {"fitglmm_brent", (DL_FUNC) &fitglmm_brent, 12},
   {"fitglmm_nm", (DL_FUNC) &fitglmm_nm, 11},
@@ -30,6 +42,12 @@ static const R_CallMethodDef R_CallDef[]  = {
   {"glmm_score_bed_sp", (DL_FUNC) &glmm_score_bed_sp, 14},
   {"glmm_wald_text", (DL_FUNC) &glmm_wald_text, 14},
   {"glmm_wald_bed", (DL_FUNC) &glmm_wald_bed, 7},
+  {"glmm_score_bgen13", (DL_FUNC) &glmm_score_bgen13, 17},
+  {"glmm_score_bgen11", (DL_FUNC) &glmm_score_bgen11, 17},
+  {"glmm_score_bgen13_sp", (DL_FUNC) &glmm_score_bgen13_sp, 19},
+  {"glmm_score_bgen11_sp", (DL_FUNC) &glmm_score_bgen11_sp, 19},
+  {"bgenHeader", (DL_FUNC) &bgenHeader, 1},
+  {"getVariantPos", (DL_FUNC) &getVariantPos, 7},
   {NULL, NULL, 0}
 };
 

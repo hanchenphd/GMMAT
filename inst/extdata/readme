@@ -1,3 +1,4 @@
+geno.bgen, geno.sample: bgen v1.2 format genotype file for 400 individuals and 100 SNPS
 geno.txt: plain text genotype file for 400 individuals and 100 SNPs
 geno.txt.gz: gzip compressed text genotype file for 400 individuals and 100 SNPs
 geno.txt.bz2: bzip2 compressed text genotype file for 400 individuals and 100 SNPs

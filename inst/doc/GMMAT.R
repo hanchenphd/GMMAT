@@ -149,7 +149,16 @@ glmm.score(model0, infile = geno.file, outfile =
 
 
 ###################################################
-### code chunk number 19: GMMATwaldtxt
+### code chunk number 19: GMMATscorebgen
+###################################################
+geno.file <- system.file("extdata", "geno.bgen", package = "GMMAT")
+samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
+glmm.score(model0, infile = geno.file, BGEN.samplefile = samplefile,
+	outfile = "glmm.score.bgen.testoutfile.txt")
+
+
+###################################################
+### code chunk number 20: GMMATwaldtxt
 ###################################################
 geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
 snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
@@ -160,7 +169,7 @@ glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 
 
 ###################################################
-### code chunk number 20: GMMATwaldbed
+### code chunk number 21: GMMATwaldbed
 ###################################################
 geno.file <- strsplit(system.file("extdata", "geno.bed", 
         package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
@@ -169,7 +178,7 @@ glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 
 
 ###################################################
-### code chunk number 21: GMMATwaldgds
+### code chunk number 22: GMMATwaldgds
 ###################################################
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
@@ -177,7 +186,7 @@ glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 
 
 ###################################################
-### code chunk number 22: GMMATscoremeta
+### code chunk number 23: GMMATscoremeta
 ###################################################
 meta1.file <- system.file("extdata", "meta1.txt", package = "GMMAT")
 meta2.file <- system.file("extdata", "meta2.txt", package = "GMMAT")
@@ -188,7 +197,7 @@ glmm.score.meta(files = c(meta1.file, meta2.file, meta3.file),
 
 
 ###################################################
-### code chunk number 23: SMMAT1
+### code chunk number 24: SMMAT1
 ###################################################
 group.file <- system.file("extdata", "SetID.withweights.txt", 
         package = "GMMAT")
@@ -199,7 +208,7 @@ SMMAT(model0, group.file = group.file, geno.file = geno.file,
 
 
 ###################################################
-### code chunk number 24: SMMAT2
+### code chunk number 25: SMMAT2
 ###################################################
 SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
@@ -207,7 +216,7 @@ SMMAT(model0, group.file = group.file, geno.file = geno.file,
 
 
 ###################################################
-### code chunk number 25: SMMATmeta
+### code chunk number 26: SMMATmeta
 ###################################################
 SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
@@ -215,27 +224,27 @@ SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
 
 
 ###################################################
-### code chunk number 26: MKL (eval = FALSE)
+### code chunk number 27: MKL (eval = FALSE)
 ###################################################
 ## Sys.setenv(MKL_NUM_THREADS = 1)
 
 
 ###################################################
-### code chunk number 27: select (eval = FALSE)
+### code chunk number 28: select (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, pheno_ID[obj$id_include])
 ## select[is.na(select)] <- 0
 
 
 ###################################################
-### code chunk number 28: select2 (eval = FALSE)
+### code chunk number 29: select2 (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, unique(obj$id_include))
 ## select[is.na(select)] <- 0
 
 
 ###################################################
-### code chunk number 29: select3 (eval = FALSE)
+### code chunk number 30: select3 (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, unique(data[, id]))
 ## select[is.na(select)] <- 0

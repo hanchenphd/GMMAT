@@ -37,9 +37,9 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.2.0}
-\date{May 14, 2020}
-\author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\Center for Precision Health\\School of Public Health \& School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.3.0}
+\date{September 4, 2020}
+\author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\School of Public Health\\Center for Precision Health\\School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
 \newpage
@@ -161,7 +161,7 @@ Mats <- list(Mat1, Mat2, Mat3)
 All matrices must be positive semi-definite. Sparse matrices from the \textit{Matrix} package are also allowed.
 
 \subsection{Genotypes}
-\textit{GMMAT} can take genotype files either in plain text format (or the compressed version .gz or .bz2), \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED format}, or in the GDS format. Non-integer imputed genotypes (dosages) should be saved in plain text files (or the compressed version .gz or .bz2). The plain text file can be space-, tab-, comma-, or even special character-delimited, and there can be additional rows (e.g., comments) and/or columns before the genotype data matrix. Here is an example of part of a tab-delimited plain text genotype file geno.txt:
+\textit{GMMAT} can take genotype files either in plain text format (or the compressed version .gz or .bz2), \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED format}, in the GDS format, or in the BGEN format. Non-integer imputed genotypes (dosages) should be saved in plain text files (or the compressed version .gz or .bz2). The plain text file can be space-, tab-, comma-, or even special character-delimited, and there can be additional rows (e.g., comments) and/or columns before the genotype data matrix. Here is an example of part of a tab-delimited plain text genotype file geno.txt:
 \begin{verbatim}
 # This is an example genotype file for demonstrating GMMAT
 # Each row represents one SNP for all individuals in the study
@@ -321,14 +321,22 @@ glmm.score(model0, infile = geno.file, outfile =
 @
 Here "infile" is the prefix (and path if not in the current working directory) of the \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK} files (.bed, .bim and .fam). SNP information in the .bim file (in our example, "geno.bim") is carried over to the output file.
 
-Alternatively, if your genotype information is saved in a GDS file "geno.gds", you can use:
+If your genotype information is saved in a GDS file "geno.gds", you can use:
 <<GMMATscoregds>>=
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.score(model0, infile = geno.file, outfile = 
         "glmm.score.gds.testoutfile.txt")
 @
 
-The function \textbf{glmm.score} returns the actual computation time in seconds from its function call for plain text genotype files (or compressed files .gz and .bz2) and \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED files}. For GDS genotype files, no value is returned.
+Alternatively, if your genotype information is saved in a BGEN file "geno.bgen", with a BGEN sample file "geno.sample", you can use:
+<<GMMATscorebgen>>=
+geno.file <- system.file("extdata", "geno.bgen", package = "GMMAT")
+samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
+glmm.score(model0, infile = geno.file, BGEN.samplefile = samplefile,
+	outfile = "glmm.score.bgen.testoutfile.txt")
+@
+
+The function \textbf{glmm.score} returns the actual computation time in seconds from its function call for plain text genotype files (or compressed files .gz and .bz2) and \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED files}. For GDS and BGEN genotype files, no value is returned.
 
 \subsubsection{Wald tests}
 When performing Wald tests for candidate SNPs to get effect size estimates, we need the phenotype (and covariates) data frame, the matrices modeling the covariance structure of the random effects, and the genotype file. To perform Wald tests, we do not need fitting the null GLMM required in score tests using \textbf{glmmkin}. In the example below, we perform Wald tests for 4 candidate SNPs of interest and get their effect estimates:
@@ -464,6 +472,25 @@ SCORE                   VAR                   PVAL
 ...
 \end{verbatim}
 The first 5 columns are extracted from the GDS file: SNP ("annotation/id"), CHR ("chromosome"), POS ("position"), reference and alternate alleles ("allele"). Results are included in 6 columns: the sample size N (with non-missing genotypes), the genotype missing rate MISSRATE, the allele frequency (AF) of ALT allele, the score statistic SCORE of ALT allele, the variance of the score VAR, and score test \textit{P} value PVAL.
+
+If you use a BGEN genotype file "geno.bgen", here are the header and the first 5 rows of the example output "glmm.score.bgen.testoutfile.txt" from \textbf{glmm.score}:
+\begin{verbatim}
+SNP     RSID    CHR     POS     A1      A2      N       AF      
+SNP1    SNP1    1       1       T       A       393     0.974555        
+SNP2    SNP2    1       2       A       C       400     0.5     
+SNP3    SNP3    1       3       C       A       400     0.7925  
+SNP4    SNP4    1       4       G       A       400     0.70125 
+SNP5    SNP5    1       5       A       G       400     0.59375 
+...
+SCORE    VAR     PVAL
+-1.985   4.55635 0.352406
+3.51032  46.3328 0.60606
+0.5334   30.6023 0.923185
+3.11494  40.5128 0.624567
+-4.00135 42.2757 0.538287
+...
+\end{verbatim}
+The first 6 columns are copied from the BGEN file: the SNP, RSID, chromosome CHR, physical position POS, and alleles A1 and A2. Results are included in 5 columns: the sample size N, the allele frequency (AF) of A2 allele, the score statistic SCORE of A2 allele, the variance of the score VAR, and score test \textit{P} value PVAL.
 
 The meta-analysis function \textbf{glmm.score.meta} generates a tab-delimited plain text output file. Here are the header and the first 5 rows of the example output from the meta-analysis "glmm.score.meta.testoutfile.txt":
 \begin{verbatim}
@@ -736,11 +763,17 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Supported imputed dosage GDS files (in the node annotation/format/DS/data) (thanks to Rounak Dey).
 \end{enumerate}
 
+\subsection{Version 1.3.0 (September 4, 2020)}
+\begin{enumerate}
+\item Implemented a temporary fix that explicitly converts data in tibble format to data.frame objects in \textbf{glmmkin} and \textbf{glmm.wald}.
+\item Supported BGEN genotype files in \textbf{glmm.score} (credit: Duy T. Pham).
+\end{enumerate}
+
 \section{Contact}
 Please refer to the R help document of \textit{GMMAT} for specific questions about each function. For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 \section{Acknowledgments}
-We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, Dr. Ken Rice for help with sparse matrices, Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform, Arthur Gilly for supporting reordered group definition files in \textbf{SMMAT.meta}, and Dr. Rounak Dey for supporting imputed dosage GDS files. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
+Duy T. Pham implemented support for BGEN genotype files. We would like to thank Dr. Chaolong Wang and Dr. Brian Cade for comments and suggestions on \textit{GMMAT} and the user manual. We would also like to thank Dr. Matthew Conomos for help with the Average Information REML algorithm, Dr. Stephanie Gogarten for help with the GDS genotype format, Dr. Ken Rice for help with sparse matrices, Jennifer Brody for help with parallel computing and App development in Analysis Commons, a cloud computing platform, Arthur Gilly for supporting reordered group definition files in \textbf{SMMAT.meta}, and Dr. Rounak Dey for supporting imputed dosage GDS files. The \textit{GMMAT} implementation is supported by NIH grant R00 HL130593, and the analysis pipeline implementation (the gmmat App) in Analysis Commons is supported by NIH grant U01 HL120393.
 
 \begin{thebibliography}{}
 

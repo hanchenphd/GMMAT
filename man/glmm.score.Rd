@@ -7,7 +7,7 @@ Performing GLMM based score tests
 Use a glmmkin class object from the null GLMM to perform score tests for association with genotypes in a plink .bed file (binary genotypes), a GDS file .gds, or a plain text file (or compressed .gz or .bz2 file).
 }
 \usage{
-glmm.score(obj, infile, outfile, center = T, select = NULL, 
+glmm.score(obj, infile, outfile, BGEN.samplefile = NULL, center = T, select = NULL, 
 	MAF.range = c(1e-7, 0.5), miss.cutoff = 1, 
 	missing.method = "impute2mean", nperbatch = 100, tol = 1e-5,
 	infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t",
@@ -19,10 +19,14 @@ glmm.score(obj, infile, outfile, center = T, select = NULL,
 a class glmmkin or class glmmkin.multi object, returned by fitting the null GLMM using \code{glmmkin( )}.
 }
   \item{infile}{
-the input file name. Note that for plink binary genotype files only the prefix without .bed, .bim or .fam should be used. Only SNP major mode recognized in the binary file. Alternatively, it can be the full name of a GDS file (including the suffix .gds) or a plain text file with some delimiters (comma, space, tab or something else), with one row for each SNP and one column for each individual. In that case, SNPs should be coded as numeric values (0/1/2 or dosages allowed, A/C/G/T coding is not recognized). There can be additional rows and columns to skip at the beginning. The order of individuals can be different from \code{obj} in the null GLMM (see the argument \code{select}). Some compressed files (.gz and .bz2) also allowed.
+the input file name. Note that for plink binary genotype files only the prefix without .bed, .bim or .fam should be used. Only SNP major mode recognized in the binary file. Alternatively, it can be the full name of a BGEN file (including the suffix .bgen), a GDS file (including the suffix .gds) or a plain text file with some delimiters (comma, space, tab or something else), with one row for each SNP and one column for each individual. In that case, SNPs should be coded as numeric values (0/1/2 or dosages allowed, A/C/G/T coding is not recognized). There can be additional rows and columns to skip at the beginning. The order of individuals can be different from \code{obj} in the null GLMM (see the argument \code{select}). Some compressed files (.gz and .bz2) also allowed.
 }
+
   \item{outfile}{
 the output file name.
+}
+  \item{BGEN.samplefile}{
+path to the BGEN sample file. Required when the BGEN file does not contain sample identifiers or the \code{select} parameter is NULL (default = NULL).
 }
   \item{center}{
 a logical switch for centering genotypes before tests. If TRUE, genotypes will be centered to have mean 0 before tests, otherwise raw values will be directly used in tests (default = TRUE).
@@ -74,13 +78,13 @@ a positive integer indicating the number of cores to be used in parallel computi
 }
 }
 \value{
-NULL if \code{infile} is a GDS file (.gds), otherwise computational time in seconds, excluding I/O time.
+NULL if \code{infile} is a BGEN file (.bgen) or a GDS file (.gds), otherwise computational time in seconds, excluding I/O time.
 }
 \references{
 Chen, H., Wang, C., Conomos, M.P., Stilp, A.M., Li, Z., Sofer, T., Szpiro, A.A., Chen, W., Brehm, J.M., Celedón, J.C., Redline, S., Papanicolaou, G.J., Thornton, T.A., Laurie, C.C., Rice, K. and Lin, X. (2016) Control forpopulation structure and relatedness for binary traits in genetic association studies via logistic mixed models. The American Journal of Human Genetics 98, 653-666.
 }
 \author{
-Han Chen
+Han Chen, Duy T. Pham
 }
 \seealso{
 \code{\link{glmmkin}}, \code{\link{glmm.wald}}
@@ -103,7 +107,11 @@ outfile <- "glmm.score.text.testoutfile.txt"
 glmm.score(model0, infile = infile, outfile = outfile, infile.nrow.skip = 5, 
 	infile.ncol.skip = 3, infile.ncol.print = 1:3, 
 	infile.header.print = c("SNP", "Allele1", "Allele2"))
-unlink(paste0("glmm.score.", c("bed", "gds", "text"), ".testoutfile.txt"))
+infile <- system.file("extdata", "geno.bgen", package = "GMMAT")
+samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
+outfile <- "glmm.score.bgen.testoutfile.txt"
+glmm.score(model0, infile = infile, BGEN.samplefile = samplefile, outfile = outfile)
+unlink(paste0("glmm.score.", c("bed", "gds", "text","bgen"), ".testoutfile.txt"))
 }
 }
 \keyword{ generalized linear mixed model }
