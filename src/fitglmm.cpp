@@ -2432,7 +2432,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         uint physpos; ret = fread(&physpos, 4, 1, fp);
 	      string physpos_tmp = to_string(physpos);
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
-
+        if (LKnum > 2) {Rcout << "Error reading BGEN file: There are variants with more than 2 alleles. \n"; return R_NilValue;}
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
         if (LA > maxLA) {
           maxLA = 2 * LA;
@@ -2766,7 +2766,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         uint physpos; ret = fread(&physpos, 4, 1, fp);
       	string physpos_tmp = to_string(physpos);
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
-        
+        if (LKnum > 2) {Rcout << "Error reading BGEN file: There are variants with more than 2 alleles. \n"; return R_NilValue;}
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
         if (LA > maxLA) {
           maxLA = 2 * LA;
