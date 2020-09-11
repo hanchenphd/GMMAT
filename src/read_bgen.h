@@ -1,6 +1,7 @@
 #ifndef READBGEN_H
 #define READBGEN_H
 
+#include <R.h>
 #include <Rcpp.h>
 using namespace Rcpp;
 #include <fstream>
@@ -16,27 +17,50 @@ using namespace std;
 using namespace Rcpp;
 
 
-uintptr_t Bgen13GetOneVal(const unsigned char* prob_start, uint64_t prob_offset, uint32_t bit_precision, uintptr_t numer_mask) {
-  const uint64_t bit_offset = prob_offset * bit_precision;
-  uint64_t relevant_bits;
-  // This can read slightly past the end of the buffer.
-  memcpy(&relevant_bits, &(prob_start[bit_offset / CHAR_BIT]), sizeof(int64_t));
-  return (relevant_bits >> (bit_offset % CHAR_BIT)) & numer_mask;
+// These two functions below are being redistributed from plink2.0 
+uintptr_t Bgen13GetOneVal(const unsigned char* prob_start, uint32_t bit_precision) {
+  
+  switch(bit_precision) {
+  case 8:
+    return(prob_start[0]);
+  case 16:
+    return(prob_start[0]|(prob_start[1]<<8));
+  case 24:
+    return(prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16));
+  case 32:
+    return(prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16)|(prob_start[3]<<24));
+  }
+  return 0;
 }
 
 
-void Bgen13GetTwoVals(const unsigned char* prob_start, uint64_t prob_offset, uint32_t bit_precision, uintptr_t numer_mask, uintptr_t* first_val_ptr, uintptr_t* second_val_ptr) {
-  const uint64_t bit_offset = prob_offset * bit_precision;
-  uint64_t relevant_bits;
-  // This can read slightly past the end of the buffer.
-  // Note that with bit_precision=29 and variable ploidy,
-  // (bit_offset % CHAR_BIT) == 7 is possible, so we may only get 57 bits when
-  // we need 58; thus we don't support 29-31 bits for now.
-  memcpy(&relevant_bits, &(prob_start[bit_offset / CHAR_BIT]), sizeof(int64_t));
-  relevant_bits = relevant_bits >> (bit_offset % CHAR_BIT);
-  *first_val_ptr = relevant_bits & numer_mask;
-  *second_val_ptr = (relevant_bits >> bit_precision) & numer_mask;
+void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, uintptr_t offset, uintptr_t* first_val_ptr, uintptr_t* second_val_ptr) {
+  
+  switch(bit_precision) {
+  case 8:
+    *first_val_ptr  = prob_start[0];
+    prob_start += offset;
+    *second_val_ptr = prob_start[0];
+    break;
+  case 16:
+    *first_val_ptr  = prob_start[0]|(prob_start[1]<<8);
+    prob_start += offset;
+    *second_val_ptr = prob_start[0]|(prob_start[1]<<8);
+    break;
+  case 24:
+    *first_val_ptr  = prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16);
+    prob_start += offset;
+    *second_val_ptr = prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16);
+    break;
+  case 32:
+    *first_val_ptr  = prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16)|(prob_start[3]<<24);
+    prob_start += offset;
+    *second_val_ptr = prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16)|(prob_start[3]<<24);
+    break;
+  }
+  
 }
+
 
 
 extern "C" 
@@ -222,6 +246,12 @@ extern "C"
       if (ret == 0) { Rcout << "Error reading BGEN file : Cannot parse variant block.\n"; return R_NilValue; }
     }
     
+    delete[] snpID;
+    delete[] rsID;
+    delete[] chrStr;
+    delete[] allele0;
+    delete[] allele1;
+
     fclose(fin);
     return(Rcpp::List::create(Named("begin") = begin,
                               Named("end") = end,
