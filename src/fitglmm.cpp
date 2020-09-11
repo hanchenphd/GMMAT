@@ -2499,7 +2499,12 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         if (is_phased < 0 || is_phased > 1) {Rcout << "Error reading bgen file: Phased value must be 0 or 1. \n"; return R_NilValue;}
         
         const uint32_t B = probs_start[-1];
-        const uintptr_t numer_mask = (1U << B) - 1;
+        
+	if (B != 8 && B!= 16 && B !=24 && B != 32) {
+            Rcout << "Error reading bgen file: Bits to store probabilities must be 8, 16, 24, or 32. \n"; return R_NilValue;
+	}
+	
+	const uintptr_t numer_mask = (1U << B) - 1;
         const uintptr_t probs_offset = B / 8;
         
         gmean=0.0;
