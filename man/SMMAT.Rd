@@ -1,10 +1,13 @@
 \name{SMMAT}
 \alias{SMMAT}
+\alias{SMMAT.prep}
+\alias{SMMAT.lowmem}
 \title{
 Variant Set Mixed Model Association Tests (SMMAT)
 }
 \description{
 Variant Set Mixed Model Association Tests (SMMAT-B, SMMAT-S, SMMAT-O and SMMAT-E) for multiple user-defined test units and a null generalized linear mixed model.
+\code{SMMAT.prep} and \code{SMMAT.lowmem} are the two-step low-memory version of \code{SMMAT}. \code{SMMAT.lowmem} takes the returned R object from \code{SMMAT.prep} and uses less memory (if the returned R object from \code{SMMAT.prep} is saved to an R data file, the R session is terminated, and this R object is loaded into a new R session for running \code{SMMAT.lowmem}), especially when \code{group.file} contains only a subset of variants from \code{geno.file}.
 }
 \usage{
 SMMAT(null.obj, geno.file, group.file, group.file.sep = "\t", 
@@ -14,11 +17,20 @@ SMMAT(null.obj, geno.file, group.file, group.file.sep = "\t",
 	tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 
 	0.5^2, 0.5, 1), use.minor.allele = FALSE, 
 	auto.flip = FALSE, Garbage.Collection = FALSE,
-	is.dosage = FALSE, ncores = 1)
+	is.dosage = FALSE, ncores = 1, verbose = FALSE)
+SMMAT.prep(null.obj, geno.file, group.file, group.file.sep = "\t", 
+	auto.flip = FALSE)
+SMMAT.lowmem(SMMAT.prep.obj, meta.file.prefix = NULL,
+        MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25),
+	miss.cutoff = 1, missing.method = "impute2mean",
+	method = "davies", tests = "E", rho = c(0, 0.1^2,
+	0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1),
+	use.minor.allele = FALSE, Garbage.Collection = FALSE,
+	is.dosage = FALSE, ncores = 1, verbose = FALSE)
 }
 \arguments{
   \item{null.obj}{
-a class glmmkin or a class glmmkin.multi object, returned by fitting the null GLMM using \code{glmmkin( )}.
+a class glmmkin or a class glmmkin.multi object, returned by fitting the null GLMM using \code{glmmkin}.
 }
   \item{geno.file}{
 a .gds file for the full genotypes. The \code{sample.id} in \code{geno.file} should overlap \code{id_include} in \code{null.obj}. It is recommended that \code{sample.id} in \code{geno.file} include the full samples (at least all samples as specified in \code{id_include} of \code{null.obj}). It is not necessary for the user to take a subset of \code{geno.file} before running the analysis.
@@ -68,9 +80,15 @@ a logical switch for whether imputed dosage should be used from \code{geno.file}
   \item{ncores}{
 a positive integer indicating the number of cores to be used in parallel computing (default = 1).
 }
+  \item{verbose}{
+a logical switch for whether a progress bar should be shown (default = FALSE).
+}
+  \item{SMMAT.prep.obj}{
+a class SMMAT.prep object, returned by \code{SMMAT.prep}.
+}
 }
 \value{
-a data frame with the following components:
+\code{SMMAT} and \code{SMMAT.lowmem} return a data frame with the following components:
   \item{group}{
 name of the test unit group.
 }
@@ -119,6 +137,40 @@ rho value at the minimum p-value in the SKAT-O search grid.
   \item{E.pval}{
 SMMAT efficient hybrid test of the burden test and SKAT p-value.
 }
+\code{SMMAT.prep} return a list with the following components:
+  \item{null.obj}{
+a class glmmkin or a class glmmkin.multi object from the null model, after pre-processing.
+}
+  \item{geno.file}{
+the name of the .gds file for the full genotypes.
+}
+  \item{group.file}{
+the name of the plain text file with 6 columns defining the test units.
+}
+  \item{group.file.sep}{
+the delimiter in group.file.
+}
+  \item{auto.flip}{
+a logical indicator showing whether automatic allele flipping is enabled in pre-processing if a variant with alleles ref/alt is not found at a position, but a variant at the same position with alleles alt/ref is found.
+}
+  \item{residuals}{
+residuals from the null model, after pre-processing.
+}
+  \item{sample.id}{
+sample.id from geno.file, after pre-processing.
+}
+  \item{group.info}{
+group.info read from group.file, after pre-processing.
+}
+  \item{groups}{
+unique groups in group.info, after pre-processing.
+}
+  \item{group.idx.start}{
+a vector of the start variant index for each group, after pre-processing.
+}
+  \item{group.idx.end}{
+a vector of the end variant index for each group, after pre-processing.
+}
 }
 \references{
 Wu, M.C., Lee, S., Cai, T., Li, Y., Boehnke, M., Lin, X. (2011) Rare-variant association testing for sequencing data with the sequence kernel association test. The American Journal of Human Genetics 89, 82-93.
@@ -147,6 +199,17 @@ group.file <- system.file("extdata", "SetID.withweights.txt",
 out <- SMMAT(model0, geno.file, group.file, MAF.range = c(0, 0.5), 
        		miss.cutoff = 1, method = "davies")
 print(out)
+}
+\dontrun{
+obj <- SMMAT.prep(model0, geno.file, group.file)
+save(obj, file = "SMMAT.prep.tmp.Rdata")
+# quit R session
+# open a new R session
+obj <- get(load("SMMAT.prep.tmp.Rdata"))
+out <- SMMAT.lowmem(obj, MAF.range = c(0, 0.5), miss.cutoff = 1,
+        method = "davies")
+print(out)
+unlink("SMMAT.prep.tmp.Rdata")
 }
 }
 \keyword{ variant set-based test }

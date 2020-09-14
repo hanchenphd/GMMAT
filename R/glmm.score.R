@@ -1,4 +1,5 @@
-glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", is.dosage = FALSE, ncores = 1) {
+glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T, select = NULL, MAF.range = c(1e-7, 0.5), miss.cutoff = 1, missing.method = "impute2mean", nperbatch = 100, tol = 1e-5, infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", is.dosage = FALSE, ncores = 1, verbose = FALSE) {
+  is.Windows <- Sys.info()["sysname"] == "Windows"
   if(!class(obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: obj must be a class glmmkin or glmmkin.multi object!")
   n.pheno <- obj$n.pheno
   if(any(duplicated(obj$id_include))) {
@@ -51,7 +52,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
     #print(sprintf("Computational time: %.2f seconds", time))
     return(invisible(time))
   } else if(grepl("\\.gds$", infile)) { # GDS genotype file
-    if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
+    if(is.Windows && ncores > 1) {
       warning("The package doMC is not available on Windows... Switching to single thread...")
       ncores <- 1
     }
@@ -89,12 +90,18 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
       foreach(b = 1:ncores, .inorder=FALSE, .options.multicore = list(preschedule = FALSE, set.seed = FALSE)) %dopar% {
         variant.idx <- if(b <= n.p.percore_1) variant.idx.all[((b-1)*(p.percore-1)+1):(b*(p.percore-1))] else variant.idx.all[(n.p.percore_1*(p.percore-1)+(b-n.p.percore_1-1)*p.percore+1):(n.p.percore_1*(p.percore-1)+(b-n.p.percore_1)*p.percore)]
         p <- length(variant.idx)
+	if(verbose) {
+	  if(b==1) cat("Progress of score test:\n")
+	  pb <- txtProgressBar(min = 0, max = p, style = 3)
+	  cat("\n")
+	}
         gds <- SeqArray::seqOpen(infile)
         SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0], verbose = FALSE)
         rm(sample.id); rm(select)
         nbatch.flush <- (p-1) %/% 100000 + 1
         ii <- 0
         for(i in 1:nbatch.flush) {
+	  if(verbose) setTxtProgressBar(pb, (i-1)*100000)
           gc()
           tmp.variant.idx <- if(i == nbatch.flush) variant.idx[((i-1)*100000+1):p] else variant.idx[((i-1)*100000+1):(i*100000)]
           SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx, verbose = FALSE)
@@ -168,6 +175,10 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
           rm(out)
         }
         SeqArray::seqClose(gds)
+	if(verbose) {
+	  setTxtProgressBar(pb, p)
+	  close(pb)
+	}
       }
       for(b in 2:ncores) {
         system(paste0("cat ", outfile, "_tmp.", b, " >> ", outfile))
@@ -177,12 +188,24 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
       variant.idx <- variant.idx.all
       rm(variant.idx.all)
       p <- length(variant.idx)
+      if(verbose) {
+	if(is.Windows) pb <- winProgressBar(min = 0, max = p)
+	else {
+          cat("Progress of score test:\n")
+	  pb <- txtProgressBar(min = 0, max = p, style = 3)
+	  cat("\n")
+	}
+      }
       gds <- SeqArray::seqOpen(infile)
       SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0], verbose = FALSE)
       rm(sample.id); rm(select)
       nbatch.flush <- (p-1) %/% 100000 + 1
       ii <- 0
       for(i in 1:nbatch.flush) {
+	if(verbose) {
+	  if(is.Windows) setWinProgressBar(pb, (i-1)*100000, title=paste0("Progress of score test: ",round((i-1)*100000/p*100),"%"))
+	  else setTxtProgressBar(pb, (i-1)*100000)
+	}
         gc()
         tmp.variant.idx <- if(i == nbatch.flush) variant.idx[((i-1)*100000+1):p] else variant.idx[((i-1)*100000+1):(i*100000)]
         tmp.p <- length(tmp.variant.idx)
@@ -253,11 +276,16 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
         rm(out)
       }
       SeqArray::seqClose(gds)
+      if(verbose) {
+	if(is.Windows) setWinProgressBar(pb, p, title="Progress of score test: 100%")
+	else setTxtProgressBar(pb, p)
+	close(pb)
+      }
     }
     return(invisible(NULL))
   } else if (grepl("\\.bgen$", infile)){
     if(class(obj) == "glmmkin.multi") stop("Error: multiple phenotypes currently not implemented for BGEN format genotypes.")
-    if(Sys.info()["sysname"] == "Windows" && ncores > 1) {
+    if(is.Windows && ncores > 1) {
       warning("The package doMC is not available on Windows... Switching to single thread...")
       ncores <- 1
     }
