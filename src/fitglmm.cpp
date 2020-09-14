@@ -2430,9 +2430,9 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         ret = fread(chrStr, 1, LC, fp); chrStr[LC] = '\0';
         
         uint physpos; ret = fread(&physpos, 4, 1, fp);
-	      string physpos_tmp = to_string(physpos);
+	string physpos_tmp = to_string(physpos);
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
-        if (LKnum > 2) {Rcout << "Error reading BGEN file: There are variants with more than 2 alleles. \n"; return R_NilValue;}
+        if (LKnum != 2) {Rcout << "Error reading BGEN file: There are non-bi-allelic variants. \n"; return R_NilValue;}
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
         if (LA > maxLA) {
           maxLA = 2 * LA;
@@ -2489,9 +2489,9 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         uint16_t K; memcpy(&K, &(bufAt[4]), sizeof(int16_t));
         if (K != 2) {Rcout << "Error reading bgen file: There are variants with more than 2 alleles. \n"; return R_NilValue;}
         const uint32_t min_ploidy = bufAt[6];
-        if (min_ploidy > 2) {Rcout << "Error reading bgen file: There are variants with ploidy value >2. \n"; return R_NilValue;}
+        if (min_ploidy != 2) {Rcout << "Error reading bgen file: Minimum ploidy should be 2. \n"; return R_NilValue;}
         const uint32_t max_ploidy = bufAt[7];
-        if (max_ploidy > 2) {Rcout << "Error reading bgen file: There are variants with ploidy value >2. \n"; return R_NilValue;}
+        if (max_ploidy != 2) {Rcout << "Error reading bgen file: Maximum ploidy should be 2. \n"; return R_NilValue;}
         
         const unsigned char* missing_and_ploidy_info = &(bufAt[8]);
         const unsigned char* probs_start = &(bufAt[10 + N]);
@@ -2530,24 +2530,8 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
                 ncount++;
                 continue;
               
-            } else if (missing_and_ploidy == 1){
-                const uintptr_t numer_a = Bgen13GetOneVal(probs_start, B);
-                probs_start += probs_offset;
-                numer_aa = numer_a;
-                numer_ab = 0;
-              
-            } else if (missing_and_ploidy == 129){
-                probs_start += probs_offset;
-                gmiss[select[ncount]-1] = 1;
-                nmiss++;
-                ncount++;
-                continue;
-              
             } else {
-                gmiss[select[ncount]-1] = 1;
-                nmiss++;
-                ncount++;
-                continue;
+		Rcout << "Error reading bgen file: Ploidy value " << missing_and_ploidy << " is unsupported. Must be 2 or 130. \n"; return R_NilValue;    
             }
             
             
@@ -2582,24 +2566,8 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
                ncount++;
                continue;
              
-           } else if (missing_and_ploidy == 1){
-               const uintptr_t numer_a = Bgen13GetOneVal(probs_start, B);
-               probs_start += probs_offset;
-               numer_aa = numer_a;
-               numer_ab = 0;
-             
-           } else if (missing_and_ploidy == 129){
-               probs_start += probs_offset;
-               gmiss[select[ncount]-1] = 1;
-               nmiss++;
-               ncount++;
-               continue;
-             
            } else {
-               gmiss[select[ncount]-1] = 1;
-               nmiss++;
-               ncount++;
-               continue;
+	       Rcout << "Error reading bgen file: Ploidy value " << missing_and_ploidy << " is unsupported. Must be 2 or 130. \n"; return R_NilValue;
            }
            
            if (select[ncount] > 0){ 
@@ -2766,7 +2734,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         uint physpos; ret = fread(&physpos, 4, 1, fp);
       	string physpos_tmp = to_string(physpos);
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
-        if (LKnum > 2) {Rcout << "Error reading BGEN file: There are variants with more than 2 alleles. \n"; return R_NilValue;}
+        if (LKnum != 2) {Rcout << "Error reading BGEN file: There are non-bi-allelic variants. \n"; return R_NilValue;}
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
         if (LA > maxLA) {
           maxLA = 2 * LA;
@@ -2794,7 +2762,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
           
           uLongf destLen = dLen;
           if (libdeflate_zlib_decompress(decompressor, &zBuf12[0], cLen - 4, &shortBuf12[0], destLen, NULL) != LIBDEFLATE_SUCCESS) {
-			        Rcout << "Error reading bgen file: Decompressing variant block failed with libdeflate. \n"; return R_NilValue;
+	      Rcout << "Error reading bgen file: Decompressing variant block failed with libdeflate. \n"; return R_NilValue;
           }
           bufAt = &shortBuf12[0];
         }
@@ -2823,9 +2791,9 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         uint16_t K; memcpy(&K, &(bufAt[4]), sizeof(int16_t));
         if (K != 2) {Rcout << "Error reading bgen file: There are variants with more than 2 alleles. \n"; return R_NilValue;}
         const uint32_t min_ploidy = bufAt[6];
-        if (min_ploidy > 2) {Rcout << "Error reading bgen file: There are variants with ploidy value >2. \n"; return R_NilValue;}
+        if (min_ploidy != 2) {Rcout << "Error reading bgen file: Minimum ploidy must be 2. \n"; return R_NilValue;}
         const uint32_t max_ploidy = bufAt[7];
-        if (max_ploidy > 2) {Rcout << "Error reading bgen file: There are variants with ploidy value >2. \n"; return R_NilValue;}
+        if (max_ploidy != 2) {Rcout << "Error reading bgen file: Maximum ploidy must be 2. \n"; return R_NilValue;}
         
         const unsigned char* missing_and_ploidy_info = &(bufAt[8]);
         const unsigned char* probs_start = &(bufAt[10 + N]);
@@ -2861,26 +2829,9 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
                   nmiss++;
                   ncount++;
                   continue;
-                
-              } else if (missing_and_ploidy == 1){
-                  const uintptr_t numer_a = Bgen13GetOneVal(probs_start, B);
-                  probs_start += probs_offset;
-                  numer_aa = numer_a;
-                  numer_ab = 0;
-                
-              } else if (missing_and_ploidy == 129){
-                  probs_start += probs_offset;
-                  gmiss[select[ncount]-1] = 1;
-                  nmiss++;
-                  ncount++;
-                  continue;
-    
               } else {
-                  gmiss[select[ncount]-1] = 1;
-                  nmiss++;
-                  ncount++;
-                  continue;
-              }
+                  Rcout << "Error reading bgen file: Ploidy value " << missing_and_ploidy << " is unsupported. Must be 2 or 130. \n"; return R_NilValue;
+	      }
               
               
               if (select[ncount] > 0){ 
@@ -2914,24 +2865,8 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
               ncount++;
               continue;
               
-            } else if (missing_and_ploidy == 1){
-              const uintptr_t numer_a = Bgen13GetOneVal(probs_start, B);
-              probs_start += probs_offset;
-              numer_aa = numer_a;
-              numer_ab = 0;
-              
-            } else if (missing_and_ploidy == 129){
-              probs_start += probs_offset;
-              gmiss[select[ncount]-1] = 1;
-              nmiss++;
-              ncount++;
-              continue;
-              
             } else {
-              gmiss[select[ncount]-1] = 1;
-              nmiss++;
-              ncount++;
-              continue;
+	      Rcout << "Error reading bgen file: Ploidy value " << missing_and_ploidy << " is unsupported. Must be 2 or 130. \n"; return R_NilValue;
             }
             
             if (select[ncount] > 0){ 

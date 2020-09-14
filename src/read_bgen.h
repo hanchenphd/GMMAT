@@ -17,23 +17,6 @@ using namespace std;
 using namespace Rcpp;
 
 
-// These two functions below are being redistributed from plink2.0 
-uintptr_t Bgen13GetOneVal(const unsigned char* prob_start, uint32_t bit_precision) {
-  
-  switch(bit_precision) {
-  case 8:
-    return(prob_start[0]);
-  case 16:
-    return(prob_start[0]|(prob_start[1]<<8));
-  case 24:
-    return(prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16));
-  case 32:
-    return(prob_start[0]|(prob_start[1]<<8)|(prob_start[2]<<16)|(prob_start[3]<<24));
-  }
-  return 0;
-}
-
-
 void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, uintptr_t offset, uintptr_t* first_val_ptr, uintptr_t* second_val_ptr) {
   
   switch(bit_precision) {
@@ -121,6 +104,7 @@ extern "C"
           samID[LSID] = '\0';
           samVec[n] = string(samID);
       }
+      delete[] samID;
     }
     
 
