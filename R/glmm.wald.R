@@ -1,5 +1,6 @@
 glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), infile, snps, method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, center = T, select = NULL, missing.method = "impute2mean", infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t", infile.na = "NA", snp.col = 1, infile.ncol.skip = 1, infile.ncol.print = 1, infile.header.print = "SNP", is.dosage = FALSE, verbose = FALSE, ...) {
-        if(!is.null(kins) && !class(kins)[1] %in% c("matrix", "list")) {
+	is.Windows <- Sys.info()["sysname"] == "Windows"
+	if(!is.null(kins) && !class(kins)[1] %in% c("matrix", "list")) {
                 if(is.null(attr(class(kins), "package"))) stop("Error: \"kins\" must be a matrix or a list.")
                 else if(attr(class(kins), "package") != "Matrix") stop("Error: if \"kins\" is a sparse matrix, it must be created using the Matrix package.")
         }
@@ -129,6 +130,14 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
                 if(!is.null(groups)) stop("Error: heteroscedastic linear models for unrelated observations have not been implemented.")
 	}
 	N <- AF <- BETA <- SE <- PVAL <- converged <- rep(NA, length(snps))
+	if(verbose) {
+		if(is.Windows) pb <- winProgressBar(min = 0, max = length(snps))
+		else {
+	                cat("Progress of Wald test:\n")
+			pb <- txtProgressBar(min = 0, max = length(snps), style = 3)
+			cat("\n")
+		}
+	}
 	for(ii in 1:length(snps)) {
 	        snp <- snps[ii]
 		if(verbose) cat("\nAnalyze SNP ", ii, ": ", snp, "\n")
@@ -201,7 +210,12 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 				}
 			}
 		}
+		if(verbose) {
+		        if(is.Windows) setWinProgressBar(pb, ii, title=paste0("Progress of Wald test: ",round(ii/length(snps)*100),"%"))
+			else setTxtProgressBar(pb, ii)
+		}
 	}
+	if(verbose) close(pb)
 	res <- data.frame(snpinfo, N, AF, BETA, SE, PVAL, converged)
 	if(is.plinkfiles) {
 		names(res)[1:6] <- c("CHR", "SNP", "cM", "POS", "A1", "A2")

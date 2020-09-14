@@ -11,7 +11,8 @@ SMMAT.meta(meta.files.prefix, n.files = rep(1, length(meta.files.prefix)),
 	cohort.group.idx = NULL, group.file, group.file.sep = "\t", 
 	MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), 
 	miss.cutoff = 1, method = "davies", tests = "E", rho = c(0, 0.1^2, 
-	0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE)
+	0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE,
+	verbose = FALSE)
 }
 \arguments{
   \item{meta.files.prefix}{
@@ -49,6 +50,9 @@ a numeric vector defining the search grid used in SMMAT-O for SKAT-O (see the SK
 }
   \item{use.minor.allele}{
 a logical switch for whether to use the minor allele (instead of the alt allele) as the coding allele (default = FALSE). It does not change SMMAT-S results, but SMMAT-B (as well as SMMAT-O and SMMAT-E) will be affected. Along with the MAF filter, this option is useful for combining rare mutations, assuming rare allele effects are in the same direction. Use with caution, as major/minor alleles may flip in different cohorts. In that case, minor allele will be determined based on the allele frequency in the combined samples.
+}
+  \item{verbose}{
+a logical switch for whether a progress bar should be shown (default = FALSE).
 }
 }
 \value{

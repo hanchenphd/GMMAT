@@ -12,16 +12,15 @@ glmm.score(obj, infile, outfile, BGEN.samplefile = NULL, center = T, select = NU
 	missing.method = "impute2mean", nperbatch = 100, tol = 1e-5,
 	infile.nrow = NULL, infile.nrow.skip = 0, infile.sep = "\t",
 	infile.na = "NA", infile.ncol.skip = 1, infile.ncol.print = 1,
-	infile.header.print = "SNP", is.dosage = FALSE, ncores = 1)
+	infile.header.print = "SNP", is.dosage = FALSE, ncores = 1, verbose = FALSE)
 }
 \arguments{
   \item{obj}{
-a class glmmkin or class glmmkin.multi object, returned by fitting the null GLMM using \code{glmmkin( )}.
+a class glmmkin or class glmmkin.multi object, returned by fitting the null GLMM using \code{glmmkin}.
 }
   \item{infile}{
 the input file name. Note that for plink binary genotype files only the prefix without .bed, .bim or .fam should be used. Only SNP major mode recognized in the binary file. Alternatively, it can be the full name of a BGEN file (including the suffix .bgen), a GDS file (including the suffix .gds) or a plain text file with some delimiters (comma, space, tab or something else), with one row for each SNP and one column for each individual. In that case, SNPs should be coded as numeric values (0/1/2 or dosages allowed, A/C/G/T coding is not recognized). There can be additional rows and columns to skip at the beginning. The order of individuals can be different from \code{obj} in the null GLMM (see the argument \code{select}). Some compressed files (.gz and .bz2) also allowed.
 }
-
   \item{outfile}{
 the output file name.
 }
@@ -75,6 +74,9 @@ a logical switch for whether imputed dosage should be used from a GDS \code{infi
 }
   \item{ncores}{
 a positive integer indicating the number of cores to be used in parallel computing (default = 1).
+}
+  \item{verbose}{
+a logical switch for whether a progress bar should be shown for a GDS \code{infile} (default = FALSE).
 }
 }
 \value{

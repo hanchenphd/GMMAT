@@ -5,7 +5,9 @@ import(Matrix)
 importFrom("stats", "as.formula", "binomial", "dbeta", "glm", "model.frame",
 "model.matrix", "na.omit", "na.pass", "pchisq", "dchisq", "qchisq", "var",
 "pnorm", "uniroot", "integrate", "weights", "vcov")
-importFrom("utils", "read.table", "write.table")
+importFrom("utils", "read.table", "write.table", "txtProgressBar",
+"setTxtProgressBar")
+if(tools:::.OStype() == "windows") importFrom("utils", "winProgressBar", "setWinProgressBar")
 importFrom("CompQuadForm", "davies", "liu")
 importFrom("SeqArray", "seqOpen", "seqGetData", "seqClose", "seqSetFilter")
 importFrom("SeqVarTools", "missingGenotypeRate", "alleleFrequency", "altDosage")
@@ -14,4 +16,4 @@ importFrom("methods", "as")
 useDynLib(GMMAT, .registration = TRUE, .fixes = "C_")
 
 # functions
-export(glmmkin, glmm.score, glmm.wald, glmm.score.meta, SMMAT, SMMAT.meta)
+export(glmmkin, glmm.score, glmm.wald, glmm.score.meta, SMMAT, SMMAT.prep, SMMAT.lowmem, SMMAT.meta)

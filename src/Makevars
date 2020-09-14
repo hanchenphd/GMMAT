@@ -10,27 +10,10 @@ SOURCES= zstd-1.4.5/lib/common/debug.c \
 	 zstd-1.4.5/lib/common/threading.c \
 	 zstd-1.4.5/lib/common/xxhash.c \
          zstd-1.4.5/lib/common/zstd_common.c \
-         zstd-1.4.5/lib/compress/fse_compress.c \
-         zstd-1.4.5/lib/compress/hist.c \
-         zstd-1.4.5/lib/compress/huf_compress.c \
-         zstd-1.4.5/lib/compress/zstd_compress.c \
-         zstd-1.4.5/lib/compress/zstd_compress_literals.c \
-         zstd-1.4.5/lib/compress/zstd_compress_sequences.c \
-         zstd-1.4.5/lib/compress/zstd_compress_superblock.c \
-         zstd-1.4.5/lib/compress/zstd_double_fast.c \
-         zstd-1.4.5/lib/compress/zstd_fast.c \
-         zstd-1.4.5/lib/compress/zstd_lazy.c \
-         zstd-1.4.5/lib/compress/zstd_ldm.c \
-         zstd-1.4.5/lib/compress/zstd_opt.c \
-         zstd-1.4.5/lib/compress/zstdmt_compress.c \
          zstd-1.4.5/lib/decompress/huf_decompress.c \
          zstd-1.4.5/lib/decompress/zstd_ddict.c \
          zstd-1.4.5/lib/decompress/zstd_decompress.c \
          zstd-1.4.5/lib/decompress/zstd_decompress_block.c \
-         zstd-1.4.5/lib/dictBuilder/cover.c \
-         zstd-1.4.5/lib/dictBuilder/divsufsort.c \
-         zstd-1.4.5/lib/dictBuilder/fastcover.c \
-         zstd-1.4.5/lib/dictBuilder/zdict.c \
 	 libdeflate-1.6/lib/adler32.c \
 	 libdeflate-1.6/lib/crc32.c \
 	 libdeflate-1.6/lib/deflate_compress.c \
@@ -53,19 +36,6 @@ OBJECTS= fitglmm.o \
 	 zstd-1.4.5/lib/common/threading.o \
 	 zstd-1.4.5/lib/common/xxhash.o \
          zstd-1.4.5/lib/common/zstd_common.o \
-         zstd-1.4.5/lib/compress/fse_compress.o \
-         zstd-1.4.5/lib/compress/hist.o \
-         zstd-1.4.5/lib/compress/huf_compress.o \
-         zstd-1.4.5/lib/compress/zstd_compress.o \
-         zstd-1.4.5/lib/compress/zstd_compress_literals.o \
-         zstd-1.4.5/lib/compress/zstd_compress_sequences.o \
-         zstd-1.4.5/lib/compress/zstd_compress_superblock.o \
-         zstd-1.4.5/lib/compress/zstd_double_fast.o \
-         zstd-1.4.5/lib/compress/zstd_fast.o \
-         zstd-1.4.5/lib/compress/zstd_lazy.o \
-         zstd-1.4.5/lib/compress/zstd_ldm.o \
-         zstd-1.4.5/lib/compress/zstd_opt.o \
-         zstd-1.4.5/lib/compress/zstdmt_compress.o \
          zstd-1.4.5/lib/decompress/huf_decompress.o \
          zstd-1.4.5/lib/decompress/zstd_ddict.o \
          zstd-1.4.5/lib/decompress/zstd_decompress.o \

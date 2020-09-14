@@ -102,7 +102,7 @@ a character vector indicating column name(s) of column(s) selected to print by \
 a logical switch for whether imputed dosage should be used from a GDS \code{infile} (default = FALSE).
 }
   \item{verbose}{
-a logical switch for printing detailed information (parameter estimates in each iteration) for testing and debugging purpose (default = FALSE).
+a logical switch for printing a progress bar and detailed information (parameter estimates in each iteration) for testing and debugging purpose (default = FALSE).
 }
   \item{\dots}{
 additional arguments that could be passed to \code{\link{glm}}.
