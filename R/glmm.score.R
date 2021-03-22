@@ -51,13 +51,17 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
     }
     #print(sprintf("Computational time: %.2f seconds", time))
     return(invisible(time))
-  } else if(grepl("\\.gds$", infile)) { # GDS genotype file
+  } else if(grepl("\\.gds$", infile[1])) { # GDS genotype file
     if(is.Windows && ncores > 1) {
       warning("The package doMC is not available on Windows... Switching to single thread...")
       ncores <- 1
     }
     ncores <- min(c(ncores, parallel::detectCores(logical = TRUE)))
-    gds <- SeqArray::seqOpen(infile)
+    if (class(infile)[1] != "SeqVarGDSClass") {
+      gds <- SeqArray::seqOpen(infile)
+    } else {
+      gds <- infile
+    }
     sample.id <- SeqArray::seqGetData(gds, "sample.id")
     if(is.null(select)) {
       if(any(is.na(match(unique(obj$id_include), sample.id)))) warning("Check your data... Some id_include in obj are missing in sample.id of infile!")
@@ -81,7 +85,9 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
     }
     rm(select2)
     variant.idx.all <- SeqArray::seqGetData(gds, "variant.id")
-    SeqArray::seqClose(gds)
+    if (class(infile)[1] != "SeqVarGDSClass") {
+      SeqArray::seqClose(gds)
+    }
     p.all <- length(variant.idx.all)
     if(ncores > 1) {
       doMC::registerDoMC(cores = ncores)
@@ -95,7 +101,11 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
 	  pb <- txtProgressBar(min = 0, max = p, style = 3)
 	  cat("\n")
 	}
-        gds <- SeqArray::seqOpen(infile)
+        if (class(infile)[1] != "SeqVarGDSClass") {
+          gds <- SeqArray::seqOpen(infile)
+        } else {
+          gds <- infile
+        }
         SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0], verbose = FALSE)
         rm(sample.id); rm(select)
         nbatch.flush <- (p-1) %/% 100000 + 1
@@ -180,6 +190,9 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
 	  close(pb)
 	}
       }
+      if (class(infile)[1] == "SeqVarGDSClass") {
+        SeqArray::seqClose(infile)
+      } 
       for(b in 2:ncores) {
         system(paste0("cat ", outfile, "_tmp.", b, " >> ", outfile))
         unlink(paste0(outfile, "_tmp.", b))
@@ -196,7 +209,9 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
 	  cat("\n")
 	}
       }
-      gds <- SeqArray::seqOpen(infile)
+      if (class(infile)[1] != "SeqVarGDSClass") {
+        gds <- SeqArray::seqOpen(infile)
+      }
       SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0], verbose = FALSE)
       rm(sample.id); rm(select)
       nbatch.flush <- (p-1) %/% 100000 + 1
