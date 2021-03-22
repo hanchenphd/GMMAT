@@ -286,11 +286,16 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
   } else if (grepl("\\.bgen$", infile)){
     if(class(obj) == "glmmkin.multi") stop("Error: multiple phenotypes currently not implemented for BGEN format genotypes.")
     if(is.Windows && ncores > 1) {
-      warning("The package doMC is not available on Windows... Switching to single thread...")
+      warning("The package doMC is not available on Windows... Switching to single thread...", immediate. = TRUE)
       ncores <- 1
     }
     ncores <- min(c(ncores, parallel::detectCores(logical = TRUE)))
     bgenInfo <- .Call(C_bgenHeader, infile)
+    if (is.null(bgenInfo)) {
+      opt <- options(show.error.messages = FALSE)
+      on.exit(options(opt))
+      stop()
+    }
     if(!is.null(select)){
       if(length(select) != bgenInfo$N) stop("Error: number of individuals in select does not match infile!")
     } else if (!is.null(BGEN.samplefile)) {
@@ -299,7 +304,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
         stop(paste0("Error: Number of sample identifiers in sample file (", nrow(sampleFile)-1, ") does not match number of samples in BGEN file (", bgenInfo$N,")."))
       }
       sample.id <- sampleFile[-1,1]
-      if(any(is.na(match(unique(obj$id_include), sample.id)))) warning("Check your data... Some id_include in obj are missing in BGEN.samplefile!")
+      if(any(is.na(match(unique(obj$id_include), sample.id)))) warning("Check your data... Some id_include in obj are missing in BGEN.samplefile!", immediate. = TRUE)
       select <- match(sample.id, unique(obj$id_include))
       select[is.na(select)] <- 0
       if(all(select == 0)) stop("Error: id_include in obj does not match sample.id in BGEN.samplefile!")
@@ -308,7 +313,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
       if (is.null(BGEN.samplefile) && bgenInfo$SampleIdFlag == 0) {
         stop("Error: BGEN file does not contain sample identifiers. Use the BGEN.samplefile or select parameter.")
       } 
-      if(any(is.na(match(unique(obj$id_include), bgenInfo$SampleIds)))) warning("Check your data... Some id_include in obj are missing in sample.id of infile!")
+      if(any(is.na(match(unique(obj$id_include), bgenInfo$SampleIds)))) warning("Check your data... Some id_include in obj are missing in sample.id of infile!", immediate. = TRUE)
       select <- match(bgenInfo$SampleIds, unique(obj$id_include))
       select[is.na(select)] <- 0
       if(all(select == 0)) stop("Error: id_include in obj does not match sample.id in infile!")
@@ -330,7 +335,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
     if (ncores > 1){
       if (ncores > bgenInfo$M) {
         ncores = bgenInfo$M
-        warning(paste0("The number of threads specified is greater than the number of variants. Using ", ncores, " cores instead."))
+        warning(paste0("The number of threads specified is greater than the number of variants. Using ", ncores, " cores instead."), immediate. = TRUE)
       }
       
       threadInfo <- .Call(C_getVariantPos, infile, bgenInfo$offset, bgenInfo$M, bgenInfo$N, bgenInfo$CompressionFlag, bgenInfo$LayoutFlag, ncores)
