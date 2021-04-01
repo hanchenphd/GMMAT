@@ -68,9 +68,13 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
         stop("Error: cannot read group.file!")
     }
     variant.id1 <- paste(group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")
-    group.info <- group.info[!duplicated(paste(group.info$group, variant.id1, sep = ":")), ]
+    is.duplicated <- duplicated(paste(group.info$group, variant.id1, sep = ":"))
+    group.info <- group.info[!is.duplicated, ]
+    variant.id1 <- variant.id1[!is.duplicated]
+    rm(is.duplicated)
     variant.idx1 <- variant.idx[match(variant.id1, variant.id)]
     group.info$variant.idx <- variant.idx1
+  
     group.info$flip <- 0
     if(auto.flip) {
         cat("Automatic allele flipping enabled...\nVariants matching alt/ref but not ref/alt alleles will also be included, with flipped effects\n")

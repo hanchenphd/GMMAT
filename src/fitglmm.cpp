@@ -2392,7 +2392,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
 
       uint maxLA = 65536;
-      uint maxLB = 65536;
       std::vector<uchar> zBuf12;
       std::vector<uchar> shortBuf12;
       uint compression = Rcpp::as<uint>(compression_in);
@@ -2417,8 +2416,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       int ret;
       for (uint m = begin; m < end; m++) {
         stringstream writeout;
-        maxLA = 65536;
-        maxLB = 65536;
         
         ushort LS; ret = fread(&LS, 2, 1, fp);
         ret = fread(snpID, 1, LS, fp); snpID[LS] = '\0';
@@ -2433,22 +2430,14 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         
         uint physpos; ret = fread(&physpos, 4, 1, fp);
 	string physpos_tmp = to_string(physpos);
+        
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
         if (LKnum != 2) {Rcout << "Error reading BGEN file: There are non-bi-allelic variants. \n"; return R_NilValue;}
+       
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
-        if (LA > maxLA) {
-          maxLA = 2 * LA;
-          delete[] allele1;
-          allele1 = new char[maxLA + 1];
-        }
         ret = fread(allele1, 1, LA, fp); allele1[LA] = '\0';
 
         uint32_t LB; ret = fread(&LB, 4, 1, fp);
-        if (LB > maxLB) {
-          maxLB = 2 * LB;
-          delete[] allele0;
-          allele0 = new char[maxLB + 1];
-        }
         ret = fread(allele0, 1, LB, fp); allele0[LB] = '\0';
         
         uint cLen; ret = fread(&cLen, 4, 1, fp);
@@ -2696,7 +2685,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
       
       uint maxLA = 65536;
-      uint maxLB = 65536;
       std::vector<uchar> zBuf12;
       std::vector<uchar> shortBuf12;
       uint compression = Rcpp::as<uint>(compression_in);
@@ -2735,8 +2723,10 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         
         uint physpos; ret = fread(&physpos, 4, 1, fp);
       	string physpos_tmp = to_string(physpos);
+      	
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
         if (LKnum != 2) {Rcout << "Error reading BGEN file: There are non-bi-allelic variants. \n"; return R_NilValue;}
+        
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
         ret = fread(allele1, 1, LA, fp); allele1[LA] = '\0';
         
@@ -2986,7 +2976,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
         
       uint maxLA = 65536;
-      uint maxLB = 65536;
       char* snpID   = new char[maxLA + 1];
       char* rsID    = new char[maxLA + 1];
       char* chrStr  = new char[maxLA + 1];
@@ -3201,7 +3190,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
       
       uint maxLA = 65536;
-      uint maxLB = 65536;
       char* snpID   = new char[maxLA + 1];
       char* rsID    = new char[maxLA + 1];
       char* chrStr  = new char[maxLA + 1];
@@ -3228,8 +3216,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       int ret; 
       for (uint m = begin; m < end; m++) {
         stringstream writeout;
-        maxLA = 65536;
-        maxLB = 65536;
         
         uint Nprob; ret = fread(&Nprob, 4, 1, fp); 
         if (Nprob != Nbgen) {
@@ -3250,19 +3236,9 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 	string physpos_tmp = to_string(physpos);
 
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
-        if (LA > maxLA) {
-          maxLA = 2 * LA;
-          delete[] allele1;
-          allele1 = new char[maxLA + 1];
-        }
         ret = fread(allele1, 1, LA, fp); allele1[LA] = '\0';
         
         uint32_t LB; ret = fread(&LB, 4, 1, fp);
-        if (LB > maxLB) {
-          maxLB = 2 * LB;
-          delete[] allele0;
-          allele0 = new char[maxLB + 1];
-        }
         ret = fread(allele0, 1, LB, fp); allele0[LB] = '\0';
         
         
