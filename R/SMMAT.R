@@ -1206,7 +1206,7 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     if(length(lambda) != length(delta)) stop("Error: inconsistent length in lambda and delta!")
     if(length(lambda) != length(df)) stop("Error: inconsistent length in lambda and df!")
     if (length(lambda) == 1) {
-        pchisq(x/lambda, df = df, ncp = delta, lower.tail = FALSE)
+        return(pchisq(x/lambda, df = df, ncp = delta, lower.tail = FALSE))
     }
     d <- max(lambda)
     lambda <- lambda/d
