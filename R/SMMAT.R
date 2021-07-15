@@ -1,5 +1,6 @@
 SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, auto.flip = FALSE, Garbage.Collection = FALSE, is.dosage = FALSE, ncores = 1, verbose = FALSE)
 {
+    if(!grepl("\\.gds$", geno.file[1])) stop("Error: currently only .gds format is supported in geno.file!")
     is.Windows <- Sys.info()["sysname"] == "Windows"
     if(is.Windows && ncores > 1) {
         warning("The package doMC is not available on Windows... Switching to single thread...")
@@ -26,8 +27,12 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
         rm(J)
     } else residuals <- null.obj$scaled.residuals
     n <- length(unique(null.obj$id_include))
-    if(!grepl("\\.gds$", geno.file)) stop("Error: currently only .gds format is supported in geno.file!")
-    gds <- SeqArray::seqOpen(geno.file)
+    
+    if (class(geno.file)[1] != "SeqVarGDSClass") {
+        gds <- SeqArray::seqOpen(geno.file)
+    } else {
+        gds <- geno.file
+    }
     sample.id <- SeqArray::seqGetData(gds, "sample.id")
     if(any(is.na(match(null.obj$id_include, sample.id)))) warning("Check your data... Some individuals in null.obj$id_include are missing in sample.id of geno.file!")
     sample.id <- sample.id[sample.id %in% null.obj$id_include]
@@ -53,7 +58,9 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     ref <- unlist(lapply(alleles.list, function(x) x[1]))
     alt <- unlist(lapply(alleles.list, function(x) paste(x[-1], collapse=",")))
     rm(alleles.list); gc()
-    SeqArray::seqClose(gds)
+    if (class(geno.file)[1] != "SeqVarGDSClass") {
+        SeqArray::seqClose(gds) 
+    }
     variant.id <- paste(chr, pos, ref, alt, sep = ":")
     rm(chr, pos, ref, alt); gc()
     group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
@@ -61,9 +68,13 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
         stop("Error: cannot read group.file!")
     }
     variant.id1 <- paste(group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")
-    group.info <- group.info[!duplicated(paste(group.info$group, variant.id1, sep = ":")), ]
+    is.duplicated <- duplicated(paste(group.info$group, variant.id1, sep = ":"))
+    group.info <- group.info[!is.duplicated, ]
+    variant.id1 <- variant.id1[!is.duplicated]
+    rm(is.duplicated)
     variant.idx1 <- variant.idx[match(variant.id1, variant.id)]
     group.info$variant.idx <- variant.idx1
+  
     group.info$flip <- 0
     if(auto.flip) {
         cat("Automatic allele flipping enabled...\nVariants matching alt/ref but not ref/alt alleles will also be included, with flipped effects\n")
@@ -107,7 +118,11 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 		pb <- txtProgressBar(min = 0, max = n.groups, style = 3)
 		cat("\n")
 	    }
-    	    gds <- SeqArray::seqOpen(geno.file)
+	        if (class(geno.file)[1] != "SeqVarGDSClass") {
+    	        gds <- SeqArray::seqOpen(geno.file)
+	        } else {
+	            gds <- geno.file
+	        }
     	    SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
 	    n.variants <- rep(0,n.groups)
     	    miss.min <- rep(NA,n.groups)
@@ -253,7 +268,11 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    }
     	    if(SMMAT) tmp.out$E.pval <- SMMAT.pval
 	    tmp.out
-	}
+  }
+    	if (class(geno.file)[1] == "SeqVarGDSClass") {
+    	   SeqArray::seqClose(geno.file)
+    	}
+    	return(out)
     } else { # use a single core
 	n.groups <- n.groups.all
 	if(verbose) {
@@ -264,7 +283,9 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 		cat("\n")
 	    }
 	}
-    	gds <- SeqArray::seqOpen(geno.file)
+	    if (class(geno.file)[1] != "SeqVarGDSClass") {
+    	  gds <- SeqArray::seqOpen(geno.file)
+	    }
     	SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
 	n.variants <- rep(0,n.groups)
     	miss.min <- rep(NA,n.groups)
@@ -419,6 +440,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 
 SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", auto.flip = FALSE)
 {
+    if(!grepl("\\.gds$", geno.file[1])) stop("Error: currently only .gds format is supported in geno.file!")
     if(!class(null.obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
     n.pheno <- null.obj$n.pheno
     if(any(duplicated(null.obj$id_include))) {
@@ -433,8 +455,11 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
         rm(J)
     } else residuals <- null.obj$scaled.residuals
     n <- length(unique(null.obj$id_include))
-    if(!grepl("\\.gds$", geno.file)) stop("Error: currently only .gds format is supported in geno.file!")
-    gds <- SeqArray::seqOpen(geno.file)
+    if (class(geno.file)[1] != "SeqVarGDSClass") {
+        gds <- SeqArray::seqOpen(geno.file)
+    } else {
+        gds <- geno.file
+    }
     sample.id <- SeqArray::seqGetData(gds, "sample.id")
     if(any(is.na(match(null.obj$id_include, sample.id)))) warning("Check your data... Some individuals in null.obj$id_include are missing in sample.id of geno.file!")
     sample.id <- sample.id[sample.id %in% null.obj$id_include]
@@ -505,7 +530,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
     return(out)
 }
 
-SMMAT.lowmem <- function(SMMAT.prep.obj, meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, Garbage.Collection = FALSE, is.dosage = FALSE, ncores = 1, verbose = FALSE)
+SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, Garbage.Collection = FALSE, is.dosage = FALSE, ncores = 1, verbose = FALSE)
 {
     if(class(SMMAT.prep.obj) != "SMMAT.prep") stop("Error: SMMAT.prep.obj must be a class SMMAT.prep object!")
     is.Windows <- Sys.info()["sysname"] == "Windows"
@@ -514,7 +539,10 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, meta.file.prefix = NULL, MAF.range = c(
         ncores <- 1
     }
     null.obj <- SMMAT.prep.obj$null.obj
-    geno.file <- SMMAT.prep.obj$geno.file
+    if (is.null(geno.file)) {
+      geno.file <- SMMAT.prep.obj$geno.file
+    }
+    if(!grepl("\\.gds$", geno.file[1])) stop("Error: currently only .gds format is supported in geno.file!")
     residuals <- SMMAT.prep.obj$residuals
     sample.id <- SMMAT.prep.obj$sample.id
     group.info <- SMMAT.prep.obj$group.info
@@ -532,7 +560,6 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, meta.file.prefix = NULL, MAF.range = c(
     SKAT <- "S" %in% tests
     SKATO <- "O" %in% tests
     SMMAT <- "E" %in% tests
-    if(!grepl("\\.gds$", geno.file)) stop("Error: currently only .gds format is supported in geno.file!")
     ncores <- min(c(ncores, parallel::detectCores(logical = TRUE)))
     if(ncores > 1) {
     	doMC::registerDoMC(cores = ncores)
@@ -547,7 +574,11 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, meta.file.prefix = NULL, MAF.range = c(
 		pb <- txtProgressBar(min = 0, max = n.groups, style = 3)
 		cat("\n")
 	    }
-    	    gds <- SeqArray::seqOpen(geno.file)
+	        if (class(geno.file)[1] != "SeqVarGDSClass") {
+    	        gds <- SeqArray::seqOpen(geno.file)
+	        } else {
+	            gds <- geno.file
+	        }
     	    SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
 	    n.variants <- rep(0,n.groups)
     	    miss.min <- rep(NA,n.groups)
@@ -693,7 +724,11 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, meta.file.prefix = NULL, MAF.range = c(
 	    }
     	    if(SMMAT) tmp.out$E.pval <- SMMAT.pval
 	    tmp.out
-	}
+  }
+    	if (class(geno.file)[1] == "SeqVarGDSClass") {
+    	  SeqArray::seqClose(geno.file)
+    	}
+    	return(out)
     } else { # use a single core
 	n.groups <- n.groups.all
 	if(verbose) {
@@ -704,7 +739,11 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, meta.file.prefix = NULL, MAF.range = c(
 		cat("\n")
 	    }
 	}
-    	gds <- SeqArray::seqOpen(geno.file)
+	    if (class(geno.file)[1] != "SeqVarGDSClass") {
+    	    gds <- SeqArray::seqOpen(geno.file)
+	    } else {
+	        gds <- geno.file
+	    }
     	SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
 	n.variants <- rep(0,n.groups)
     	miss.min <- rep(NA,n.groups)
@@ -1167,7 +1206,7 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     if(length(lambda) != length(delta)) stop("Error: inconsistent length in lambda and delta!")
     if(length(lambda) != length(df)) stop("Error: inconsistent length in lambda and df!")
     if (length(lambda) == 1) {
-        pchisq(x/lambda, df = df, ncp = delta, lower.tail = FALSE)
+        return(pchisq(x/lambda, df = df, ncp = delta, lower.tail = FALSE))
     }
     d <- max(lambda)
     lambda <- lambda/d

@@ -1,5 +1,5 @@
 /*  GMMAT : An R Package for Generalized linear Mixed Model Association Tests
- *  Copyright (C) 2014--2020  Han Chen, Matthew P. Conomos, Duy T. Pham
+ *  Copyright (C) 2014--2021  Han Chen, Matthew P. Conomos, Duy T. Pham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1681,7 +1681,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		      gmin=100.0;
 		      nmiss=0;
 		      gmiss.zeros();
-		      readbedfile.seekg(i*nblocks+3);
+		      readbedfile.seekg((std::streamoff)i*nblocks+3, readbedfile.beg);
 		      ncount = 0;
 		      readbedfile.read((char *)buffer, nblocks);
 		      for(int j=0; j<nblocks; ++j) {
@@ -1839,7 +1839,7 @@ void nmmin(int n, double *Bvec, double *X, double *Fmin, optimfn fn,
 		      gmin=100.0;
 		      nmiss=0;
 		      gmiss.zeros();
-		      readbedfile.seekg(i*nblocks+3);
+		      readbedfile.seekg((std::streamoff)i*nblocks+3, readbedfile.beg);
 		      ncount = 0;
 		      readbedfile.read((char *)buffer, nblocks);
 		      for(int j=0; j<nblocks; ++j) {
@@ -2293,7 +2293,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 		      gmin=100.0;
 		      nmiss=0;
 		      gmiss.zeros();
-		      readfile.seekg(p*nblocks+3);
+		      readfile.seekg((std::streamoff)p*nblocks+3, readfile.beg);
 		      ncount = 0;
 		      readfile.read((char *)buffer, nblocks);
 		      for(int j=0; j<nblocks; ++j) {
@@ -2392,7 +2392,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
 
       uint maxLA = 65536;
-      uint maxLB = 65536;
       std::vector<uchar> zBuf12;
       std::vector<uchar> shortBuf12;
       uint compression = Rcpp::as<uint>(compression_in);
@@ -2417,11 +2416,11 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       int ret;
       for (uint m = begin; m < end; m++) {
         stringstream writeout;
-        maxLA = 65536;
-        maxLB = 65536;
         
         ushort LS; ret = fread(&LS, 2, 1, fp);
         ret = fread(snpID, 1, LS, fp); snpID[LS] = '\0';
+        string str_snpID = "NA";
+        if (LS != 0) { str_snpID = string(snpID); }
         
         ushort LR; ret = fread(&LR, 2, 1, fp);
         ret = fread(rsID, 1, LR, fp);  rsID[LR] = '\0';
@@ -2431,22 +2430,14 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         
         uint physpos; ret = fread(&physpos, 4, 1, fp);
 	string physpos_tmp = to_string(physpos);
+        
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
         if (LKnum != 2) {Rcout << "Error reading BGEN file: There are non-bi-allelic variants. \n"; return R_NilValue;}
+       
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
-        if (LA > maxLA) {
-          maxLA = 2 * LA;
-          delete[] allele1;
-          allele1 = new char[maxLA + 1];
-        }
         ret = fread(allele1, 1, LA, fp); allele1[LA] = '\0';
 
         uint32_t LB; ret = fread(&LB, 4, 1, fp);
-        if (LB > maxLB) {
-          maxLB = 2 * LB;
-          delete[] allele0;
-          allele0 = new char[maxLB + 1];
-        }
         ret = fread(allele0, 1, LB, fp); allele0[LB] = '\0';
         
         uint cLen; ret = fread(&cLen, 4, 1, fp);
@@ -2597,7 +2588,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
        }
 
        gmean /= 2.0; // convert mean to allele freq
-       writeout << snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
+       writeout << str_snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
        tmpout[npbidx] = writeout.str();
        writeout.clear();
        if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
@@ -2694,7 +2685,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
       
       uint maxLA = 65536;
-      uint maxLB = 65536;
       std::vector<uchar> zBuf12;
       std::vector<uchar> shortBuf12;
       uint compression = Rcpp::as<uint>(compression_in);
@@ -2719,11 +2709,11 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       int ret;
       for (uint m = begin; m < end; m++) {
         stringstream writeout;
-        maxLA = 65536;
-        maxLB = 65536;
         
         ushort LS; ret = fread(&LS, 2, 1, fp);
         ret = fread(snpID, 1, LS, fp); snpID[LS] = '\0';
+        string str_snpID = "NA";
+        if (LS != 0) { str_snpID = string(snpID); }
         
         ushort LR; ret = fread(&LR, 2, 1, fp);
         ret = fread(rsID, 1, LR, fp);  rsID[LR] = '\0';
@@ -2733,22 +2723,14 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         
         uint physpos; ret = fread(&physpos, 4, 1, fp);
       	string physpos_tmp = to_string(physpos);
+      	
         ushort LKnum; ret = fread(&LKnum, 2, 1, fp);
         if (LKnum != 2) {Rcout << "Error reading BGEN file: There are non-bi-allelic variants. \n"; return R_NilValue;}
+        
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
-        if (LA > maxLA) {
-          maxLA = 2 * LA;
-          delete[] allele1;
-          allele1 = new char[maxLA + 1];
-        }
         ret = fread(allele1, 1, LA, fp); allele1[LA] = '\0';
         
         uint32_t LB; ret = fread(&LB, 4, 1, fp);
-        if (LB > maxLB) {
-          maxLB = 2 * LB;
-          delete[] allele0;
-          allele0 = new char[maxLB + 1];
-        }
         ret = fread(allele0, 1, LB, fp); allele0[LB] = '\0';
         
         uint cLen; ret = fread(&cLen, 4, 1, fp);
@@ -2896,7 +2878,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         }
         
         gmean /= 2.0; // convert mean to allele freq
-        writeout << snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
+        writeout << str_snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
         tmpout[npbidx] = writeout.str();
         writeout.clear();
         if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
@@ -2994,7 +2976,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
         
       uint maxLA = 65536;
-      uint maxLB = 65536;
       char* snpID   = new char[maxLA + 1];
       char* rsID    = new char[maxLA + 1];
       char* chrStr  = new char[maxLA + 1];
@@ -3002,8 +2983,14 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       char* allele0 = new char[maxLA + 1];
       uint Nbgen = Rcpp::as<uint>(nbgen_in);
       uint compression = Rcpp::as<uint>(compression_in);
-      uchar* zBuf1  = (unsigned char*)malloc(6 * Nbgen);
-      uint16_t* shortBuf1 = (uint16_t*)malloc(6 * Nbgen);
+      vector<uchar> zBuf1;
+      vector<uint16_t> shortBuf1;
+      uLongf destLen1 = 6 * Nbgen;
+      if (compression == 0) {
+        zBuf1.resize(destLen1);
+      } else {
+        shortBuf1.resize(destLen1);
+      }
       struct libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
       
       uint begin = Rcpp::as<uint>(begin_in);
@@ -3022,8 +3009,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 
       for (uint m = begin; m < end; m++) {
         stringstream writeout;
-        maxLA = 65536;
-        maxLB = 65536;
         
         uint Nprob; ret = fread(&Nprob, 4, 1, fp); 
         if (Nprob != Nbgen) {
@@ -3031,6 +3016,8 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         }
         ushort LS; ret = fread(&LS, 2, 1, fp);
         ret = fread(snpID, 1, LS, fp); snpID[LS] = '\0';
+        string str_snpID = "NA";
+        if (LS != 0) { str_snpID = string(snpID); }
         
         ushort LR; ret = fread(&LR, 2, 1, fp);
         ret = fread(rsID, 1, LR, fp);  rsID[LR] = '\0';
@@ -3042,35 +3029,25 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 	      string physpos_tmp = to_string(physpos);
 
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
-        if (LA > maxLA) {
-          maxLA = 2 * LA;
-          delete[] allele1;
-          allele1 = new char[maxLA + 1];
-        }
         ret = fread(allele1, 1, LA, fp); allele1[LA] = '\0';
         
         uint32_t LB; ret = fread(&LB, 4, 1, fp);
-        if (LB > maxLB) {
-          maxLB = 2 * LB;
-          delete[] allele0;
-          allele0 = new char[maxLB + 1];
-        }
         ret = fread(allele0, 1, LB, fp); allele0[LB] = '\0';
         
-
-        uLongf destLen1 = 6 * Nbgen;
-        
+        uint16_t* probs_start;
         if (compression == 1) {
           uint cLen; ret = fread(&cLen, 4, 1, fp);
-          ret = fread(zBuf1, 1, cLen, fp);
+          zBuf1.resize(cLen);
+          ret = fread(&zBuf1[0], 1, cLen, fp);
           
           if (libdeflate_zlib_decompress(decompressor, &zBuf1[0], cLen, &shortBuf1[0], destLen1, NULL) != LIBDEFLATE_SUCCESS) {
 			  Rcout << "Error reading bgen file: Decompressing variant block failed with libdeflate. \n"; return R_NilValue;
           }
+          probs_start = &shortBuf1[0];
         }
         else {
-          ret = fread(zBuf1, 1, destLen1, fp);
-          shortBuf1 = reinterpret_cast<uint16_t*>(zBuf1);
+          ret = fread(&zBuf1[0], 1, destLen1, fp);
+          probs_start = reinterpret_cast<uint16_t*>(&zBuf1[0]);
         }
         
         const double scale = 1.0 / 32768;
@@ -3084,9 +3061,9 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         for (size_t i = 0; i < Nbgen; i++) {
           if (select[ncount] > 0) {
             
-            double p11 = shortBuf1[3 * i] * scale;
-            double p10 = shortBuf1[3 * i + 1] * scale;
-            double p00 = shortBuf1[3 * i + 2] * scale;
+            double p11 = probs_start[3 * i] * scale;
+            double p10 = probs_start[3 * i + 1] * scale;
+            double p00 = probs_start[3 * i + 2] * scale;
             if (p11 == 0.0 && p10 == 0.0 && p00 == 0.0){
               gmiss[select[ncount]-1] = 1;
               nmiss++;
@@ -3117,7 +3094,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         }
         
         gmean /= 2.0; // convert mean to allele freq
-        writeout << snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
+        writeout << str_snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
         tmpout[npbidx] = writeout.str();
         writeout.clear();
         if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
@@ -3162,11 +3139,11 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       delete [] chrStr;
       delete [] allele0;
       delete [] allele1;
+      libdeflate_free_decompressor(decompressor);
       writefile.close();
       writefile.clear();
       fclose(fp);
-      free(zBuf1);
-      free(shortBuf1);
+      
       return wrap(compute_time);
     } 
     catch( std::exception &ex ) {
@@ -3213,7 +3190,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       
       
       uint maxLA = 65536;
-      uint maxLB = 65536;
       char* snpID   = new char[maxLA + 1];
       char* rsID    = new char[maxLA + 1];
       char* chrStr  = new char[maxLA + 1];
@@ -3240,8 +3216,6 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
       int ret; 
       for (uint m = begin; m < end; m++) {
         stringstream writeout;
-        maxLA = 65536;
-        maxLB = 65536;
         
         uint Nprob; ret = fread(&Nprob, 4, 1, fp); 
         if (Nprob != Nbgen) {
@@ -3249,6 +3223,8 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         }
         ushort LS; ret = fread(&LS, 2, 1, fp);
         ret = fread(snpID, 1, LS, fp); snpID[LS] = '\0';
+        string str_snpID = "NA";
+        if (LS != 0) { str_snpID = string(snpID); }
         
         ushort LR; ret = fread(&LR, 2, 1, fp);
         ret = fread(rsID, 1, LR, fp);  rsID[LR] = '\0';
@@ -3260,19 +3236,9 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
 	string physpos_tmp = to_string(physpos);
 
         uint32_t LA; ret = fread(&LA, 4, 1, fp);
-        if (LA > maxLA) {
-          maxLA = 2 * LA;
-          delete[] allele1;
-          allele1 = new char[maxLA + 1];
-        }
         ret = fread(allele1, 1, LA, fp); allele1[LA] = '\0';
         
         uint32_t LB; ret = fread(&LB, 4, 1, fp);
-        if (LB > maxLB) {
-          maxLB = 2 * LB;
-          delete[] allele0;
-          allele0 = new char[maxLB + 1];
-        }
         ret = fread(allele0, 1, LB, fp); allele0[LB] = '\0';
         
         
@@ -3335,7 +3301,7 @@ SEXP glmm_wald_bed(SEXP n_in, SEXP snp_in, SEXP bimfile_in, SEXP bedfile_in, SEX
         }
         
         gmean /= 2.0; // convert mean to allele freq
-        writeout << snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
+        writeout << str_snpID << "\t" << rsID << "\t" << chrStr << "\t" << physpos_tmp << "\t" << allele1 << "\t" << allele0 << "\t" << (n-nmiss) << "\t" << gmean << "\t";
         tmpout[npbidx] = writeout.str();
         writeout.clear();
         if((gmax-gmin<tol) || ((double)nmiss/n>missrate) || ((gmean<minmaf || gmean>maxmaf) && (gmean<1-maxmaf || gmean>1-minmaf))) { // monomorphic, missrate, MAF
