@@ -16,7 +16,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     SKATO <- "O" %in% tests
     SMMAT <- "E" %in% tests
     if(any(duplicated(null.obj$id_include))) {
-        J <- Matrix(sapply(unique(null.obj$id_include), function(x) 1*(null.obj$id_include==x)), sparse = TRUE)
+        J <- sparseMatrix(i=1:length(null.obj$id_include), j=match(null.obj$id_include,unique(null.obj$id_include)), x=1)
         residuals <- as.numeric(as.matrix(crossprod(J, null.obj$scaled.residuals)))
         if(!is.null(null.obj$P)) null.obj$P <- as.matrix(crossprod(J, crossprod(null.obj$P, J)))
 	else {
@@ -83,10 +83,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     	if(any(!is.na(variant.idx1) & !is.na(variant.idx2))) {
             tmp.dups <- which(!is.na(variant.idx1) & !is.na(variant.idx2))
 	    cat("The following ambiguous variants were found:\n")
-	    cat("chr:", chr[tmp.dups], "\n")
-	    cat("pos:", pos[tmp.dups], "\n")
-	    cat("ref:", ref[tmp.dups], "\n")
-	    cat("alt:", alt[tmp.dups], "\n")
+	    cat("variant.id:", variant.id[tmp.dups], "\n")
 	    cat("Warning: both variants with alleles ref/alt and alt/ref were present at the same position and coding should be double checked!\nFor these variants, only those with alleles ref/alt were used in the analysis...\n")
 	    variant.idx2[tmp.dups] <- NA
 	    rm(tmp.dups)
@@ -444,7 +441,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
     if(!class(null.obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
     n.pheno <- null.obj$n.pheno
     if(any(duplicated(null.obj$id_include))) {
-        J <- Matrix(sapply(unique(null.obj$id_include), function(x) 1*(null.obj$id_include==x)), sparse = TRUE)
+        J <- sparseMatrix(i=1:length(null.obj$id_include), j=match(null.obj$id_include,unique(null.obj$id_include)), x=1)
         residuals <- as.numeric(as.matrix(crossprod(J, null.obj$scaled.residuals)))
         if(!is.null(null.obj$P)) null.obj$P <- as.matrix(crossprod(J, crossprod(null.obj$P, J)))
 	else {
@@ -504,10 +501,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
     	if(any(!is.na(variant.idx1) & !is.na(variant.idx2))) {
             tmp.dups <- which(!is.na(variant.idx1) & !is.na(variant.idx2))
 	    cat("The following ambiguous variants were found:\n")
-	    cat("chr:", chr[tmp.dups], "\n")
-	    cat("pos:", pos[tmp.dups], "\n")
-	    cat("ref:", ref[tmp.dups], "\n")
-	    cat("alt:", alt[tmp.dups], "\n")
+	    cat("variant.id:", variant.id[tmp.dups], "\n")
 	    cat("Warning: both variants with alleles ref/alt and alt/ref were present at the same position and coding should be double checked!\nFor these variants, only those with alleles ref/alt were used in the analysis...\n")
 	    variant.idx2[tmp.dups] <- NA
 	    rm(tmp.dups)

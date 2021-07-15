@@ -3,7 +3,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
   if(!class(obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: obj must be a class glmmkin or glmmkin.multi object!")
   n.pheno <- obj$n.pheno
   if(any(duplicated(obj$id_include))) {
-    J <- Matrix(sapply(unique(obj$id_include), function(x) 1*(obj$id_include==x)), sparse = TRUE)
+    J <- sparseMatrix(i=1:length(obj$id_include), j=match(obj$id_include,unique(obj$id_include)), x=1)
     res <- as.vector(as.matrix(crossprod(J, obj$scaled.residuals)))
     if(!is.null(obj$P)) obj$P <- as.matrix(crossprod(J, crossprod(obj$P, J)))
     else {
