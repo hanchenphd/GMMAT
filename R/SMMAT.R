@@ -1146,6 +1146,9 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
 	if(rho[i]==0) SKAT.pval <- pval[i]
     }
     minp <- min(pval)
+  if(any(is.na(pval))){
+       return(list(p=NA, minp=NA, minp.rho=NA, Burden.score=Burden.score, Burden.var=Burden.var, Burden.pval=Burden.pval, SKAT.pval=SKAT.pval))
+    }
     for(i in 1:n.r) {
 	df <- sum(lambdas[[i]]^2)^2/sum(lambdas[[i]]^4)
 	qval[i] <- (qchisq(minp, df, lower.tail = FALSE)-df)/sqrt(2*df)*sqrt(2*sum(lambdas[[i]]^2))+sum(lambdas[[i]])
@@ -1169,19 +1172,32 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     Burden.score=Burden.score, Burden.var=Burden.var, Burden.pval=Burden.pval,
     SKAT.pval=SKAT.pval))
 }
-
+		   
 .Q_pval <- function(Q, lambda, method = "davies") {
-    if(method == "davies") {
-        tmp <- suppressWarnings(CompQuadForm::davies(q = Q, lambda = lambda, acc = 1e-6))
-        pval <- tmp$Qq
-	if((tmp$ifault > 0) | (pval <= 1e-5) | (pval >= 1)) method <- "kuonen"
-    }
-    if(method == "kuonen") {
-    	pval <- .pKuonen(x = Q, lambda = lambda)
-	if(is.na(pval)) method <- "liu"
-    }
-    if(method == "liu") pval <- CompQuadForm::liu(q = Q, lambda = lambda)
-    return(pval)
+  pval=NA
+  if(method == "davies") {
+    tmp = try(CompQuadForm::davies(q = Q, lambda = lambda, acc = 1e-6))
+    if(class(tmp) == "try-error" || (tmp$ifault > 0) || (tmp$Qq <= 1e-5) || (tmp$Qq >= 1)) {
+	    method <- "kuonen"
+  } else {
+    return(tmp$Qq)
+  }
+	  }
+  if(method == "kuonen") {
+    pval <- try(.pKuonen(x = Q, lambda = lambda))
+    if(class(pval) == "try-error" || is.na(pval)) method <- "liu"
+  }
+  if(method == "liu") pval <- try(CompQuadForm::liu(q = Q, lambda = lambda))
+  if(class(pval) == "try-error"){
+    cat(paste(
+      "[WARNING] : all methods failed for a position, returning a NA p-value for SKAT-O (Q=",
+      paste(Q, sep=",",collapse=";"), 
+       ", lambda=",
+       paste(lambda, sep=",",collapse=";"),
+        ".\n"))
+    return(NA)
+  }
+  return(pval)
 }
 
 .quad_pval <- function(U, V, method = "davies") {
@@ -1237,7 +1253,7 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
         NA
     else pnorm(w + log(v/w)/w, lower.tail = FALSE)
 }
-
+		   
 MAF.weights.beta.fun <- function(freq, beta1, beta2) {
     freq[freq > 0.5] <- 1 - freq[freq > 0.5]
     ifelse(freq <= 0, 0, dbeta(freq, beta1, beta2))
