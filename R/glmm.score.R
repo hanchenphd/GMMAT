@@ -115,8 +115,8 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
           gc()
           tmp.variant.idx <- if(i == nbatch.flush) variant.idx[((i-1)*100000+1):p] else variant.idx[((i-1)*100000+1):(i*100000)]
           SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx, verbose = FALSE)
-          MISSRATE <- SeqVarTools::missingGenotypeRate(gds, margin = "by.variant")
-          AF <- 1 - SeqVarTools::alleleFrequency(gds)
+          MISSRATE <- if(is.dosage) SeqArray::seqApply(gds, "annotation/format/DS", function(xx) mean(is.na(xx)), margin = "by.variant", as.is = "double") else SeqVarTools::missingGenotypeRate(gds, margin = "by.variant")
+          AF <- if(is.dosage) SeqArray::seqApply(gds, "annotation/format/DS", mean, margin = "by.variant", as.is = "double", na.rm = TRUE)/2 else 1 - SeqVarTools::alleleFrequency(gds)
           include <- (MISSRATE <= miss.cutoff & ((AF >= MAF.range[1] & AF <= MAF.range[2]) | (AF >= 1-MAF.range[2] & AF <= 1-MAF.range[1])))
           if(sum(include) == 0) next
           ii <- ii + 1
@@ -225,8 +225,8 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
         tmp.variant.idx <- if(i == nbatch.flush) variant.idx[((i-1)*100000+1):p] else variant.idx[((i-1)*100000+1):(i*100000)]
         tmp.p <- length(tmp.variant.idx)
         SeqArray::seqSetFilter(gds, variant.id = tmp.variant.idx, verbose = FALSE)
-        MISSRATE <- SeqVarTools::missingGenotypeRate(gds, margin = "by.variant")
-        AF <- 1 - SeqVarTools::alleleFrequency(gds)
+        MISSRATE <- if(is.dosage) SeqArray::seqApply(gds, "annotation/format/DS", function(xx) mean(is.na(xx)), margin = "by.variant", as.is = "double") else SeqVarTools::missingGenotypeRate(gds, margin = "by.variant")
+        AF <- if(is.dosage) SeqArray::seqApply(gds, "annotation/format/DS", mean, margin = "by.variant", as.is = "double", na.rm = TRUE)/2 else 1 - SeqVarTools::alleleFrequency(gds)
         include <- (MISSRATE <= miss.cutoff & ((AF >= MAF.range[1] & AF <= MAF.range[2]) | (AF >= 1-MAF.range[2] & AF <= 1-MAF.range[1])))
         if(sum(include) == 0) next
         ii <- ii + 1
