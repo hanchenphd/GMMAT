@@ -63,7 +63,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     }
     variant.id <- paste(chr, pos, ref, alt, sep = ":")
     rm(chr, pos, ref, alt); gc()
-    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
+    group.info <- try(fread(group.file, header = FALSE, data.table = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
     if (class(group.info) == "try-error") {
         stop("Error: cannot read group.file!")
     }
@@ -485,7 +485,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
     SeqArray::seqClose(gds)
     variant.id <- paste(chr, pos, ref, alt, sep = ":")
     rm(chr, pos, ref, alt); gc()
-    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
+    group.info <- try(fread(group.file, header = FALSE, data.table = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
     if (class(group.info) == "try-error") {
         stop("Error: cannot read group.file!")
     }
@@ -906,7 +906,7 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     SKAT <- "S" %in% tests
     SKATO <- "O" %in% tests
     SMMAT <- "E" %in% tests
-    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
+    group.info <- try(fread(group.file, header = FALSE, data.table = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
     if (class(group.info) == "try-error") {
         stop("Error: cannot read group.file!")
     }
@@ -933,7 +933,7 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     for(i in 1:n.cohort) {
         tmp.scores <- NULL
 	for(j in 1:n.files[i]) {
-	    tmp <- try(read.table(paste0(meta.files.prefix[i], ".score.", j), header = TRUE, as.is = TRUE))
+	    tmp <- try(fread(paste0(meta.files.prefix[i], ".score.", j), header = TRUE, data.table = FALSE))
     	    if (class(tmp) == "try-error") {
                 stop(paste0("Error: cannot read ", meta.files.prefix[i], ".score.", j, "!"))
     	    }
