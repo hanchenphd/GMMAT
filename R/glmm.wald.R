@@ -41,7 +41,7 @@ glmm.wald <- function(fixed, data = parent.frame(), kins = NULL, id, random.slop
 		bimfile <- paste(infile, "bim", sep=".")
 		bedfile <- paste(infile, "bed", sep=".")
 		famfile <- paste(infile, "fam", sep=".")
-		sample.id <- read.table(famfile, as.is=T)[,2]
+		sample.id <- fread(famfile, header=F, data.table=F)[,2]
 		snpinfo <- matrix(NA, length(snps), 6)
 	} else if(is.gds) { # GDS genotype file
 	        gds <- SeqArray::seqOpen(infile)
