@@ -23,7 +23,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
     bimfile <- paste(infile, "bim", sep=".")
     bedfile <- paste(infile, "bed", sep=".")
     famfile <- paste(infile, "fam", sep=".")
-    sample.id <- read.table(famfile, as.is=T)[,2]
+    sample.id <- fread(famfile, header=F, data.table=F)[,2]
     if(is.null(select)) {
       if(any(is.na(match(unique(obj$id_include), sample.id)))) warning("Check your data... Some id_include in obj are missing in sample.id of infile!")
       select <- match(sample.id, unique(obj$id_include))
@@ -314,7 +314,7 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
     if(!is.null(select)){
       if(length(select) != bgenInfo$N) stop("Error: number of individuals in select does not match infile!")
     } else if (!is.null(BGEN.samplefile)) {
-      sampleFile <- read.table(file = BGEN.samplefile, header = TRUE, sep = " ")
+      sampleFile <- fread(file = BGEN.samplefile, header = TRUE, data.table=F)
       if ((nrow(sampleFile)-1) != bgenInfo$N){
         stop(paste0("Error: Number of sample identifiers in sample file (", nrow(sampleFile)-1, ") does not match number of samples in BGEN file (", bgenInfo$N,")."))
       }
@@ -459,13 +459,13 @@ glmm.score.meta <- function(files, outfile, SNP = rep("SNP", length(files)), A1 
   if(length(SNP) != k) stop("Error: \"SNP\" must have the same length as \"files\"!")
   if(length(A1) != k) stop("Error: \"A1\" must have the same length as \"files\"!")
   if(length(A2) != k) stop("Error: \"A2\" must have the same length as \"files\"!")
-  master <- read.table(files[1], header=T, as.is=T)[, c(SNP[1], A1[1], A2[1], "N", "AF", "SCORE", "VAR", "PVAL")]
+  master <- fread(files[1], header=T, data.table=F)[, c(SNP[1], A1[1], A2[1], "N", "AF", "SCORE", "VAR", "PVAL")]
   names(master)[1:3] <- c("SNP", "A1", "A2")
   master <- master[!is.na(master$SCORE) & !is.na(master$VAR) & !is.na(master$PVAL), ]
   flag <- rep(0, nrow(master))
   if(k > 1) {
     for(i in 2:k) {
-      tmp <- read.table(files[i], header=T, as.is=T)[, c(SNP[i], A1[i], A2[i], "N", "AF", "SCORE", "VAR", "PVAL")]
+      tmp <- fread(files[i], header=T, data.table=F)[, c(SNP[i], A1[i], A2[i], "N", "AF", "SCORE", "VAR", "PVAL")]
       names(tmp)[1:3] <- c("SNP", "A1", "A2")
       tmp <- tmp[!is.na(tmp$SCORE) & !is.na(tmp$VAR) & !is.na(tmp$PVAL), ]
       idx <- tmp$SNP %in% master$SNP
