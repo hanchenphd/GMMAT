@@ -18,7 +18,7 @@ glmm.wald(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL,
 }
 \arguments{
   \item{fixed}{
-an object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the fixed effects model to be fitted.
+an object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the fixed effects model (without including any \code{snps} to be tested) to be fitted.
 }
   \item{data}{
 a data frame or list (or object coercible by \code{\link{as.data.frame}} to a data frame) containing the variables in the model.
