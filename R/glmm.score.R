@@ -211,8 +211,6 @@ glmm.score <- function(obj, infile, outfile, BGEN.samplefile = NULL, center = T,
       }
       if (!inherits(infile, "SeqVarGDSClass")) {
         gds <- SeqArray::seqOpen(infile)
-      } else {
-	gds <- infile
       }
       SeqArray::seqSetFilter(gds, sample.id = sample.id[select > 0], verbose = FALSE)
       rm(sample.id); rm(select)
