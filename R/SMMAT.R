@@ -265,7 +265,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    }
     	    if(SMMAT) tmp.out$E.pval <- SMMAT.pval
 	    tmp.out
-  }
+        }
     	if (inherits(geno.file, "SeqVarGDSClass")) {
     	   SeqArray::seqClose(geno.file)
     	}
@@ -283,7 +283,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	if (!inherits(geno.file, "SeqVarGDSClass")) {
     	  gds <- SeqArray::seqOpen(geno.file)
 	}
-    	SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
+	SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
 	n.variants <- rep(0,n.groups)
     	miss.min <- rep(NA,n.groups)
     	miss.mean <- rep(NA, n.groups)
@@ -431,9 +431,6 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    out$O.minp.rho <- SKATO.minp.rho
 	}
     	if(SMMAT) out$E.pval <- SMMAT.pval
-    }
-    if (inherits(geno.file, "SeqVarGDSClass")) {
-        SeqArray::seqClose(geno.file)
     }
     return(out[match(groups, out$group),])
 }
@@ -724,7 +721,7 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 	    }
     	    if(SMMAT) tmp.out$E.pval <- SMMAT.pval
 	    tmp.out
-  }
+        }
     	if (inherits(geno.file, "SeqVarGDSClass")) {
     	  SeqArray::seqClose(geno.file)
     	}
@@ -892,9 +889,6 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 	    out$O.minp.rho <- SKATO.minp.rho
 	}
     	if(SMMAT) out$E.pval <- SMMAT.pval
-    }
-    if (inherits(geno.file, "SeqVarGDSClass")) {
-    	SeqArray::seqClose(geno.file)
     }
     return(out[match(groups, out$group),])
 }
