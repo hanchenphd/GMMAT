@@ -1,5 +1,3 @@
-context("single-variant score test")
-
 test_that("cross-sectional id le 400 binomial", {
 	plinkfiles <- strsplit(system.file("extdata", "geno.bed", package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
 	bgenfile <- system.file("extdata", "geno.bgen", package = "GMMAT")
