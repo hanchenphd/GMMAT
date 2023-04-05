@@ -1,21 +1,21 @@
 glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope = NULL, groups = NULL, family = binomial(link = "logit"), method = "REML", method.optim = "AI", maxiter = 500, tol = 1e-5, taumin = 1e-5, taumax = 1e5, tauregion = 10, verbose = FALSE, ...) {
   call <- match.call()
-  if(!is.null(kins) && !class(kins)[1] %in% c("matrix", "list")) {
+  if(!is.null(kins) && !inherits(kins, c("matrix", "list"))) {
     if(is.null(attr(class(kins), "package"))) stop("Error: \"kins\" must be a matrix or a list.")
     else if(attr(class(kins), "package") != "Matrix") stop("Error: if \"kins\" is a sparse matrix, it must be created using the Matrix package.")
   }
   if(!method %in% c("REML", "ML"))
     stop("Error: \"method\" must be \"REML\" or \"ML\".")
   method.optim <- try(match.arg(method.optim, c("AI", "Brent", "Nelder-Mead")))
-  if(class(method.optim) == "try-error")
+  if(inherits(method.optim, "try-error"))
     stop("Error: \"method.optim\" must be \"AI\", \"Brent\" or \"Nelder-Mead\".")
   if(method.optim == "AI" && method == "ML")
     stop("Error: method \"ML\" not available for method.optim \"AI\", use method \"REML\" instead.")
-  if(method.optim == "Brent" && class(kins)[1] == "list")
+  if(method.optim == "Brent" && inherits(kins, "list"))
     stop("Error: method.optim \"Brent\" can only be applied in one-dimensional optimization, use a matrix for \"kins\".")
-  if(method.optim != "AI" && ((!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix") || (class(kins)[1] == "list" && any(sapply(kins, function(xx) !is.null(attr(class(xx), "package")) && attr(class(xx), "package") == "Matrix")))))
+  if(method.optim != "AI" && ((!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix") || (inherits(kins, "list") && any(sapply(kins, function(xx) !is.null(attr(class(xx), "package")) && attr(class(xx), "package") == "Matrix")))))
     stop("Error: sparse matrices can only be handled by method.optim \"AI\".")
-  if(class(family) != "family")
+  if(!inherits(family, "family"))
     stop("Error: \"family\" must be an object of class \"family\".")
   if(!family$family %in% c("binomial", "gaussian", "Gamma", "inverse.gaussian", "poisson", "quasi", "quasibinomial", "quasipoisson"))
     stop("Error: \"family\" must be one of the following: binomial, gaussian, Gamma, inverse.gaussian, poisson, quasi, quasibinomial, quasipoisson.")
@@ -25,13 +25,13 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
     if(!groups %in% names(data)) stop("Error: \"groups\" must be one of the variables in the names of \"data\".")
   }
   if(!id %in% names(data)) stop("Error: \"id\" must be one of the variables in the names of \"data\".")
-  if("data.frame" %in% class(data) && length(class(data)) > 1) data <- as.data.frame(data)
+  if(inherits(data, "data.frame") && length(class(data)) > 1) data <- as.data.frame(data)
   if(!is.null(random.slope)) {
     if(method.optim != "AI") stop("Error: random slope for longitudinal data is currently only implemented for method.optim \"AI\".")
     if(!random.slope %in% names(data)) stop("Error: \"random.slope\" must be one of the variables in the names of \"data\".")
   }
   if(!is.null(attr(class(kins), "package")) && attr(class(kins), "package") == "Matrix")  kins <- list(kins1 = kins)
-  if(method.optim != "Brent" && class(kins)[1] == "matrix") kins <- list(kins1 = kins)
+  if(method.optim != "Brent" && inherits(kins, "matrix")) kins <- list(kins1 = kins)
   mdl <- model.frame(formula = fixed, data = data, na.action = na.omit)
   idx <- match(rownames(mdl), rownames(model.frame(formula = fixed, data = data, na.action = na.pass)))
   multi.pheno <- !is.null(ncol(mdl[,1])) && ncol(mdl[,1]) > 1
@@ -60,12 +60,12 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
       rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[idx, id])
     }
   } else if(!is.null(random.slope)) stop("Error: no duplicated \"id\" found, \"random.slope\" must be used for longitudinal data with duplicated \"id\".")
-  if(class(kins)[1] == "matrix") {
+  if(inherits(kins, "matrix")) {
     match.idx1 <- match(data[idx, id], rownames(kins))
     match.idx2 <- match(data[idx, id], colnames(kins))
     if(any(is.na(c(match.idx1, match.idx2)))) stop("Error: kins matrix does not include all individuals in the data.")
     kins <- kins[match.idx1, match.idx2]
-  } else if(class(kins)[1] == "list") {
+  } else if(inherits(kins, "list")) {
     for(i in 1:length(kins)) {
       match.idx1 <- match(data[idx, id], rownames(kins[[i]]))
       match.idx2 <- match(data[idx, id], colnames(kins[[i]]))

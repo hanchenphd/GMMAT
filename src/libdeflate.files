@@ -1,0 +1,1 @@
+libdeflate/lib/adler32.c libdeflate/lib/deflate_decompress.c libdeflate/lib/utils.c libdeflate/lib/crc32.c libdeflate/lib/gzip_compress.c libdeflate/lib/zlib_compress.c libdeflate/lib/deflate_compress.c libdeflate/lib/gzip_decompress.c libdeflate/lib/zlib_decompress.c libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c

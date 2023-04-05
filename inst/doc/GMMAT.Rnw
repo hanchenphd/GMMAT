@@ -37,8 +37,8 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.3.2}
-\date{July 15, 2021}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.4.0}
+\date{April 5, 2023}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\School of Public Health\\Center for Precision Health\\School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -100,7 +100,7 @@ In this joint model, $\bs\varepsilon$ follow a matrix normal distribution $\math
 \textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package. It is also available on CRAN (\url{https://CRAN.R-project.org/package=GMMAT}).
 
 \subsection{Installing \textit{GMMAT}}
-\textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, \href{https://cran.r-project.org/web/packages/Matrix/index.html}{Matrix}, methods, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
+\textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, \href{https://cran.r-project.org/web/packages/Matrix/index.html}{Matrix}, methods, \href{https://cran.r-project.org/web/packages/data.table/index.html}{data.table}, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
 
 For optimal computational performance, it is recommended to use an R version configured with the Intel Math Kernel Library (or other fast BLAS/LAPACK libraries). See the instructions on building R with Intel MKL (\url{https://software.intel.com/en-us/articles/using-intel-mkl-with-r}).
 
@@ -110,7 +110,7 @@ Here is an example for installing \textit{GMMAT} and all its dependencies in an 
 ## try http:// if https:// URLs are not supported
 ## remove "doMC" below if you are running Windows
 install.packages(c("devtools", "RcppArmadillo", "CompQuadForm", "doMC", 
-        "foreach", "Matrix", "BiocManager", "testthat"), 
+        "foreach", "Matrix", "data.table", "BiocManager", "testthat"), 
 	repos = "https://cran.r-project.org/")
 BiocManager::install(c("SeqArray", "SeqVarTools"))
 devtools::install_github("hanchenphd/GMMAT")
@@ -783,6 +783,18 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Fixed a minor bug in \textbf{.pKuonen} (credit: Duy T. Pham).
 \item Fixed a minor bug in printing duplicate variant.id in \textbf{SMMAT}.
 \item Used a low-memory sparse design matrix J for longitudinal data analysis in \textbf{glmm.score} and \textbf{SMMAT}.
+\end{enumerate}
+
+\subsection{Version 1.4.0 (April 5, 2023)}
+\begin{enumerate}
+\item Check for system copies of zstd and libdeflate libraries.
+\item Implemented better error control in the internal function .Q\_pval (credit: Arthur Gilly).
+\item Fixed minor bugs in \textbf{SMMAT}.
+\item Fixed minor bugs for MISSRATE and AF calculation for imputed gds files in \textbf{glmm.score}.
+\item Fixed a minor bug in reading the ID column for bgen sample files in \textbf{glmm.score}.
+\item Replaced \textbf{read.table} by the more efficient function \textbf{data.table::fread}.
+\item Replaced \textbf{class} checks using \textbf{inherits}.
+\item Removed \textbf{context} in testthat tests.
 \end{enumerate}
 
 \section{Contact}

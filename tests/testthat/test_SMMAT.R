@@ -1,5 +1,3 @@
-context("variant set mixed model association test (SMMAT)")
-
 test_that("cross-sectional id le 400 binomial", {
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	group.file <- system.file("extdata", "SetID.withweights.txt", package = "GMMAT")

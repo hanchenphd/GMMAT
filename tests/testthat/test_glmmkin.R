@@ -1,5 +1,3 @@
-context("null model")
-
 test_that("cross-sectional id le 400 binomial", {
 	skip_on_cran()
 

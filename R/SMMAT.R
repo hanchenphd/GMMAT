@@ -6,10 +6,10 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
         warning("The package doMC is not available on Windows... Switching to single thread...")
         ncores <- 1
     }
-    if(!class(null.obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
+    if(!inherits(null.obj, c("glmmkin", "glmmkin.multi"))) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
     n.pheno <- null.obj$n.pheno
     missing.method <- try(match.arg(missing.method, c("impute2mean", "impute2zero")))
-    if(class(missing.method) == "try-error") stop("Error: \"missing.method\" must be \"impute2mean\" or \"impute2zero\".")
+    if(inherits(missing.method, "try-error")) stop("Error: \"missing.method\" must be \"impute2mean\" or \"impute2zero\".")
     if(any(!tests %in% c("B", "S", "O", "E"))) stop("Error: \"tests\" should only include \"B\" for the burden test, \"S\" for SKAT, \"O\" for SKAT-O or \"E\" for the efficient hybrid test of the burden test and SKAT.")
     Burden <- "B" %in% tests
     SKAT <- "S" %in% tests
@@ -28,7 +28,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     } else residuals <- null.obj$scaled.residuals
     n <- length(unique(null.obj$id_include))
     
-    if (class(geno.file)[1] != "SeqVarGDSClass") {
+    if (!inherits(geno.file, "SeqVarGDSClass")) {
         gds <- SeqArray::seqOpen(geno.file)
     } else {
         gds <- geno.file
@@ -38,7 +38,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     sample.id <- sample.id[sample.id %in% null.obj$id_include]
     if(length(sample.id) == 0) stop("Error: null.obj$id_include does not match sample.id in geno.file!")
     match.id <- match(sample.id, unique(null.obj$id_include))
-    if(class(null.obj) == "glmmkin.multi") {
+    if(inherits(null.obj, "glmmkin.multi")) {
         residuals <- residuals[match.id, , drop = FALSE]
     	match.id <- rep(match.id, n.pheno) + rep((0:(n.pheno-1))*n, each = length(match.id))
     } else {
@@ -58,13 +58,13 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     ref <- unlist(lapply(alleles.list, function(x) x[1]))
     alt <- unlist(lapply(alleles.list, function(x) paste(x[-1], collapse=",")))
     rm(alleles.list); gc()
-    if (class(geno.file)[1] != "SeqVarGDSClass") {
+    if (!inherits(geno.file, "SeqVarGDSClass")) {
         SeqArray::seqClose(gds) 
     }
     variant.id <- paste(chr, pos, ref, alt, sep = ":")
     rm(chr, pos, ref, alt); gc()
-    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
-    if (class(group.info) == "try-error") {
+    group.info <- try(fread(group.file, header = FALSE, data.table = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
+    if (inherits(group.info, "try-error")) {
         stop("Error: cannot read group.file!")
     }
     variant.id1 <- paste(group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")
@@ -83,7 +83,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
     	if(any(!is.na(variant.idx1) & !is.na(variant.idx2))) {
             tmp.dups <- which(!is.na(variant.idx1) & !is.na(variant.idx2))
 	    cat("The following ambiguous variants were found:\n")
-	    cat("variant.id:", variant.id[tmp.dups], "\n")
+	    cat("variant.id:", variant.id1[tmp.dups], "\n")
 	    cat("Warning: both variants with alleles ref/alt and alt/ref were present at the same position and coding should be double checked!\nFor these variants, only those with alleles ref/alt were used in the analysis...\n")
 	    variant.idx2[tmp.dups] <- NA
 	    rm(tmp.dups)
@@ -115,7 +115,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 		pb <- txtProgressBar(min = 0, max = n.groups, style = 3)
 		cat("\n")
 	    }
-	        if (class(geno.file)[1] != "SeqVarGDSClass") {
+	        if (!inherits(geno.file, "SeqVarGDSClass")) {
     	        gds <- SeqArray::seqOpen(geno.file)
 	        } else {
 	            gds <- geno.file
@@ -141,7 +141,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    }
     	    if(SMMAT) SMMAT.pval <- rep(NA, n.groups)
 	    if(!is.null(meta.file.prefix)) {
-	    	if(class(null.obj) == "glmmkin.multi") stop("Error: meta-analysis not supported yet for multiple phenotypes.")
+	    	if(inherits(null.obj, "glmmkin.multi")) stop("Error: meta-analysis not supported yet for multiple phenotypes.")
 	        if(.Platform$endian!="little") stop("Error: platform must be little endian.")
 		meta.file.score <- paste0(meta.file.prefix, ".score.", b)
 		meta.file.var <- paste0(meta.file.prefix, ".var.", b)
@@ -173,7 +173,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    	    geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    	}
 	    	U <- as.vector(crossprod(geno, residuals))
-		if(class(null.obj) == "glmmkin.multi") geno <- Diagonal(n = n.pheno) %x% geno
+		if(inherits(null.obj, "glmmkin.multi")) geno <- Diagonal(n = n.pheno) %x% geno
 		if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
 		else {
 		    GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
@@ -265,8 +265,8 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    }
     	    if(SMMAT) tmp.out$E.pval <- SMMAT.pval
 	    tmp.out
-  }
-    	if (class(geno.file)[1] == "SeqVarGDSClass") {
+        }
+    	if (inherits(geno.file, "SeqVarGDSClass")) {
     	   SeqArray::seqClose(geno.file)
     	}
     	return(out)
@@ -280,10 +280,10 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 		cat("\n")
 	    }
 	}
-	    if (class(geno.file)[1] != "SeqVarGDSClass") {
+	if (!inherits(geno.file, "SeqVarGDSClass")) {
     	  gds <- SeqArray::seqOpen(geno.file)
-	    }
-    	SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
+	}
+	SeqArray::seqSetFilter(gds, sample.id = sample.id, verbose = FALSE)
 	n.variants <- rep(0,n.groups)
     	miss.min <- rep(NA,n.groups)
     	miss.mean <- rep(NA, n.groups)
@@ -304,7 +304,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	}
     	if(SMMAT) SMMAT.pval <- rep(NA, n.groups)
     	if(!is.null(meta.file.prefix)) {
-	    if(class(null.obj) == "glmmkin.multi") stop("Error: meta-analysis not supported yet for multiple phenotypes.")
+	    if(inherits(null.obj, "glmmkin.multi")) stop("Error: meta-analysis not supported yet for multiple phenotypes.")
             if(.Platform$endian!="little") stop("Error: platform must be little endian.")
 	    meta.file.score <- paste0(meta.file.prefix, ".score.1")
 	    meta.file.var <- paste0(meta.file.prefix, ".var.1")
@@ -339,7 +339,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 	    	geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    }
 	    U <- as.vector(crossprod(geno, residuals))
-	    if(class(null.obj) == "glmmkin.multi") geno <- Diagonal(n = n.pheno) %x% geno
+	    if(inherits(null.obj, "glmmkin.multi")) geno <- Diagonal(n = n.pheno) %x% geno
     	    if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
 	    else {
 		GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
@@ -438,7 +438,7 @@ SMMAT <- function(null.obj, geno.file, group.file, group.file.sep = "\t", meta.f
 SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", auto.flip = FALSE)
 {
     if(!grepl("\\.gds$", geno.file[1])) stop("Error: currently only .gds format is supported in geno.file!")
-    if(!class(null.obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
+    if(!inherits(null.obj, c("glmmkin", "glmmkin.multi"))) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
     n.pheno <- null.obj$n.pheno
     if(any(duplicated(null.obj$id_include))) {
         J <- sparseMatrix(i=1:length(null.obj$id_include), j=match(null.obj$id_include,unique(null.obj$id_include)), x=1)
@@ -452,7 +452,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
         rm(J)
     } else residuals <- null.obj$scaled.residuals
     n <- length(unique(null.obj$id_include))
-    if (class(geno.file)[1] != "SeqVarGDSClass") {
+    if (!inherits(geno.file, "SeqVarGDSClass")) {
         gds <- SeqArray::seqOpen(geno.file)
     } else {
         gds <- geno.file
@@ -462,7 +462,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
     sample.id <- sample.id[sample.id %in% null.obj$id_include]
     if(length(sample.id) == 0) stop("Error: null.obj$id_include does not match sample.id in geno.file!")
     match.id <- match(sample.id, unique(null.obj$id_include))
-    if(class(null.obj) == "glmmkin.multi") {
+    if(inherits(null.obj, "glmmkin.multi")) {
         residuals <- residuals[match.id, , drop = FALSE]
     	match.id <- rep(match.id, n.pheno) + rep((0:(n.pheno-1))*n, each = length(match.id))
     } else {
@@ -485,12 +485,15 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
     SeqArray::seqClose(gds)
     variant.id <- paste(chr, pos, ref, alt, sep = ":")
     rm(chr, pos, ref, alt); gc()
-    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
-    if (class(group.info) == "try-error") {
+    group.info <- try(fread(group.file, header = FALSE, data.table = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
+    if (inherits(group.info, "try-error")) {
         stop("Error: cannot read group.file!")
     }
     variant.id1 <- paste(group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")
-    group.info <- group.info[!duplicated(paste(group.info$group, variant.id1, sep = ":")), ]
+    is.duplicated <- duplicated(paste(group.info$group, variant.id1, sep = ":"))
+    group.info <- group.info[!is.duplicated, ]
+    variant.id1 <- variant.id1[!is.duplicated]
+    rm(is.duplicated)
     variant.idx1 <- variant.idx[match(variant.id1, variant.id)]
     group.info$variant.idx <- variant.idx1
     group.info$flip <- 0
@@ -501,7 +504,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
     	if(any(!is.na(variant.idx1) & !is.na(variant.idx2))) {
             tmp.dups <- which(!is.na(variant.idx1) & !is.na(variant.idx2))
 	    cat("The following ambiguous variants were found:\n")
-	    cat("variant.id:", variant.id[tmp.dups], "\n")
+	    cat("variant.id:", variant.id1[tmp.dups], "\n")
 	    cat("Warning: both variants with alleles ref/alt and alt/ref were present at the same position and coding should be double checked!\nFor these variants, only those with alleles ref/alt were used in the analysis...\n")
 	    variant.idx2[tmp.dups] <- NA
 	    rm(tmp.dups)
@@ -526,7 +529,7 @@ SMMAT.prep <- function(null.obj, geno.file, group.file, group.file.sep = "\t", a
 
 SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NULL, MAF.range = c(1e-7, 0.5), MAF.weights.beta = c(1, 25), miss.cutoff = 1, missing.method = "impute2mean", method = "davies", tests = "E", rho = c(0, 0.1^2, 0.2^2, 0.3^2, 0.4^2, 0.5^2, 0.5, 1), use.minor.allele = FALSE, Garbage.Collection = FALSE, is.dosage = FALSE, ncores = 1, verbose = FALSE)
 {
-    if(class(SMMAT.prep.obj) != "SMMAT.prep") stop("Error: SMMAT.prep.obj must be a class SMMAT.prep object!")
+    if(!inherits(SMMAT.prep.obj, "SMMAT.prep")) stop("Error: SMMAT.prep.obj must be a class SMMAT.prep object!")
     is.Windows <- Sys.info()["sysname"] == "Windows"
     if(is.Windows && ncores > 1) {
         warning("The package doMC is not available on Windows... Switching to single thread...")
@@ -545,10 +548,10 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
     group.idx.start <- SMMAT.prep.obj$group.idx.start
     group.idx.end <- SMMAT.prep.obj$group.idx.end
     rm(SMMAT.prep.obj); gc()
-    if(!class(null.obj) %in% c("glmmkin", "glmmkin.multi")) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
+    if(!inherits(null.obj, c("glmmkin", "glmmkin.multi"))) stop("Error: null.obj must be a class glmmkin or glmmkin.multi object!")
     n.pheno <- null.obj$n.pheno
     missing.method <- try(match.arg(missing.method, c("impute2mean", "impute2zero")))
-    if(class(missing.method) == "try-error") stop("Error: \"missing.method\" must be \"impute2mean\" or \"impute2zero\".")
+    if(inherits(missing.method, "try-error")) stop("Error: \"missing.method\" must be \"impute2mean\" or \"impute2zero\".")
     if(any(!tests %in% c("B", "S", "O", "E"))) stop("Error: \"tests\" should only include \"B\" for the burden test, \"S\" for SKAT, \"O\" for SKAT-O or \"E\" for the efficient hybrid test of the burden test and SKAT.")
     Burden <- "B" %in% tests
     SKAT <- "S" %in% tests
@@ -568,7 +571,7 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 		pb <- txtProgressBar(min = 0, max = n.groups, style = 3)
 		cat("\n")
 	    }
-	        if (class(geno.file)[1] != "SeqVarGDSClass") {
+	        if (!inherits(geno.file, "SeqVarGDSClass")) {
     	        gds <- SeqArray::seqOpen(geno.file)
 	        } else {
 	            gds <- geno.file
@@ -594,7 +597,7 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 	    }
     	    if(SMMAT) SMMAT.pval <- rep(NA, n.groups)
 	    if(!is.null(meta.file.prefix)) {
-	    	if(class(null.obj) == "glmmkin.multi") stop("Error: meta-analysis not supported yet for multiple phenotypes.")
+	    	if(inherits(null.obj, "glmmkin.multi")) stop("Error: meta-analysis not supported yet for multiple phenotypes.")
 	        if(.Platform$endian!="little") stop("Error: platform must be little endian.")
 		meta.file.score <- paste0(meta.file.prefix, ".score.", b)
 		meta.file.var <- paste0(meta.file.prefix, ".var.", b)
@@ -626,7 +629,7 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 	    	    geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    	}
 	    	U <- as.vector(crossprod(geno, residuals))
-		if(class(null.obj) == "glmmkin.multi") geno <- Diagonal(n = n.pheno) %x% geno
+		if(inherits(null.obj, "glmmkin.multi")) geno <- Diagonal(n = n.pheno) %x% geno
 		if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
 		else {
 		    GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
@@ -718,8 +721,8 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 	    }
     	    if(SMMAT) tmp.out$E.pval <- SMMAT.pval
 	    tmp.out
-  }
-    	if (class(geno.file)[1] == "SeqVarGDSClass") {
+        }
+    	if (inherits(geno.file, "SeqVarGDSClass")) {
     	  SeqArray::seqClose(geno.file)
     	}
     	return(out)
@@ -733,7 +736,7 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 		cat("\n")
 	    }
 	}
-	    if (class(geno.file)[1] != "SeqVarGDSClass") {
+	    if (!inherits(geno.file, "SeqVarGDSClass")) {
     	    gds <- SeqArray::seqOpen(geno.file)
 	    } else {
 	        gds <- geno.file
@@ -759,7 +762,7 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 	}
     	if(SMMAT) SMMAT.pval <- rep(NA, n.groups)
     	if(!is.null(meta.file.prefix)) {
-	    if(class(null.obj) == "glmmkin.multi") stop("Error: meta-analysis not supported yet for multiple phenotypes.")
+	    if(inherits(null.obj, "glmmkin.multi")) stop("Error: meta-analysis not supported yet for multiple phenotypes.")
             if(.Platform$endian!="little") stop("Error: platform must be little endian.")
 	    meta.file.score <- paste0(meta.file.prefix, ".score.1")
 	    meta.file.var <- paste0(meta.file.prefix, ".var.1")
@@ -794,7 +797,7 @@ SMMAT.lowmem <- function(SMMAT.prep.obj, geno.file = NULL, meta.file.prefix = NU
 	    	geno[miss.idx] <- if(missing.method=="impute2mean") 2*freq[ceiling(miss.idx/nrow(geno))] else 0
 	    }
 	    U <- as.vector(crossprod(geno, residuals))
-	    if(class(null.obj) == "glmmkin.multi") geno <- Diagonal(n = n.pheno) %x% geno
+	    if(inherits(null.obj, "glmmkin.multi")) geno <- Diagonal(n = n.pheno) %x% geno
     	    if(!is.null(null.obj$P)) V <- crossprod(geno, crossprod(null.obj$P, geno))
 	    else {
 		GSigma_iX <- crossprod(geno, null.obj$Sigma_iX)
@@ -906,8 +909,8 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     SKAT <- "S" %in% tests
     SKATO <- "O" %in% tests
     SMMAT <- "E" %in% tests
-    group.info <- try(read.table(group.file, header = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
-    if (class(group.info) == "try-error") {
+    group.info <- try(fread(group.file, header = FALSE, data.table = FALSE, col.names = c("group", "chr", "pos", "ref", "alt", "weight"), colClasses = c("character","character","integer","character","character","numeric"), sep = group.file.sep), silent = TRUE)
+    if (inherits(group.info, "try-error")) {
         stop("Error: cannot read group.file!")
     }
     variant.id <- paste(group.info$group, group.info$chr, group.info$pos, group.info$ref, group.info$alt, sep = ":")
@@ -933,8 +936,8 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
     for(i in 1:n.cohort) {
         tmp.scores <- NULL
 	for(j in 1:n.files[i]) {
-	    tmp <- try(read.table(paste0(meta.files.prefix[i], ".score.", j), header = TRUE, as.is = TRUE))
-    	    if (class(tmp) == "try-error") {
+	    tmp <- try(fread(paste0(meta.files.prefix[i], ".score.", j), header = TRUE, data.table = FALSE))
+    	    if (inherits(tmp, "try-error")) {
                 stop(paste0("Error: cannot read ", meta.files.prefix[i], ".score.", j, "!"))
     	    }
 	    tmp <- tmp[,c("group", "chr", "pos", "ref", "alt", "N", "missrate", "altfreq", "SCORE")]
@@ -1174,30 +1177,22 @@ SMMAT.meta <- function(meta.files.prefix, n.files = rep(1, length(meta.files.pre
 }
 		   
 .Q_pval <- function(Q, lambda, method = "davies") {
-  pval=NA
   if(method == "davies") {
-    tmp = try(CompQuadForm::davies(q = Q, lambda = lambda, acc = 1e-6))
-    if(class(tmp) == "try-error" || (tmp$ifault > 0) || (tmp$Qq <= 1e-5) || (tmp$Qq >= 1)) {
-	    method <- "kuonen"
-  } else {
-    return(tmp$Qq)
+    tmp <- try(suppressWarnings(CompQuadForm::davies(q = Q, lambda = lambda, acc = 1e-6)))
+    if(inherits(tmp, "try-error") || tmp$ifault > 0 || tmp$Qq <= 1e-5 || tmp$Qq >= 1) method <- "kuonen"
+    else return(tmp$Qq)
   }
-	  }
   if(method == "kuonen") {
     pval <- try(.pKuonen(x = Q, lambda = lambda))
-    if(class(pval) == "try-error" || is.na(pval)) method <- "liu"
+    if(inherits(pval, "try-error") || is.na(pval)) method <- "liu"
+    else return(pval)
   }
-  if(method == "liu") pval <- try(CompQuadForm::liu(q = Q, lambda = lambda))
-  if(class(pval) == "try-error"){
-    cat(paste(
-      "[WARNING] : all methods failed for a position, returning a NA p-value for SKAT-O (Q=",
-      paste(Q, sep=",",collapse=";"), 
-       ", lambda=",
-       paste(lambda, sep=",",collapse=";"),
-        ".\n"))
-    return(NA)
+  if(method == "liu") {
+    pval <- try(CompQuadForm::liu(q = Q, lambda = lambda))
+    if(inherits(pval, "try-error")) cat("Warning: method \"liu\" failed...\nQ:", Q, "\nlambda:", lambda, "\n")
+    else return(pval)
   }
-  return(pval)
+  return(NA)
 }
 
 .quad_pval <- function(U, V, method = "davies") {

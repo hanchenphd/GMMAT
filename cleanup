@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rm -rf config.* src/Makevars src/libdeflate/lib/*.o src/libdeflate/lib/*/*.o src/zstd/lib/*/*.o

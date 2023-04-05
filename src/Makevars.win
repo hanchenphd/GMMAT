@@ -1,68 +1,31 @@
-CXX_STD=CXX11
-
 PKG_CXXFLAGS=-DARMA_64BIT_WORD
 
-SOURCES= zstd-1.4.5/lib/common/debug.c \
-	 zstd-1.4.5/lib/common/entropy_common.c \
-	 zstd-1.4.5/lib/common/error_private.c \
-	 zstd-1.4.5/lib/common/fse_decompress.c \
-	 zstd-1.4.5/lib/common/pool.c \
-	 zstd-1.4.5/lib/common/threading.c \
-	 zstd-1.4.5/lib/common/xxhash.c \
-         zstd-1.4.5/lib/common/zstd_common.c \
-         zstd-1.4.5/lib/decompress/huf_decompress.c \
-         zstd-1.4.5/lib/decompress/zstd_ddict.c \
-         zstd-1.4.5/lib/decompress/zstd_decompress.c \
-         zstd-1.4.5/lib/decompress/zstd_decompress_block.c \
-	 libdeflate-1.6/lib/adler32.c \
-	 libdeflate-1.6/lib/crc32.c \
-	 libdeflate-1.6/lib/deflate_compress.c \
-	 libdeflate-1.6/lib/deflate_decompress.c \
-	 libdeflate-1.6/lib/gzip_compress.c \
-	 libdeflate-1.6/lib/gzip_decompress.c \
-	 libdeflate-1.6/lib/utils.c \
-	 libdeflate-1.6/lib/zlib_compress.c \
-	 libdeflate-1.6/lib/zlib_decompress.c \
-	 libdeflate-1.6/lib/arm/cpu_features.c \
-	 libdeflate-1.6/lib/x86/cpu_features.c
+OBJECTS_ZSTD = zstd/lib/common/debug.o \
+           zstd/lib/common/entropy_common.o \
+           zstd/lib/common/error_private.o \
+           zstd/lib/common/fse_decompress.o \
+           zstd/lib/common/pool.o \
+           zstd/lib/common/threading.o \
+           zstd/lib/common/xxhash.o \
+           zstd/lib/common/zstd_common.o \
+           zstd/lib/decompress/huf_decompress.o \
+           zstd/lib/decompress/zstd_ddict.o \
+           zstd/lib/decompress/zstd_decompress.o \
+           zstd/lib/decompress/zstd_decompress_block.o
 
-OBJECTS= fitglmm.o \
-	 registerDynamicSymbol.o \
-	 zstd-1.4.5/lib/common/debug.o \
-	 zstd-1.4.5/lib/common/entropy_common.o \
-	 zstd-1.4.5/lib/common/error_private.o \
-	 zstd-1.4.5/lib/common/fse_decompress.o \
-	 zstd-1.4.5/lib/common/pool.o \
-	 zstd-1.4.5/lib/common/threading.o \
-	 zstd-1.4.5/lib/common/xxhash.o \
-         zstd-1.4.5/lib/common/zstd_common.o \
-         zstd-1.4.5/lib/decompress/huf_decompress.o \
-         zstd-1.4.5/lib/decompress/zstd_ddict.o \
-         zstd-1.4.5/lib/decompress/zstd_decompress.o \
-         zstd-1.4.5/lib/decompress/zstd_decompress_block.o \
-	 libdeflate-1.6/lib/adler32.o \
-	 libdeflate-1.6/lib/crc32.o \
-	 libdeflate-1.6/lib/deflate_compress.o \
-	 libdeflate-1.6/lib/deflate_decompress.o \
-	 libdeflate-1.6/lib/gzip_compress.o \
-	 libdeflate-1.6/lib/gzip_decompress.o \
-	 libdeflate-1.6/lib/utils.o \
-	 libdeflate-1.6/lib/zlib_compress.o \
-	 libdeflate-1.6/lib/zlib_decompress.o \
-	 libdeflate-1.6/lib/arm/cpu_features.o \
-	 libdeflate-1.6/lib/x86/cpu_features.o
-
-PKG_LIBS=$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -lz -lbz2
+OBJECTS_LIBDEFLATE = libdeflate/lib/arm/cpu_features.o \
+                 libdeflate/lib/x86/cpu_features.o \
+                 libdeflate/lib/adler32.o \
+                 libdeflate/lib/crc32.o \
+                 libdeflate/lib/deflate_compress.o \
+                 libdeflate/lib/deflate_decompress.o \
+                 libdeflate/lib/gzip_compress.o \
+                 libdeflate/lib/gzip_decompress.o \
+                 libdeflate/lib/utils.o \
+                 libdeflate/lib/zlib_compress.o \
+                 libdeflate/lib/zlib_decompress.o
 
 
-all: $(SHLIB)
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -lz -lbz2 $(OBJECTS_ZSTD) $(OBJECTS_LIBDEFLATE)
 
-
-.PHONY: shlib-clean clean
-
-shlib-clean: clean
-
-clean:
-	rm -rf $(OBJECTS) *.so
-
-
+$(SHLIB): $(OBJECTS_ZSTD) $(OBJECTS_LIBDEFLATE)

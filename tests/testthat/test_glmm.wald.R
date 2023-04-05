@@ -1,5 +1,3 @@
-context("single-variant wald test")
-
 test_that("cross-sectional binomial", {
 	skip_on_cran()
 
