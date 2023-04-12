@@ -2,10 +2,19 @@ Package: GMMAT
 Version: 1.4.0
 Date: 2023-04-05
 Title: Generalized Linear Mixed Model Association Tests
-Author: Han Chen [aut, cre], Matthew P. Conomos [aut], Duy T. Pham [aut], Arthor Gilly [ctb], Eric Biggers [ctb, cph] (author and copyright holder of bundled sources from the 'libdeflate' library), Tino Reichardt [ctb, cph] (author and copyright holder of threading code used in the 'zstd' library), Meta Platforms, Inc. and affiliates [cph] (copyright holder of bundled sources from the 'zstd' library)
-Maintainer: Han Chen <Han.Chen.2@uth.tmc.edu>
+Authors@R: c(person("Han", "Chen", role = c("aut", "cre"), email = "han.chen.2@uth.tmc.edu"),
+             person("Matthew", "Conomos", role = "aut"),
+	     person("Duy", "Pham", role = "aut"),
+	     person("Arthor", "Gilly", role = "ctb"),
+	     person("Robert", "Gentleman", role = c("ctb", "cph"), comment = "Author and copyright holder of the C function Brent_fmin"),
+             person("Ross", "Ihaka", role = c("ctb", "cph"), comment = "Author and copyright holder of the C function Brent_fmin"),
+             person("The R Core Team", role = c("ctb", "cph"), comment = "Author and copyright holder of the C function Brent_fmin"),
+             person("The R Foundation", role = "cph", comment = "Copyright holder of the C function Brent_fmin"),
+             person("Eric", "Biggers", role = c("ctb", "cph"), comment = "Author and copyright holder of included libdeflate library"),
+             person("Tino", "Reichardt", role = c("ctb", "cph"), comment = "Author and copyright holder of threading code used in the included Zstandard (zstd) library"),
+             person("Meta Platforms, Inc. and affiliates", role = "cph", comment = "Copyright holder of included Zstandard (zstd) library"))
 Description: Perform association tests using generalized linear mixed models (GLMMs) in genome-wide association studies (GWAS) and sequencing association studies. First, GMMAT fits a GLMM with covariate adjustment and random effects to account for population structure and familial or cryptic relatedness. For GWAS, GMMAT performs score tests for each genetic variant as proposed in Chen et al. (2016) <DOI:10.1016/j.ajhg.2016.02.012>. For candidate gene studies, GMMAT can also perform Wald tests to get the effect size estimate for each genetic variant. For rare variant analysis from sequencing association studies, GMMAT performs the variant Set Mixed Model Association Tests (SMMAT) as proposed in Chen et al. (2019) <DOI:10.1016/j.ajhg.2018.12.012>, including the burden test, the sequence kernel association test (SKAT), SKAT-O and an efficient hybrid test of the burden test and SKAT, based on user-defined variant sets.
-License: GPL-3
+License: GPL (>= 3)
 Copyright: See COPYRIGHTS for details.
 Imports: Rcpp, SeqArray, SeqVarTools, CompQuadForm, foreach, parallel,
         Matrix, methods, data.table

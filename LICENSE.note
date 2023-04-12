@@ -1,0 +1,7 @@
+The GMMAT package is distributed under GPL (>= 3). It includes components from other open source software. Here is a list of these components:
+
+* Brent_fmin (the C function used by R function optimize): GPL (>= 2)
+* libdeflate: MIT
+* Zstandard (zstd): BSD_3_clause | GPL-2
+
+Full copies of the MIT and BSD_3_clause license agreements are included in `inst/COPYRIGHTS`.

@@ -1,18 +1,5 @@
 PKG_CXXFLAGS=-DARMA_64BIT_WORD
 
-OBJECTS_ZSTD = zstd/lib/common/debug.o \
-           zstd/lib/common/entropy_common.o \
-           zstd/lib/common/error_private.o \
-           zstd/lib/common/fse_decompress.o \
-           zstd/lib/common/pool.o \
-           zstd/lib/common/threading.o \
-           zstd/lib/common/xxhash.o \
-           zstd/lib/common/zstd_common.o \
-           zstd/lib/decompress/huf_decompress.o \
-           zstd/lib/decompress/zstd_ddict.o \
-           zstd/lib/decompress/zstd_decompress.o \
-           zstd/lib/decompress/zstd_decompress_block.o
-
 OBJECTS_LIBDEFLATE = libdeflate/lib/arm/cpu_features.o \
                  libdeflate/lib/x86/cpu_features.o \
                  libdeflate/lib/adler32.o \
@@ -26,6 +13,6 @@ OBJECTS_LIBDEFLATE = libdeflate/lib/arm/cpu_features.o \
                  libdeflate/lib/zlib_decompress.o
 
 
-PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -lz -lbz2 $(OBJECTS_ZSTD) $(OBJECTS_LIBDEFLATE)
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -lz -lbz2 -lzstd $(OBJECTS_LIBDEFLATE)
 
-$(SHLIB): $(OBJECTS_ZSTD) $(OBJECTS_LIBDEFLATE)
+$(SHLIB): $(OBJECTS_LIBDEFLATE)
