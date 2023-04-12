@@ -38,7 +38,7 @@ morekeywords={}
 
 \begin{document}
 \title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.4.0}
-\date{April 5, 2023}
+\date{April 12, 2023}
 \author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\School of Public Health\\Center for Precision Health\\School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
@@ -785,7 +785,7 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Used a low-memory sparse design matrix J for longitudinal data analysis in \textbf{glmm.score} and \textbf{SMMAT}.
 \end{enumerate}
 
-\subsection{Version 1.4.0 (April 5, 2023)}
+\subsection{Version 1.4.0 (April 12, 2023)}
 \begin{enumerate}
 \item Check for system copies of zstd and libdeflate libraries.
 \item Implemented better error control in the internal function .Q\_pval (credit: Arthur Gilly).

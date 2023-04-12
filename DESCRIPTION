@@ -1,6 +1,6 @@
 Package: GMMAT
 Version: 1.4.0
-Date: 2023-04-05
+Date: 2023-04-12
 Title: Generalized Linear Mixed Model Association Tests
 Authors@R: c(person("Han", "Chen", role = c("aut", "cre"), email = "han.chen.2@uth.tmc.edu"),
              person("Matthew", "Conomos", role = "aut"),
@@ -23,3 +23,21 @@ LinkingTo: Rcpp, RcppArmadillo
 Encoding: UTF-8
 NeedsCompilation: yes
 Depends: R (>= 3.2.0)
+Author: Han Chen [aut, cre],
+  Matthew Conomos [aut],
+  Duy Pham [aut],
+  Arthor Gilly [ctb],
+  Robert Gentleman [ctb, cph] (Author and copyright holder of the C
+    function Brent_fmin),
+  Ross Ihaka [ctb, cph] (Author and copyright holder of the C function
+    Brent_fmin),
+  The R Core Team [ctb, cph] (Author and copyright holder of the C
+    function Brent_fmin),
+  The R Foundation [cph] (Copyright holder of the C function Brent_fmin),
+  Eric Biggers [ctb, cph] (Author and copyright holder of included
+    libdeflate library),
+  Tino Reichardt [ctb, cph] (Author and copyright holder of threading
+    code used in the included Zstandard (zstd) library),
+  Meta Platforms, Inc. and affiliates [cph] (Copyright holder of included
+    Zstandard (zstd) library)
+Maintainer: Han Chen <han.chen.2@uth.tmc.edu>
