@@ -28,10 +28,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(signif(out1.bed$PVAL), signif(c(0.4303091, 0.8368987, 0.5435321, NA)))
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out1.gds <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.bed$PVAL, out1.gds$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	out1.txt <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.bed$PVAL, out1.txt$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -45,10 +49,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -63,10 +71,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(signif(out2.bed$PVAL), signif(c(0.3575308, 0.7640698, 0.4627067, NA)))
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out2.gds <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.bed$PVAL, out2.gds$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	out2.txt <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.bed$PVAL, out2.txt$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -80,10 +92,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -98,10 +114,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(signif(out3.bed$PVAL), signif(c(0.4365740, 0.8411170, 0.5471632, NA)))
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out3.gds <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.bed$PVAL, out3.gds$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	out3.txt <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.bed$PVAL, out3.txt$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -115,10 +135,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -133,10 +157,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(signif(out4.bed$PVAL), signif(c(0.3575308, 0.7640698, 0.4627067, NA)))
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out4.gds <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.bed$PVAL, out4.gds$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	out4.txt <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.bed$PVAL, out4.txt$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -150,10 +178,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -168,10 +200,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(signif(out5.bed$PVAL), signif(c(0.4303094, 0.8368988, 0.5435322, NA)))
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out5.gds <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.bed$PVAL, out5.gds$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	out5.txt <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.bed$PVAL, out5.txt$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -185,10 +221,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -203,10 +243,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(signif(out6.bed$PVAL), signif(c(0.3575250, 0.7640674, 0.4627067, NA)))
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out6.gds <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.bed$PVAL, out6.gds$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	out6.txt <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.bed$PVAL, out6.txt$PVAL)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -220,10 +264,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -242,10 +290,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -259,10 +311,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -277,10 +333,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -294,10 +354,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -312,10 +376,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -329,10 +397,13 @@ test_that("cross-sectional binomial", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -347,10 +418,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -364,10 +439,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -382,10 +461,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -399,10 +482,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -417,10 +504,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -434,10 +525,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -454,10 +549,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -471,10 +570,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -489,10 +592,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -506,10 +613,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -524,10 +635,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -541,10 +656,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -559,10 +678,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -576,10 +699,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -594,10 +721,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -611,10 +742,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = kins, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -629,10 +764,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno2, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -646,10 +785,14 @@ test_that("cross-sectional binomial", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(disease ~ age + sex, data = pheno, kins = NULL, id = "id", family = binomial(link = "logit"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -688,10 +831,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out1.bed$PVAL, digits = 5), signif(c(0.3550174, 0.5265875, 0.6089051, NA), digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out1.gds <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.bed$PVAL, out1.gds$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	out1.txt <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.bed$PVAL, out1.txt$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -705,10 +852,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -723,10 +874,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out2.bed$PVAL), signif(c(0.3652024, 0.5347624, 0.5717466, NA)))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out2.gds <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.bed$PVAL, out2.gds$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	out2.txt <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.bed$PVAL, out2.txt$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -740,10 +895,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -758,10 +917,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out3.bed$PVAL, digits = 5), signif(c(0.3485413, 0.5254271, 0.6174975, NA), digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out3.gds <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.bed$PVAL, out3.gds$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	out3.txt <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.bed$PVAL, out3.txt$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -775,10 +938,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -793,10 +960,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out4.bed$PVAL), signif(c(0.3650012, 0.5376902, 0.5786932, NA)))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out4.gds <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.bed$PVAL, out4.gds$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	out4.txt <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.bed$PVAL, out4.txt$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -810,10 +981,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -828,10 +1003,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out5.bed$PVAL), signif(c(0.3550172, 0.5265874, 0.6089053, NA)))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out5.gds <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.bed$PVAL, out5.gds$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	out5.txt <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.bed$PVAL, out5.txt$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -845,10 +1024,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -863,10 +1046,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out6.bed$PVAL), signif(c(0.9928327, 0.9166500, 0.1103733, NA)))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out6.gds <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.bed$PVAL, out6.gds$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	out6.txt <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.bed$PVAL, out6.txt$PVAL)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -880,10 +1067,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -902,10 +1093,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -919,10 +1114,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out1.bed$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(signif(out1.bed$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(signif(out1.gds$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(signif(out1.gds$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(signif(out1.txt$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -937,10 +1136,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -954,10 +1157,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -972,10 +1179,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -989,10 +1200,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1007,10 +1222,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1024,10 +1243,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1042,10 +1265,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1059,10 +1286,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1077,10 +1308,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1094,10 +1329,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1114,10 +1353,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out1.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out1.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out1.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out1.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out1.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1131,10 +1374,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(signif(out1.bed$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(signif(out1.bed$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(signif(out1.gds$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(signif(out1.gds$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(signif(out1.txt$PVAL, digits = 5), signif(tmpout$PVAL, digits = 5))
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1149,10 +1396,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1166,10 +1417,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out2.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out2.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps)
 	expect_equal(out2.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out2.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out2.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Brent", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1184,10 +1439,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1201,10 +1460,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out3.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out3.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out3.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out3.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out3.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1219,10 +1482,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1236,10 +1503,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out4.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out4.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps)
 	expect_equal(out4.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out4.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out4.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "ML", method.optim = "Nelder-Mead", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1254,10 +1525,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1271,10 +1546,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = kins, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1289,10 +1568,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno2, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1306,10 +1589,14 @@ test_that("cross-sectional gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(trait ~ age + sex, data = pheno, kins = NULL, id = "id", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1340,10 +1627,14 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(signif(out5.bed$PVAL), signif(c(0.0730724, 0.9451040, 0.3083600, NA)))
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out5.gds <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.bed$PVAL, out5.gds$PVAL)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	out5.txt <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.bed$PVAL, out5.txt$PVAL)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1358,10 +1649,14 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(signif(out6.bed$PVAL), signif(c(0.01714963, 0.48756105, 0.96724149, NA)))
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out6.gds <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.bed$PVAL, out6.gds$PVAL)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	out6.txt <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.bed$PVAL, out6.txt$PVAL)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1378,10 +1673,14 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1396,10 +1695,14 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1416,10 +1719,14 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = kins, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1434,10 +1741,14 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(y.repeated ~ sex, data = pheno, kins = NULL, id = "id", random.slope = NULL, family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1468,10 +1779,14 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(signif(out5.bed$PVAL), signif(c(0.2376449, 0.2081449, 0.1638394, NA)))
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out5.gds <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.bed$PVAL, out5.gds$PVAL)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	out5.txt <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.bed$PVAL, out5.txt$PVAL)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1486,10 +1801,14 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(signif(out6.bed$PVAL), signif(c(0.2106602, 0.4357301, 0.2180844, NA)))
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	out6.gds <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.bed$PVAL, out6.gds$PVAL)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	out6.txt <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.bed$PVAL, out6.txt$PVAL)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1506,10 +1825,14 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1524,10 +1847,14 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1544,10 +1871,14 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(out5.bed, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out5.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out5.gds, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out5.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out5.txt, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = kins, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
@@ -1562,10 +1893,14 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(out6.bed, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=plinkfiles,snps=snps,select=select)
 	expect_equal(out6.bed, tmpout)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps)
 	expect_equal(out6.gds, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=gdsfile,snps=snps,select=select)
 	expect_equal(out6.gds, tmpout)
+	}
+	
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))
 	expect_equal(out6.txt, tmpout)
 	tmpout <- glmm.wald(y.trend ~ sex + time, data = pheno, kins = NULL, id = "id", random.slope = "time", family = gaussian(link = "identity"), method = "REML", method.optim = "AI", infile=txtfile1,snps=snps,infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3,select=select,infile.header.print = c("SNP", "Allele1", "Allele2"))

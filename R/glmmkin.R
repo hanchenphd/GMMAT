@@ -55,8 +55,8 @@ glmmkin <- function(fixed, data = parent.frame(), kins = NULL, id, random.slope 
       } else stop("Error: method.optim \"Brent\" can only be applied to unrelated individuals in longitudinal data analysis.")
     } else {
       if(method.optim != "AI") kins[[length(kins) + 1]] <- diag(length(unique(data[idx,id]))) 
-      else if(length(kins) > 0) kins[[length(kins) + 1]] <- as(diag(length(unique(data[idx, id]))), "sparseMatrix")
-      else kins <- list(kins1 = as(diag(length(unique(data[idx, id]))), "sparseMatrix"))
+      else if(length(kins) > 0) kins[[length(kins) + 1]] <- Diagonal(n = length(unique(data[idx, id])))
+      else kins <- list(kins1 = Diagonal(n = length(unique(data[idx, id]))))
       rownames(kins[[length(kins)]]) <- colnames(kins[[length(kins)]]) <- unique(data[idx, id])
     }
   } else if(!is.null(random.slope) && is.null(kins)) warning("Argument \"random.slope\" ignored for cross-sectional data from unrelated individuals...", call. = FALSE)

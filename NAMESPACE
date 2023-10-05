@@ -9,8 +9,6 @@ importFrom("utils", "read.table", "write.table", "txtProgressBar",
 "setTxtProgressBar")
 if(tools:::.OStype() == "windows") importFrom("utils", "winProgressBar", "setWinProgressBar")
 importFrom("CompQuadForm", "davies", "liu")
-importFrom("SeqArray", "seqOpen", "seqGetData", "seqClose", "seqSetFilter")
-importFrom("SeqVarTools", "missingGenotypeRate", "alleleFrequency", "altDosage")
 importFrom("methods", "as")
 importFrom("data.table", "fread")
 
