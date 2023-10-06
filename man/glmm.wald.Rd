@@ -172,9 +172,12 @@ plinkfiles <- strsplit(system.file("extdata", "geno.bed", package = "GMMAT"),
        ".bed", fixed = TRUE)[[1]]
 glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 	family = binomial(link = "logit"), infile = plinkfiles, snps = snps) 
-infile <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
-	family = binomial(link = "logit"), infile = infile, snps = snps) 
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools",
+        quietly = TRUE)) {
+	infile <- system.file("extdata", "geno.gds", package = "GMMAT")
+	glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+	        family = binomial(link = "logit"), infile = infile, snps = snps)
+}
 infile <- system.file("extdata", "geno.txt", package = "GMMAT")
 glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 	family = binomial(link = "logit"), infile = infile, snps = snps, 

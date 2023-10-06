@@ -100,7 +100,7 @@ In this joint model, $\bs\varepsilon$ follow a matrix normal distribution $\math
 \textit{GMMAT} can be downloaded at \url{https://github.com/hanchenphd/GMMAT}. It can be installed as a regular R package. It is also available on CRAN (\url{https://CRAN.R-project.org/package=GMMAT}).
 
 \subsection{Installing \textit{GMMAT}}
-\textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, \href{https://cran.r-project.org/web/packages/Matrix/index.html}{Matrix}, methods, \href{https://cran.r-project.org/web/packages/data.table/index.html}{data.table}, Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools}. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
+\textit{GMMAT} links to R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp} and \href{https://cran.r-project.org/web/packages/RcppArmadillo/index.html}{RcppArmadillo}, and also imports R packages \href{https://cran.r-project.org/web/packages/Rcpp/index.html}{Rcpp}, \href{https://cran.r-project.org/web/packages/CompQuadForm/index.html}{CompQuadForm}, \href{https://cran.r-project.org/web/packages/foreach/index.html}{foreach}, \href{https://cran.r-project.org/web/views/HighPerformanceComputing.html}{parallel}, \href{https://cran.r-project.org/web/packages/Matrix/index.html}{Matrix}, methods, and \href{https://cran.r-project.org/web/packages/data.table/index.html}{data.table}. \textit{GMMAT} requires Bioconductor packages \href{http://bioconductor.org/packages/release/bioc/html/SeqArray.html}{SeqArray} and \href{http://bioconductor.org/packages/release/bioc/html/SeqVarTools.html}{SeqVarTools} to work with genotype files in the GDS format. In addition, \textit{GMMAT} requires \href{https://cran.r-project.org/web/packages/testthat/index.html}{testthat} to run code checks during development, and \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} to run parallel computing in \textbf{glmm.score} and \textbf{SMMAT} for genotype files in the GDS format (however, \href{https://cran.r-project.org/web/packages/doMC/index.html}{doMC} is not available on Windows and these functions will switch to a single thread). These dependencies should be installed before installing \textit{GMMAT}.
 
 For optimal computational performance, it is recommended to use an R version configured with the Intel Math Kernel Library (or other fast BLAS/LAPACK libraries). See the instructions on building R with Intel MKL (\url{https://software.intel.com/en-us/articles/using-intel-mkl-with-r}).
 
@@ -303,7 +303,7 @@ In this example, the dispersion parameter estimate is $\hat\phi=2.0139758$, the 
 \subsection{Single variant tests}
 \subsubsection{Score tests}
 When performing score tests in GWAS, we need a fitted GLMM under the null hypothesis $H_0: \beta=0$ and a genotype file. We can construct score tests using the glmmkin class object returned from the function \textbf{glmmkin} for the null GLMM. Note that score tests require only vector/matrix multiplications and are much faster than Wald tests, which require fitting a new GLMM for each SNP. Score tests give the direction of effects but not effect size estimates. However, we can simply add score statistics and their variances from different studies to perform a meta-analysis. Here we provide a simple example of score tests using the plain text genotype file "geno.txt":
-<<GMMATscoretxt>>=
+<<GMMATscoretxt, eval=FALSE, echo=TRUE>>=
 geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
 glmm.score(model0, infile = geno.file, outfile =
         "glmm.score.text.testoutfile.txt", infile.nrow.skip = 5, 
@@ -313,7 +313,7 @@ glmm.score(model0, infile = geno.file, outfile =
 The first argument in \textbf{glmm.score} is the returned glmmkin class object from the null GLMM. The argument "infile" is the name (and path if not in the current working directory) of the plain text genotype file (or compressed files .gz and .bz2), and the argument "outfile" is the name of the output file. In this example genotype file, we have 5 comment lines to skip using "infile.nrow.skip". The first 3 columns contain information on SNP name and alleles, which we skip from the analysis using "infile.ncol.skip" but subsequently keep in the output file using "infile.ncol.print" to select the 1st, 2nd and 3rd columns. Corresponding column names in the output file can be assigned using "infile.header.print".
 
 If your genotype information is saved in a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file} "geno.bed", you can use:
-<<GMMATscorebed>>=
+<<GMMATscorebed, eval=FALSE, echo=TRUE>>=
 geno.file <- strsplit(system.file("extdata", "geno.bed", 
         package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
 glmm.score(model0, infile = geno.file, outfile = 
@@ -322,14 +322,14 @@ glmm.score(model0, infile = geno.file, outfile =
 Here "infile" is the prefix (and path if not in the current working directory) of the \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK} files (.bed, .bim and .fam). SNP information in the .bim file (in our example, "geno.bim") is carried over to the output file.
 
 If your genotype information is saved in a GDS file "geno.gds", you can use:
-<<GMMATscoregds>>=
+<<GMMATscoregds, eval=FALSE, echo=TRUE>>=
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.score(model0, infile = geno.file, outfile = 
         "glmm.score.gds.testoutfile.txt")
 @
 
 Alternatively, if your genotype information is saved in a BGEN file "geno.bgen", with a BGEN sample file "geno.sample", you can use:
-<<GMMATscorebgen>>=
+<<GMMATscorebgen, eval=FALSE, echo=TRUE>>=
 geno.file <- system.file("extdata", "geno.bgen", package = "GMMAT")
 samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
 glmm.score(model0, infile = geno.file, BGEN.samplefile = samplefile,
@@ -340,7 +340,7 @@ The function \textbf{glmm.score} returns the actual computation time in seconds 
 
 \subsubsection{Wald tests}
 When performing Wald tests for candidate SNPs to get effect size estimates, we need the phenotype (and covariates) data frame, the matrices modeling the covariance structure of the random effects, and the genotype file. To perform Wald tests, we do not need fitting the null GLMM required in score tests using \textbf{glmmkin}. In the example below, we perform Wald tests for 4 candidate SNPs of interest and get their effect estimates:
-<<GMMATwaldtxt>>=
+<<GMMATwaldtxt, warning=FALSE>>=
 geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
 snps <- c("SNP10", "SNP25", "SNP1", "SNP0")
 glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
@@ -351,7 +351,7 @@ glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 The syntax is a hybrid of \textbf{glmmkin} and \textbf{glmm.score}. Note that the argument "fixed" is a formula including the covariates but NOT the test SNPs. The argument "snps" is a character vector of the names of the test SNPs. If "infile" is a plain text genotype file (or compressed files .gz and .bz2), the function \textbf{glmm.wald} returns a data frame with first columns copied from the genotype file using "infile.ncol.print" and names specified using "infile.header.print", followed by the sample size N, the allele frequency (AF) of the effect allele (Allele2 in this example, but you can also define Allele1 as the effect allele in your coded genotype file), effect size estimate BETA of the effect allele, standard error SE, Wald test \textit{P} value PVAL, and an indicator for whether the GLMM is converged. Note that in the example above, SNP0 is not actually included in the genotype file, so all results are missing.
 
 If your genotype information is saved in a \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED file} "geno.bed", you can use:
-<<GMMATwaldbed>>=
+<<GMMATwaldbed, warning=FALSE>>=
 geno.file <- strsplit(system.file("extdata", "geno.bed", 
         package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
 glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
@@ -360,10 +360,17 @@ glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 It returns a data frame with first 6 columns copied from the .bim file (in our example, "geno.bim"), followed by the sample size N, the allele frequency (AF) of A2 allele (the effect allele, note that A1 allele in .bim is coded 0 and A2 allele is coded 1), effect size estimate BETA of A2 allele, standard error SE, Wald test \textit{P} value PVAL, and an indicator for whether the GLMM is converged.
 
 Alternatively, if your genotype information is saved in a GDS file "geno.gds", you can use:
-<<GMMATwaldgds>>=
+<<GMMATwaldgds, eval=FALSE, echo=TRUE>>=
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
         family = binomial(link = "logit"), infile = geno.file, snps = snps)
+@
+<<GMMATwaldgds2, eval=TRUE, echo=FALSE, warning=FALSE>>=
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
+geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
+glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+        family = binomial(link = "logit"), infile = geno.file, snps = snps)
+}
 @
 It returns a data frame with first 5 columns information extracted from the GDS file, followed by the sample size N, the allele frequency (AF) of ALT allele, effect size estimate BETA of ALT allele, standard error SE, Wald test \textit{P} value PVAL, and an indicator for whether the GLMM is converged.
 
@@ -371,7 +378,7 @@ It returns a data frame with first 5 columns information extracted from the GDS 
 Score test results from multiple studies can be combined in meta-analysis. We provide the function \textbf{glmm.score.meta} to perform meta-analysis on score test results. Generally, if each study performs score tests using genotypes in \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED format} or GDS format, the score test output from \textbf{glmm.score} can be directly used as input files. Otherwise the meta-analysis function needs a tab or space delimited plain text file (or compressed files that can be recognized by the R function \textbf{read.table}) with at least 8 columns: SNP name, effect allele, reference allele, N, AF, SCORE, VAR and PVAL. Note that the SNP name, effect allele, reference allele can have customized column names in different input files, but the column names of N, AF, SCORE, VAR and PVAL should match exactly. Customized SNP and alleles column names can be specified using "SNP", "A1" and "A2". Note that we do not define whether "A1" or "A2" is the effect allele: it is your choice. However, your choice should be consistent across different studies: for example, if you have two studies with the same allele column names "Allele1" and "Allele2", and you want to define "A1" as the effect allele, but the effect allele is "Allele1" in the first study and "Allele2" in the second study, you need A2 = c("Allele2", "Allele1") for the reference allele column in each study, and A1 = c("Allele1", "Allele2") for the effect allele column in each study. Note that in \textbf{glmm.score} output from analyzing \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED format} genotypes, the effect allele has column name "A2", and in \textbf{glmm.score} output from analyzing GDS format genotypes, the effect allele has column name "ALT". Thus if you have a result file from analyzing \href{http://zzz.bwh.harvard.edu/plink/data.shtml#bed}{PLINK binary PED format} genotypes in the third study, and another result file from analyzing GDS format genotypes in the fourth study, in addition to the aforementioned two studies, and you still want to define "A1" as the effect allele, you need A2 = c("Allele2", "Allele1", "A1", "REF") for the reference allele column in each study, and A1 = c("Allele1", "Allele2", "A2", "ALT") for the effect allele column in each study.
 
 Here is an example of meta-analyzing 3 score test result files:
-<<GMMATscoremeta>>=
+<<GMMATscoremeta, eval=FALSE, echo=TRUE>>=
 meta1.file <- system.file("extdata", "meta1.txt", package = "GMMAT")
 meta2.file <- system.file("extdata", "meta2.txt", package = "GMMAT")
 meta3.file <- system.file("extdata", "meta3.txt", package = "GMMAT")
@@ -394,7 +401,7 @@ Set1    1       6       C       A       9
 Note that each variant in the group definition file is matched by chromosome, position, reference allele and alternate allele with variants from the GDS file. One genetic variant can be included in different groups with possibly different weights. If no external weights are needed in the analysis, simply replace the 6th column by all 1's.
 
 Four variant set tests are supported in the SMMAT framework: "B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT. You can include one or more tests in a single analysis. If "O" is selected, the burden test and SKAT results will be automatically included; if "E" is selected, the burden test results will be automatically included. Therefore, the following example gives all four test results:
-<<SMMAT1>>=
+<<SMMAT1, eval=FALSE, echo=TRUE>>=
 group.file <- system.file("extdata", "SetID.withweights.txt", 
         package = "GMMAT")
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
@@ -402,23 +409,47 @@ SMMAT(model0, group.file = group.file, geno.file = geno.file,
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
         tests = c("O", "E"))
 @
+<<SMMAT12, eval=TRUE, echo=FALSE>>=
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
+group.file <- system.file("extdata", "SetID.withweights.txt", 
+        package = "GMMAT")
+geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
+SMMAT(model0, group.file = group.file, geno.file = geno.file, 
+        MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
+        tests = c("O", "E"))
+}
+@
 It returns a data frame with first 8 columns showing the group (variant set) name, number of variants in each group, minimum, mean, maximum missing rate of variants in each group, minimum, mean, maximum effect allele frequency of variants in each group, followed by variant set test results. For Burden, 3 columns will be included to show the burden test score, variance of the score, and its \textit{P} value. For SKAT, the \textit{P} value column will be included. For SKAT-O, 3 columns will be included to show SKAT-O \textit{P} value, minimum \textit{P} value in the search grid, and the value of the mixing parameter $\rho$ at which the minimum \textit{P} value is observed. For the efficient hybrid test, the \textit{P} value column will be included.
 
 For a single study, intermediate files containing single variant scores and their covariance matrices for each variant set (based on the group definition file) can be saved for future use in re-analysis and/or meta-analysis. For example, here we perform the burden test and save intermediate files:
-
-<<SMMAT2>>=
+<<SMMAT2, eval=FALSE, echo=TRUE>>=
 SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
         tests = "B", meta.file.prefix = "SMMAT.meta")
+@
+<<SMMAT22, eval=TRUE, echo=FALSE>>=
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
+SMMAT(model0, group.file = group.file, geno.file = geno.file, 
+        MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
+        tests = "B", meta.file.prefix = "SMMAT.meta")
+}
 @
 In the example above, a space-delimited file "SMMAT.meta.score.1" will be generated to save the single variant scores, and a binary file "SMMAT.meta.var.1" will be generated to save the covariance matrices for the variant sets. Note that the binary file is not human-readable, but can be used by \textbf{SMMAT.meta} in re-analysis and/or meta-analysis.
 
 \subsubsection{Meta-analysis}
 With intermediate files generated by \textbf{SMMAT}, the function \textbf{SMMAT.meta} can be used in re-analysis of single study results, and/or meta-analysis to combine multiple studies. Here we show an example of rerunning SKAT using intermediate files generated above in the burden test:
-<<SMMATmeta>>=
+<<SMMATmeta, eval=FALSE, echo=TRUE>>=
 SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
         miss.cutoff = 1, method = "davies", tests = "S")
+@
+<<SMMATmeta2, eval=TRUE, echo=FALSE>>=
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
+SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
+        group.file = group.file, MAF.range = c(1e-7, 0.5), 
+        miss.cutoff = 1, method = "davies", tests = "S")
+unlink(c("SMMAT.meta.score.1", "SMMAT.meta.var.1"))
+}
 @
 The first argument, "meta.files.prefix", is a vector of intermediate files' prefix with length equal to the number of studies, and the second argument, "n.files", is a vector of integers showing how many sets of intermediate files each study has (also with length equal to the number of studies). In our above example of re-analysis, we have one set of intermediate files ("SMMAT.meta.score.1" and "SMMAT.meta.var.1") with prefix "SMMAT.meta". The group definition file (passed to "group.file") should be the same as the one used to generate intermediate files by \textbf{SMMAT} (with possibly different weights allowed). In the above example, only SKAT is performed, but four variant set tests are supported in the SMMAT framework: "B" for the burden test, "S" for SKAT, "O" for SKAT-O and "E" for the efficient hybrid test of the burden test and SKAT. You can include one or more tests by passing a vector to the argument "tests". If "O" is selected, the burden test and SKAT results will be automatically included; if "E" is selected, the burden test results will be automatically included.
 

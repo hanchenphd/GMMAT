@@ -189,16 +189,19 @@ Han Chen
 }
 \examples{
 \donttest{
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools",
+        quietly = TRUE)) {
 data(example)
 attach(example)
 model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
-       family = binomial(link = "logit"))
+        family = binomial(link = "logit"))
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 group.file <- system.file("extdata", "SetID.withweights.txt",
 	package = "GMMAT")
 out <- SMMAT(model0, geno.file, group.file, MAF.range = c(0, 0.5), 
        		miss.cutoff = 1, method = "davies")
 print(out)
+}
 }
 \dontrun{
 obj <- SMMAT.prep(model0, geno.file, group.file)

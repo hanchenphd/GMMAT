@@ -99,21 +99,26 @@ model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
        family = binomial(link = "logit"))
 plinkfiles <- strsplit(system.file("extdata", "geno.bed", package = "GMMAT"), 
        ".bed", fixed = TRUE)[[1]]
-outfile <- "glmm.score.bed.testoutfile.txt"
-glmm.score(model0, infile = plinkfiles, outfile = outfile)
-infile <- system.file("extdata", "geno.gds", package = "GMMAT")
-outfile <- "glmm.score.gds.testoutfile.txt"
-glmm.score(model0, infile = infile, outfile = outfile)
+outfile.bed <- tempfile()
+glmm.score(model0, infile = plinkfiles, outfile = outfile.bed)
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools",
+        quietly = TRUE)) {
+	infile <- system.file("extdata", "geno.gds", package = "GMMAT")
+	outfile.gds <- tempfile()
+	glmm.score(model0, infile = infile, outfile = outfile.gds)
+	unlink(outfile.gds)
+}
 infile <- system.file("extdata", "geno.txt", package = "GMMAT")
-outfile <- "glmm.score.text.testoutfile.txt"
-glmm.score(model0, infile = infile, outfile = outfile, infile.nrow.skip = 5, 
+outfile.text <- tempfile()
+glmm.score(model0, infile = infile, outfile = outfile.text, infile.nrow.skip = 5, 
 	infile.ncol.skip = 3, infile.ncol.print = 1:3, 
 	infile.header.print = c("SNP", "Allele1", "Allele2"))
 infile <- system.file("extdata", "geno.bgen", package = "GMMAT")
 samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
-outfile <- "glmm.score.bgen.testoutfile.txt"
-glmm.score(model0, infile = infile, BGEN.samplefile = samplefile, outfile = outfile)
-unlink(paste0("glmm.score.", c("bed", "gds", "text","bgen"), ".testoutfile.txt"))
+outfile.bgen <- tempfile()
+glmm.score(model0, infile = infile, BGEN.samplefile = samplefile,
+        outfile = outfile.bgen)
+unlink(c(outfile.bed, outfile.text, outfile.bgen))
 }
 }
 \keyword{ generalized linear mixed model }
