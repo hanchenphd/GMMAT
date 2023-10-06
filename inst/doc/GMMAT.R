@@ -263,32 +263,39 @@ if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools
 SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
         miss.cutoff = 1, method = "davies", tests = "S")
+}
+
+
+###################################################
+### code chunk number 31: SMMATmetacleanup
+###################################################
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 unlink(c("SMMAT.meta.score.1", "SMMAT.meta.var.1"))
 }
 
 
 ###################################################
-### code chunk number 31: MKL (eval = FALSE)
+### code chunk number 32: MKL (eval = FALSE)
 ###################################################
 ## Sys.setenv(MKL_NUM_THREADS = 1)
 
 
 ###################################################
-### code chunk number 32: select (eval = FALSE)
+### code chunk number 33: select (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, pheno_ID[obj$id_include])
 ## select[is.na(select)] <- 0
 
 
 ###################################################
-### code chunk number 33: select2 (eval = FALSE)
+### code chunk number 34: select2 (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, unique(obj$id_include))
 ## select[is.na(select)] <- 0
 
 
 ###################################################
-### code chunk number 34: select3 (eval = FALSE)
+### code chunk number 35: select3 (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, unique(data[, id]))
 ## select[is.na(select)] <- 0

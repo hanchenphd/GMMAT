@@ -448,6 +448,10 @@ if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools
 SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
         miss.cutoff = 1, method = "davies", tests = "S")
+}
+@
+<<SMMATmetacleanup, eval=TRUE, echo=FALSE>>=
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 unlink(c("SMMAT.meta.score.1", "SMMAT.meta.var.1"))
 }
 @
