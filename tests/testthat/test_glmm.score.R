@@ -43,6 +43,8 @@ test_that("cross-sectional id le 400 binomial", {
 	obj1.bgen.select.1 <- read.table(obj1.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.noselect.1, obj1.bgen.select.1)
 	expect_equal(obj1.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj1.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.1)
 	obj1.gds.noselect.1 <- read.table(obj1.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -57,6 +59,9 @@ test_that("cross-sectional id le 400 binomial", {
 	expect_equal(obj1.gds.noselect.1, obj1.gds.select.1)
 	expect_equal(obj1.bed.select.1$PVAL, signif(obj1.gds.select.1$PVAL))
 	expect_equal(signif(range(obj1.gds.select.1$PVAL)), signif(c(0.003804942, 0.986534857)))
+	unlink(c(obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1))
+	}
+	
 	obj1.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.1 <- read.table(obj1.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -72,7 +77,7 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj1, infile = txtfile2, outfile = obj1.outfile.txt2.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt2.select.1 <- read.table(obj1.outfile.txt2.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.txt.select.1, obj1.txt2.select.1)
-	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
+	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
 
 	skip_on_cran()
 
@@ -94,6 +99,8 @@ test_that("cross-sectional id le 400 binomial", {
 	obj2.bgen.select.1 <- read.table(obj2.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.noselect.1, obj2.bgen.select.1)
 	expect_equal(obj2.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj2.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.1)
 	obj2.gds.noselect.1 <- read.table(obj2.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -103,6 +110,8 @@ test_that("cross-sectional id le 400 binomial", {
 	expect_equal(obj2.gds.noselect.1, obj2.gds.select.1)
 	expect_equal(obj2.bed.select.1$PVAL, signif(obj2.gds.select.1$PVAL))
 	expect_equal(signif(range(obj2.gds.select.1$PVAL)), signif(c(0.003738918, 0.996996766)))
+	}
+	
 	obj2.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.1 <- read.table(obj2.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -137,6 +146,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.2)
 	obj1.bgen.select.2 <- read.table(obj1.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.2)
 	obj1.gds.noselect.2 <- read.table(obj1.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -145,6 +156,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.2)
 	obj1.gds.select.2 <- read.table(obj1.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.2)
+	}
+	
 	obj1.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.2 <- read.table(obj1.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -177,6 +190,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.2)
 	obj2.bgen.select.2 <- read.table(obj2.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.2)
 	obj2.gds.noselect.2 <- read.table(obj2.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -185,6 +200,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.2)
 	obj2.gds.select.2 <- read.table(obj2.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.2)
+	}
+	
 	obj2.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.2 <- read.table(obj2.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -219,6 +236,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.3)
 	obj1.bgen.select.3 <- read.table(obj1.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.3)
 	obj1.gds.noselect.3 <- read.table(obj1.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -227,6 +246,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.3)
 	obj1.gds.select.3 <- read.table(obj1.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.3)
+	}
+	
 	obj1.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.3 <- read.table(obj1.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -259,6 +280,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.3)
 	obj2.bgen.select.3 <- read.table(obj2.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.3)
 	obj2.gds.noselect.3 <- read.table(obj2.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -267,6 +290,8 @@ test_that("cross-sectional id le 400 binomial", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.3)
 	obj2.gds.select.3 <- read.table(obj2.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.3)
+	}
+	
 	obj2.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.3 <- read.table(obj2.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -280,11 +305,12 @@ test_that("cross-sectional id le 400 binomial", {
 	obj2.txt2.select.3 <- read.table(obj2.outfile.txt2.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.txt2.select.1, obj2.txt2.select.3)
 
-	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
-	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
-	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
-	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
-	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
+	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
+	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
+	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
+	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) unlink(c(obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3))
 })
 
 test_that("cross-sectional id gt 400 binomial", {
@@ -327,6 +353,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	obj1.bgen.select.1 <- read.table(obj1.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.noselect.1, obj1.bgen.select.1)
 	expect_equal(obj1.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj1.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.1)
 	obj1.gds.noselect.1 <- read.table(obj1.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -336,6 +364,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	expect_equal(obj1.gds.noselect.1, obj1.gds.select.1)
 	expect_equal(obj1.bed.select.1$PVAL, signif(obj1.gds.select.1$PVAL))
 	expect_equal(signif(range(obj1.gds.select.1$PVAL)), signif(c(0.00396727, 0.99042091)))
+	}
+	
 	obj1.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.1 <- read.table(obj1.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -367,6 +397,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	obj2.bgen.select.1 <- read.table(obj2.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.noselect.1, obj2.bgen.select.1)
 	expect_equal(obj2.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj2.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.1)
 	obj2.gds.noselect.1 <- read.table(obj2.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -376,6 +408,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	expect_equal(obj2.gds.noselect.1, obj2.gds.select.1)
 	expect_equal(obj2.bed.select.1$PVAL, signif(obj2.gds.select.1$PVAL))
 	expect_equal(signif(range(obj2.gds.select.1$PVAL)), signif(c(0.003967475, 0.992551527)))
+	}
+	
 	obj2.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.1 <- read.table(obj2.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -410,6 +444,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.2)
 	obj1.bgen.select.2 <- read.table(obj1.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.2)
 	obj1.gds.noselect.2 <- read.table(obj1.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -418,6 +454,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.2)
 	obj1.gds.select.2 <- read.table(obj1.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.2)
+	}
+	
 	obj1.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.2 <- read.table(obj1.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -450,6 +488,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.2)
 	obj2.bgen.select.2 <- read.table(obj2.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.2)
 	obj2.gds.noselect.2 <- read.table(obj2.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -458,6 +498,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.2)
 	obj2.gds.select.2 <- read.table(obj2.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.2)
+	}
+	
 	obj2.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.2 <- read.table(obj2.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -492,6 +534,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.3)
 	obj1.bgen.select.3 <- read.table(obj1.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.3)
 	obj1.gds.noselect.3 <- read.table(obj1.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -500,6 +544,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.3)
 	obj1.gds.select.3 <- read.table(obj1.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.3)
+	}
+	
 	obj1.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.3 <- read.table(obj1.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -532,6 +578,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.3)
 	obj2.bgen.select.3 <- read.table(obj2.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.3)
 	obj2.gds.noselect.3 <- read.table(obj2.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -540,6 +588,8 @@ test_that("cross-sectional id gt 400 binomial", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.3)
 	obj2.gds.select.3 <- read.table(obj2.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.3)
+	}
+	
 	obj2.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.3 <- read.table(obj2.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -553,12 +603,13 @@ test_that("cross-sectional id gt 400 binomial", {
 	obj2.txt2.select.3 <- read.table(obj2.outfile.txt2.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.txt2.select.1, obj2.txt2.select.3)
 
-	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
-	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
-	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
-	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
-	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
-	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
+	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
+	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
+	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
+	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
+	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) unlink(c(obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3))
 })
 
 test_that("cross-sectional id le 400 gaussian", {
@@ -600,6 +651,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	obj1.bgen.select.1 <- read.table(obj1.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.noselect.1, obj1.bgen.select.1)
 	expect_equal(obj1.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj1.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.1)
 	obj1.gds.noselect.1 <- read.table(obj1.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -609,6 +662,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	expect_equal(obj1.gds.noselect.1, obj1.gds.select.1)
 	expect_equal(obj1.bed.select.1$PVAL, signif(obj1.gds.select.1$PVAL))
 	expect_equal(signif(range(obj1.gds.select.1$PVAL)), signif(c(0.0316311, 0.9919671)))
+	}
+	
 	obj1.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.1 <- read.table(obj1.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -640,6 +695,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	obj2.bgen.select.1 <- read.table(obj2.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.noselect.1, obj2.bgen.select.1)
 	expect_equal(obj2.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj2.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.1)
 	obj2.gds.noselect.1 <- read.table(obj2.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -649,6 +706,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	expect_equal(obj2.gds.noselect.1, obj2.gds.select.1)
 	expect_equal(obj2.bed.select.1$PVAL, signif(obj2.gds.select.1$PVAL))
 	expect_equal(signif(range(obj2.gds.select.1$PVAL)), signif(c(0.0002293625, 0.9972561847)))
+	}
+	
 	obj2.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.1 <- read.table(obj2.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -683,6 +742,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.2)
 	obj1.bgen.select.2 <- read.table(obj1.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.2)
 	obj1.gds.noselect.2 <- read.table(obj1.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -691,6 +752,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.2)
 	obj1.gds.select.2 <- read.table(obj1.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.2)
+	}
+	
 	obj1.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.2 <- read.table(obj1.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -723,6 +786,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.2)
 	obj2.bgen.select.2 <- read.table(obj2.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.2)
 	obj2.gds.noselect.2 <- read.table(obj2.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -731,6 +796,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.2)
 	obj2.gds.select.2 <- read.table(obj2.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.2)
+	}
+	
 	obj2.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.2 <- read.table(obj2.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -765,6 +832,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.3)
 	obj1.bgen.select.3 <- read.table(obj1.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.3)
 	obj1.gds.noselect.3 <- read.table(obj1.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -773,6 +842,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.3)
 	obj1.gds.select.3 <- read.table(obj1.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.3)
+	}
+	
 	obj1.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.3 <- read.table(obj1.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -805,6 +876,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.3)
 	obj2.bgen.select.3 <- read.table(obj2.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.3)
 	obj2.gds.noselect.3 <- read.table(obj2.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -813,6 +886,8 @@ test_that("cross-sectional id le 400 gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.3)
 	obj2.gds.select.3 <- read.table(obj2.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.3)
+	}
+	
 	obj2.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.3 <- read.table(obj2.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -826,12 +901,13 @@ test_that("cross-sectional id le 400 gaussian", {
 	obj2.txt2.select.3 <- read.table(obj2.outfile.txt2.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.txt2.select.1, obj2.txt2.select.3)
 
-	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
-	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
-	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
-	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
-	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
-	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
+	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
+	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
+	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
+	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
+	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) unlink(c(obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3))
 })
 
 test_that("cross-sectional id gt 400 gaussian", {
@@ -874,6 +950,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	obj1.bgen.select.1 <- read.table(obj1.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.noselect.1, obj1.bgen.select.1)
 	expect_equal(obj1.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj1.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.1)
 	obj1.gds.noselect.1 <- read.table(obj1.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -883,6 +961,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	expect_equal(obj1.gds.noselect.1, obj1.gds.select.1)
 	expect_equal(obj1.bed.select.1$PVAL, signif(obj1.gds.select.1$PVAL))
 	expect_equal(signif(range(obj1.gds.select.1$PVAL)), signif(c(0.0326723, 0.9937123)))
+	}
+	
 	obj1.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.1 <- read.table(obj1.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -914,6 +994,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	obj2.bgen.select.1 <- read.table(obj2.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.noselect.1, obj2.bgen.select.1)
 	expect_equal(obj2.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj2.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.1)
 	obj2.gds.noselect.1 <- read.table(obj2.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -923,6 +1005,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	expect_equal(obj2.gds.noselect.1, obj2.gds.select.1)
 	expect_equal(obj2.bed.select.1$PVAL, signif(obj2.gds.select.1$PVAL))
 	expect_equal(signif(range(obj2.gds.select.1$PVAL)), signif(c(0.0003196319, 0.9952539725)))
+	}
+	
 	obj2.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.1 <- read.table(obj2.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -957,6 +1041,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.2)
 	obj1.bgen.select.2 <- read.table(obj1.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.2)
 	obj1.gds.noselect.2 <- read.table(obj1.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -965,6 +1051,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.2)
 	obj1.gds.select.2 <- read.table(obj1.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.2)
+	}
+	
 	obj1.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.2 <- read.table(obj1.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -997,6 +1085,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.2)
 	obj2.bgen.select.2 <- read.table(obj2.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.2)
 	obj2.gds.noselect.2 <- read.table(obj2.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -1005,6 +1095,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.2)
 	obj2.gds.select.2 <- read.table(obj2.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.2)
+	}
+	
 	obj2.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.2 <- read.table(obj2.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -1039,6 +1131,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.3)
 	obj1.bgen.select.3 <- read.table(obj1.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.3)
 	obj1.gds.noselect.3 <- read.table(obj1.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -1047,6 +1141,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.3)
 	obj1.gds.select.3 <- read.table(obj1.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.3)
+	}
+	
 	obj1.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.3 <- read.table(obj1.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -1079,6 +1175,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.3)
 	obj2.bgen.select.3 <- read.table(obj2.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.3)
 	obj2.gds.noselect.3 <- read.table(obj2.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -1087,6 +1185,8 @@ test_that("cross-sectional id gt 400 gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.3)
 	obj2.gds.select.3 <- read.table(obj2.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.3)
+	}
+	
 	obj2.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.3 <- read.table(obj2.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -1100,12 +1200,13 @@ test_that("cross-sectional id gt 400 gaussian", {
 	obj2.txt2.select.3 <- read.table(obj2.outfile.txt2.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.txt2.select.1, obj2.txt2.select.3)
 
-	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
-	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
-	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
-	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
-	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
-	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
+	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
+	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
+	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
+	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
+	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) unlink(c(obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3))
 })
 
 test_that("longitudinal repeated measures gaussian", {
@@ -1141,6 +1242,8 @@ test_that("longitudinal repeated measures gaussian", {
 	obj1.bgen.select.1 <- read.table(obj1.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.noselect.1, obj1.bgen.select.1)
 	expect_equal(obj1.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj1.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.1)
 	obj1.gds.noselect.1 <- read.table(obj1.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -1150,6 +1253,8 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(obj1.gds.noselect.1, obj1.gds.select.1)
 	expect_equal(obj1.bed.select.1$PVAL, signif(obj1.gds.select.1$PVAL))
 	expect_equal(signif(range(obj1.gds.select.1$PVAL)), signif(c(0.01701654, 0.99757462)))
+	}
+	
 	obj1.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.1 <- read.table(obj1.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -1181,6 +1286,8 @@ test_that("longitudinal repeated measures gaussian", {
 	obj2.bgen.select.1 <- read.table(obj2.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.noselect.1, obj2.bgen.select.1)
 	expect_equal(obj2.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj2.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.1)
 	obj2.gds.noselect.1 <- read.table(obj2.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -1190,6 +1297,8 @@ test_that("longitudinal repeated measures gaussian", {
 	expect_equal(obj2.gds.noselect.1, obj2.gds.select.1)
 	expect_equal(obj2.bed.select.1$PVAL, signif(obj2.gds.select.1$PVAL))
 	expect_equal(signif(range(obj2.gds.select.1$PVAL)), signif(c(0.01468818, 0.99432063)))
+	}
+	
 	obj2.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.1 <- read.table(obj2.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -1224,6 +1333,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.2)
 	obj1.bgen.select.2 <- read.table(obj1.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.2)
 	obj1.gds.noselect.2 <- read.table(obj1.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -1232,6 +1343,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.2)
 	obj1.gds.select.2 <- read.table(obj1.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.2)
+	}
+	
 	obj1.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.2 <- read.table(obj1.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -1264,6 +1377,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.2)
 	obj2.bgen.select.2 <- read.table(obj2.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.2)
 	obj2.gds.noselect.2 <- read.table(obj2.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -1272,6 +1387,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.2)
 	obj2.gds.select.2 <- read.table(obj2.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.2)
+	}
+	
 	obj2.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.2 <- read.table(obj2.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -1306,6 +1423,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.3)
 	obj1.bgen.select.3 <- read.table(obj1.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.3)
 	obj1.gds.noselect.3 <- read.table(obj1.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -1314,6 +1433,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.3)
 	obj1.gds.select.3 <- read.table(obj1.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.3)
+	}
+	
 	obj1.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.3 <- read.table(obj1.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -1346,6 +1467,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.3)
 	obj2.bgen.select.3 <- read.table(obj2.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.3)
 	obj2.gds.noselect.3 <- read.table(obj2.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -1354,6 +1477,8 @@ test_that("longitudinal repeated measures gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.3)
 	obj2.gds.select.3 <- read.table(obj2.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.3)
+	}
+	
 	obj2.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.3 <- read.table(obj2.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -1367,12 +1492,13 @@ test_that("longitudinal repeated measures gaussian", {
 	obj2.txt2.select.3 <- read.table(obj2.outfile.txt2.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.txt2.select.1, obj2.txt2.select.3)
 
-	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
-	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
-	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
-	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
-	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
-	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
+	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
+	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
+	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
+	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
+	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) unlink(c(obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3))
 })
 
 test_that("longitudinal random time trend gaussian", {
@@ -1408,6 +1534,8 @@ test_that("longitudinal random time trend gaussian", {
 	obj1.bgen.select.1 <- read.table(obj1.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.noselect.1, obj1.bgen.select.1)
 	expect_equal(obj1.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj1.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.1)
 	obj1.gds.noselect.1 <- read.table(obj1.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -1417,6 +1545,8 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(obj1.gds.noselect.1, obj1.gds.select.1)
 	expect_equal(obj1.bed.select.1$PVAL, signif(obj1.gds.select.1$PVAL))
 	expect_equal(signif(range(obj1.gds.select.1$PVAL), digits = 5), signif(c(0.02677175, 0.99508480), digits = 5))
+	}
+	
 	obj1.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.1 <- read.table(obj1.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -1448,6 +1578,8 @@ test_that("longitudinal random time trend gaussian", {
 	obj2.bgen.select.1 <- read.table(obj2.outfile.bgen.select.1, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.noselect.1, obj2.bgen.select.1)
 	expect_equal(obj2.bed.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")], obj2.bgen.select.1[, c("SNP","CHR","POS","A1","A2","N","AF","SCORE","VAR","PVAL")])
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.1 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.1)
 	obj2.gds.noselect.1 <- read.table(obj2.outfile.gds.noselect.1, header = TRUE, as.is = TRUE)
@@ -1457,6 +1589,8 @@ test_that("longitudinal random time trend gaussian", {
 	expect_equal(obj2.gds.noselect.1, obj2.gds.select.1)
 	expect_equal(obj2.bed.select.1$PVAL, signif(obj2.gds.select.1$PVAL))
 	expect_equal(signif(range(obj2.gds.select.1$PVAL)), signif(c(0.01366701, 0.98519024)))
+	}
+	
 	obj2.outfile.txt.select.1 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.1, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.1 <- read.table(obj2.outfile.txt.select.1, header = TRUE, as.is = TRUE)
@@ -1491,6 +1625,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.2)
 	obj1.bgen.select.2 <- read.table(obj1.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.2)
 	obj1.gds.noselect.2 <- read.table(obj1.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -1499,6 +1635,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.2)
 	obj1.gds.select.2 <- read.table(obj1.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.2)
+	}
+	
 	obj1.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.2 <- read.table(obj1.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -1531,6 +1669,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.2)
 	obj2.bgen.select.2 <- read.table(obj2.outfile.bgen.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.2)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.2 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.2)
 	obj2.gds.noselect.2 <- read.table(obj2.outfile.gds.noselect.2, header = TRUE, as.is = TRUE)
@@ -1539,6 +1679,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.2)
 	obj2.gds.select.2 <- read.table(obj2.outfile.gds.select.2, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.2)
+	}
+	
 	obj2.outfile.txt.select.2 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.2, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.2 <- read.table(obj2.outfile.txt.select.2, header = TRUE, as.is = TRUE)
@@ -1573,6 +1715,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj1, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj1.outfile.bgen.select.3)
 	obj1.bgen.select.3 <- read.table(obj1.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.bgen.select.1, obj1.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj1.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj1, infile = gdsfile, outfile = obj1.outfile.gds.noselect.3)
 	obj1.gds.noselect.3 <- read.table(obj1.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -1581,6 +1725,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj1, infile = gdsfile, select = select, outfile = obj1.outfile.gds.select.3)
 	obj1.gds.select.3 <- read.table(obj1.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj1.gds.select.1, obj1.gds.select.3)
+	}
+	
 	obj1.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj1, infile = txtfile, outfile = obj1.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj1.txt.select.3 <- read.table(obj1.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -1613,6 +1759,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj2, infile = bgenfile, BGEN.samplefile = samplefile, select = select, outfile = obj2.outfile.bgen.select.3)
 	obj2.bgen.select.3 <- read.table(obj2.outfile.bgen.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.bgen.select.1, obj2.bgen.select.3)
+	
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 	obj2.outfile.gds.noselect.3 <- tempfile()
 	glmm.score(obj2, infile = gdsfile, outfile = obj2.outfile.gds.noselect.3)
 	obj2.gds.noselect.3 <- read.table(obj2.outfile.gds.noselect.3, header = TRUE, as.is = TRUE)
@@ -1621,6 +1769,8 @@ test_that("longitudinal random time trend gaussian", {
 	glmm.score(obj2, infile = gdsfile, select = select, outfile = obj2.outfile.gds.select.3)
 	obj2.gds.select.3 <- read.table(obj2.outfile.gds.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.gds.select.1, obj2.gds.select.3)
+	}
+	
 	obj2.outfile.txt.select.3 <- tempfile()
 	glmm.score(obj2, infile = txtfile, outfile = obj2.outfile.txt.select.3, infile.nrow.skip = 5, infile.ncol.skip = 3, infile.ncol.print = 1:3, select=select, infile.header.print = c("SNP", "Allele1", "Allele2"))
 	obj2.txt.select.3 <- read.table(obj2.outfile.txt.select.3, header = TRUE, as.is = TRUE)
@@ -1634,16 +1784,19 @@ test_that("longitudinal random time trend gaussian", {
 	obj2.txt2.select.3 <- read.table(obj2.outfile.txt2.select.3, header = TRUE, as.is = TRUE)
 	expect_equal(obj2.txt2.select.1, obj2.txt2.select.3)
 
-	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
-	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
-	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
-	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
-	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
-	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	unlink(c(obj1.outfile.bed.noselect.1, obj1.outfile.bed.select.1, obj1.outfile.bgen.noselect.1, obj1.outfile.bgen.select.1, obj1.outfile.txt.select.1, obj1.outfile.txt1.select.1, obj1.outfile.txt2.select.1))
+	unlink(c(obj2.outfile.bed.noselect.1, obj2.outfile.bed.select.1, obj2.outfile.bgen.noselect.1, obj2.outfile.bgen.select.1, obj2.outfile.txt.select.1, obj2.outfile.txt1.select.1, obj2.outfile.txt2.select.1))
+	unlink(c(obj1.outfile.bed.noselect.2, obj1.outfile.bed.select.2, obj1.outfile.bgen.noselect.2, obj1.outfile.bgen.select.2, obj1.outfile.txt.select.2, obj1.outfile.txt1.select.2, obj1.outfile.txt2.select.2))
+	unlink(c(obj2.outfile.bed.noselect.2, obj2.outfile.bed.select.2, obj2.outfile.bgen.noselect.2, obj2.outfile.bgen.select.2, obj2.outfile.txt.select.2, obj2.outfile.txt1.select.2, obj2.outfile.txt2.select.2))
+	unlink(c(obj1.outfile.bed.noselect.3, obj1.outfile.bed.select.3, obj1.outfile.bgen.noselect.3, obj1.outfile.bgen.select.3, obj1.outfile.txt.select.3, obj1.outfile.txt1.select.3, obj1.outfile.txt2.select.3))
+	unlink(c(obj2.outfile.bed.noselect.3, obj2.outfile.bed.select.3, obj2.outfile.bgen.noselect.3, obj2.outfile.bgen.select.3, obj2.outfile.txt.select.3, obj2.outfile.txt1.select.3, obj2.outfile.txt2.select.3))
+	if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) unlink(c(obj1.outfile.gds.noselect.1, obj1.outfile.gds.select.1, obj2.outfile.gds.noselect.1, obj2.outfile.gds.select.1, obj1.outfile.gds.noselect.2, obj1.outfile.gds.select.2, obj2.outfile.gds.noselect.2, obj2.outfile.gds.select.2, obj1.outfile.gds.noselect.3, obj1.outfile.gds.select.3, obj2.outfile.gds.noselect.3, obj2.outfile.gds.select.3))
 })
 
 test_that("multiple phenotypes gaussian", {
 	skip_on_cran()
+	skip_if_not_installed("SeqArray")
+	skip_if_not_installed("SeqVarTools")
 
 	gdsfile <- system.file("extdata", "geno.gds", package = "GMMAT")
 	data(example)

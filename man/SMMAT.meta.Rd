@@ -105,19 +105,23 @@ Han Chen
 }
 \examples{
 \donttest{
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools",
+        quietly = TRUE)) {
 data(example)
 attach(example)
 model0 <- glmmkin(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
-       family = binomial(link = "logit"))
+        family = binomial(link = "logit"))
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 group.file <- system.file("extdata", "SetID.withweights.txt",
 	package = "GMMAT")
-out <- SMMAT(model0, geno.file, group.file, meta.file.prefix = "SMMAT.meta", 
-       		MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
+metafile <- tempfile()
+out <- SMMAT(model0, geno.file, group.file, meta.file.prefix = metafile, 
+       	MAF.range = c(0, 0.5), miss.cutoff = 1, method = "davies")
 print(out)
-out1 <- SMMAT.meta("SMMAT.meta", group.file = group.file)
+out1 <- SMMAT.meta(metafile, group.file = group.file)
 print(out1)
-unlink(paste0("SMMAT.meta.", c("score", "var"), ".1"))
+unlink(paste0(metafile, c(".score", ".var"), ".1"))
+}
 }
 }
 \keyword{ variant set-based test }

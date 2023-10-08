@@ -122,39 +122,39 @@ model5$theta
 
 
 ###################################################
-### code chunk number 16: GMMATscoretxt
+### code chunk number 16: GMMATscoretxt (eval = FALSE)
 ###################################################
-geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
-glmm.score(model0, infile = geno.file, outfile =
-        "glmm.score.text.testoutfile.txt", infile.nrow.skip = 5, 
-        infile.ncol.skip = 3, infile.ncol.print = 1:3,
-        infile.header.print = c("SNP", "Allele1", "Allele2"))
+## geno.file <- system.file("extdata", "geno.txt", package = "GMMAT")
+## glmm.score(model0, infile = geno.file, outfile =
+##         "glmm.score.text.testoutfile.txt", infile.nrow.skip = 5, 
+##         infile.ncol.skip = 3, infile.ncol.print = 1:3,
+##         infile.header.print = c("SNP", "Allele1", "Allele2"))
 
 
 ###################################################
-### code chunk number 17: GMMATscorebed
+### code chunk number 17: GMMATscorebed (eval = FALSE)
 ###################################################
-geno.file <- strsplit(system.file("extdata", "geno.bed", 
-        package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
-glmm.score(model0, infile = geno.file, outfile = 
-        "glmm.score.bed.testoutfile.txt")
+## geno.file <- strsplit(system.file("extdata", "geno.bed", 
+##         package = "GMMAT"), ".bed", fixed = TRUE)[[1]]
+## glmm.score(model0, infile = geno.file, outfile = 
+##         "glmm.score.bed.testoutfile.txt")
 
 
 ###################################################
-### code chunk number 18: GMMATscoregds
+### code chunk number 18: GMMATscoregds (eval = FALSE)
 ###################################################
-geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.score(model0, infile = geno.file, outfile = 
-        "glmm.score.gds.testoutfile.txt")
+## geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
+## glmm.score(model0, infile = geno.file, outfile = 
+##         "glmm.score.gds.testoutfile.txt")
 
 
 ###################################################
-### code chunk number 19: GMMATscorebgen
+### code chunk number 19: GMMATscorebgen (eval = FALSE)
 ###################################################
-geno.file <- system.file("extdata", "geno.bgen", package = "GMMAT")
-samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
-glmm.score(model0, infile = geno.file, BGEN.samplefile = samplefile,
-	outfile = "glmm.score.bgen.testoutfile.txt")
+## geno.file <- system.file("extdata", "geno.bgen", package = "GMMAT")
+## samplefile <- system.file("extdata", "geno.sample", package = "GMMAT")
+## glmm.score(model0, infile = geno.file, BGEN.samplefile = samplefile,
+## 	outfile = "glmm.score.bgen.testoutfile.txt")
 
 
 ###################################################
@@ -178,73 +178,124 @@ glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 
 
 ###################################################
-### code chunk number 22: GMMATwaldgds
+### code chunk number 22: GMMATwaldgds (eval = FALSE)
 ###################################################
+## geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
+## glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+##         family = binomial(link = "logit"), infile = geno.file, snps = snps)
+
+
+###################################################
+### code chunk number 23: GMMATwaldgds2
+###################################################
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 glmm.wald(fixed = disease ~ age + sex, data = pheno, kins = GRM, id = "id",
         family = binomial(link = "logit"), infile = geno.file, snps = snps)
+}
 
 
 ###################################################
-### code chunk number 23: GMMATscoremeta
+### code chunk number 24: GMMATscoremeta (eval = FALSE)
 ###################################################
-meta1.file <- system.file("extdata", "meta1.txt", package = "GMMAT")
-meta2.file <- system.file("extdata", "meta2.txt", package = "GMMAT")
-meta3.file <- system.file("extdata", "meta3.txt", package = "GMMAT")
-glmm.score.meta(files = c(meta1.file, meta2.file, meta3.file),
-        outfile = "glmm.score.meta.testoutfile.txt",
-        SNP = rep("SNP", 3), A1 = rep("A1", 3), A2 = rep("A2", 3))
+## meta1.file <- system.file("extdata", "meta1.txt", package = "GMMAT")
+## meta2.file <- system.file("extdata", "meta2.txt", package = "GMMAT")
+## meta3.file <- system.file("extdata", "meta3.txt", package = "GMMAT")
+## glmm.score.meta(files = c(meta1.file, meta2.file, meta3.file),
+##         outfile = "glmm.score.meta.testoutfile.txt",
+##         SNP = rep("SNP", 3), A1 = rep("A1", 3), A2 = rep("A2", 3))
 
 
 ###################################################
-### code chunk number 24: SMMAT1
+### code chunk number 25: SMMAT1 (eval = FALSE)
 ###################################################
+## group.file <- system.file("extdata", "SetID.withweights.txt", 
+##         package = "GMMAT")
+## geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
+## SMMAT(model0, group.file = group.file, geno.file = geno.file, 
+##         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
+##         tests = c("O", "E"))
+
+
+###################################################
+### code chunk number 26: SMMAT12
+###################################################
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 group.file <- system.file("extdata", "SetID.withweights.txt", 
         package = "GMMAT")
 geno.file <- system.file("extdata", "geno.gds", package = "GMMAT")
 SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
         tests = c("O", "E"))
+}
 
 
 ###################################################
-### code chunk number 25: SMMAT2
+### code chunk number 27: SMMAT2 (eval = FALSE)
 ###################################################
+## SMMAT(model0, group.file = group.file, geno.file = geno.file, 
+##         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
+##         tests = "B", meta.file.prefix = "SMMAT.meta")
+
+
+###################################################
+### code chunk number 28: SMMAT22
+###################################################
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 SMMAT(model0, group.file = group.file, geno.file = geno.file, 
         MAF.range = c(1e-7, 0.5), miss.cutoff = 1, method = "davies", 
         tests = "B", meta.file.prefix = "SMMAT.meta")
+}
 
 
 ###################################################
-### code chunk number 26: SMMATmeta
+### code chunk number 29: SMMATmeta (eval = FALSE)
 ###################################################
+## SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
+##         group.file = group.file, MAF.range = c(1e-7, 0.5), 
+##         miss.cutoff = 1, method = "davies", tests = "S")
+
+
+###################################################
+### code chunk number 30: SMMATmeta2
+###################################################
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
 SMMAT.meta(meta.files.prefix = "SMMAT.meta", n.files = 1,
         group.file = group.file, MAF.range = c(1e-7, 0.5), 
         miss.cutoff = 1, method = "davies", tests = "S")
+}
 
 
 ###################################################
-### code chunk number 27: MKL (eval = FALSE)
+### code chunk number 31: SMMATmetacleanup
+###################################################
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools", quietly = TRUE)) {
+unlink(c("SMMAT.meta.score.1", "SMMAT.meta.var.1"))
+}
+
+
+###################################################
+### code chunk number 32: MKL (eval = FALSE)
 ###################################################
 ## Sys.setenv(MKL_NUM_THREADS = 1)
 
 
 ###################################################
-### code chunk number 28: select (eval = FALSE)
+### code chunk number 33: select (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, pheno_ID[obj$id_include])
 ## select[is.na(select)] <- 0
 
 
 ###################################################
-### code chunk number 29: select2 (eval = FALSE)
+### code chunk number 34: select2 (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, unique(obj$id_include))
 ## select[is.na(select)] <- 0
 
 
 ###################################################
-### code chunk number 30: select3 (eval = FALSE)
+### code chunk number 35: select3 (eval = FALSE)
 ###################################################
 ## select <- match(geno_ID, unique(data[, id]))
 ## select[is.na(select)] <- 0

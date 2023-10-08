@@ -30,7 +30,7 @@ a known positive semi-definite relationship matrix (e.g. kinship matrix in genet
 a column in the data frame \code{data}, indicating the id of samples. When there are duplicates in id, the data is assumed to be longitudinal with repeated measures.
 }
   \item{random.slope}{
-an optional column indicating the random slope for time effect used in a mixed effects model for longitudinal data. It must be included in the names of \code{data}. There must be duplicates in \code{id} and \code{method.optim} must be "AI" (default = NULL).
+an optional column indicating the random slope for time effect used in a mixed effects model for cross-sectional data with related individuals, and longitudinal data. It must be included in the names of \code{data}. There must be duplicates in \code{id} and \code{method.optim} must be "AI" (default = NULL).
 }
 \item{groups}{
 an optional categorical variable indicating the groups used in a heteroscedastic linear mixed model (allowing residual variances in different groups to be different). This variable must be included in the names of \code{data}, and \code{family} must be "gaussian" and \code{method.optim} must be "AI" (default = NULL).
@@ -172,9 +172,12 @@ plinkfiles <- strsplit(system.file("extdata", "geno.bed", package = "GMMAT"),
        ".bed", fixed = TRUE)[[1]]
 glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 	family = binomial(link = "logit"), infile = plinkfiles, snps = snps) 
-infile <- system.file("extdata", "geno.gds", package = "GMMAT")
-glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
-	family = binomial(link = "logit"), infile = infile, snps = snps) 
+if(requireNamespace("SeqArray", quietly = TRUE) && requireNamespace("SeqVarTools",
+        quietly = TRUE)) {
+	infile <- system.file("extdata", "geno.gds", package = "GMMAT")
+	glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
+	        family = binomial(link = "logit"), infile = infile, snps = snps)
+}
 infile <- system.file("extdata", "geno.txt", package = "GMMAT")
 glmm.wald(disease ~ age + sex, data = pheno, kins = GRM, id = "id",
 	family = binomial(link = "logit"), infile = infile, snps = snps, 
