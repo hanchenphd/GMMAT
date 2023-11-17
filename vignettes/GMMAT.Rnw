@@ -7,7 +7,7 @@
 \usepackage{graphicx}
 \usepackage{epstopdf}
 \usepackage{hyperref}
-\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{listings}
 \usepackage[superscript]{cite}
 \newcommand{\mb}{\mathbf}
@@ -37,9 +37,9 @@ morekeywords={}
 }
 
 \begin{document}
-\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.4.1}
-\date{October 5, 2023}
-\author{Han Chen\\Human Genetics Center\\Dept. of Epidemiology, Human Genetics and Environmental Sciences\\School of Public Health\\Center for Precision Health\\School of Biomedical Informatics\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
+\title{GMMAT: Generalized linear Mixed Model Association Tests\\Version 1.4.2}
+\date{November 17, 2023}
+\author{Han Chen\\Human Genetics Center\\Department of Epidemiology\\School of Public Health\\The University of Texas Health Science Center at Houston\\Email: Han.Chen.2@uth.tmc.edu}
 
 \maketitle
 \newpage
@@ -837,6 +837,11 @@ that can be used as the "select" argument in \textbf{glmm.wald} to match the ord
 \item Random slope model implemented for cross-sectional data with related individuals.
 \item Better memory usage and improved computational efficiency for longitudinal data in \textbf{glmmkin} and \textbf{glmm.wald} (thanks to: Simon Wiegrebe).
 \item Bioconductor packages \textbf{SeqArray} and \textbf{SeqVarTools} moved to Suggests.
+\end{enumerate}
+
+\subsection{Version 1.4.2 (November 17, 2023)}
+\begin{enumerate}
+\item Removed the "usernames" option for xcolor.sty.
 \end{enumerate}
 
 \section{Contact}

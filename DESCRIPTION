@@ -1,6 +1,6 @@
 Package: GMMAT
-Version: 1.4.1
-Date: 2023-10-05
+Version: 1.4.2
+Date: 2023-11-17
 Title: Generalized Linear Mixed Model Association Tests
 Authors@R: c(person("Han", "Chen", role = c("aut", "cre"), email = "han.chen.2@uth.tmc.edu"),
              person("Matthew", "Conomos", role = "aut"),
